@@ -46,11 +46,15 @@ export default function RootLayout({
         baseTheme: shadcn,
       }}
     >
-      <html lang="en">
+      <html lang="en" className="dark" style={{ colorScheme: "dark" }}>
         <body
           className={`${geistMono.className} ${geistSans.variable} antialiased`}
         >
-          <ThemeProvider defaultTheme="dark" enableSystem={false}>
+          <ThemeProvider
+            defaultTheme="dark"
+            enableSystem={false}
+            forcedTheme="dark"
+          >
             <div className="flex h-screen text-white">
               <div
                 className={`w-70 bg-neutral-900 border-r border-neutral-700 transition-all duration-300 fixed md:relative z-50 md:z-auto h-full `}
