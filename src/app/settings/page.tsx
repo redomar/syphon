@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TelemetryDashboard } from "@/components/TelemetryDashboard";
 
-export default async function Dashboard() {
+export default async function Settings() {
   // This will automatically create the user in our database if they don't exist
   const user = await getCurrentUser();
 
@@ -12,7 +12,7 @@ export default async function Dashboard() {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-neutral-400">
-          Please sign in to access the dashboard.
+          Please sign in to access the Settings page.
         </p>
       </div>
     );
@@ -21,7 +21,7 @@ export default async function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-orange-500">Dashboard</h1>
+        <h1 className="text-3xl font-bold text-orange-500">User Settings</h1>
         <p className="text-neutral-400">
           Welcome back, {user.firstName || user.email}!
         </p>

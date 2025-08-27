@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import Navigation from "@/components/Navigation";
+import { DynamicBreadcrumb } from "@/components/DynamicBreadcrumb";
 import { Bell, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -92,12 +93,7 @@ export default function RootLayout({
               <div className="flex-1 flex flex-col">
                 <div className="h-16 bg-neutral-800 border-b border-neutral-700 flex items-center justify-between px-6">
                   <div className="flex items-center gap-4">
-                    <div className="text-sm text-neutral-400">
-                      BUDGET CONTROL /{" "}
-                      <span className="text-orange-500">
-                        FINANCIAL DASHBOARD
-                      </span>
-                    </div>
+                    <DynamicBreadcrumb />
                   </div>
                   <div className="flex items-center gap-2 sm:gap-4">
                     <Button
