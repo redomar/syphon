@@ -2,6 +2,7 @@ import React from "react";
 import { getCurrentUser } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { TelemetryDashboard } from "@/components/TelemetryDashboard";
 
 export default async function Dashboard() {
   // This will automatically create the user in our database if they don't exist
@@ -77,6 +78,11 @@ export default async function Dashboard() {
             <p className="text-neutral-400">No recent transactions yet.</p>
           </CardContent>
         </Card>
+
+        {/* Telemetry Dashboard spans full width */}
+        <div className="md:col-span-2 lg:col-span-3">
+          <TelemetryDashboard />
+        </div>
       </div>
     </div>
   );
