@@ -6,15 +6,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { SignedIn, SignedOut } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignUpButton } from "@clerk/nextjs";
 import { currentUser } from "@clerk/nextjs/server";
-import {
-  Calendar,
-  PoundSterling,
-  Target,
-  TrendingDown
-} from "lucide-react";
-import Link from "next/link";
+import { Calendar, PoundSterling, Target, TrendingDown } from "lucide-react";
 
 export default async function Home() {
   const user = await currentUser().catch(() => null);
@@ -69,25 +63,20 @@ export default async function Home() {
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           <Card className="md:col-span-2 xl:col-span-3 bg-neutral-900 border-neutral-700">
             <CardContent className="flex flex-col lg:flex-row lg:items-center gap-8">
-              <div className="flex-1 space-y-4">
-                <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-br from-orange-500 via-orange-400 to-yellow-400 bg-clip-text text-transparent">
+              <div className="flex-1 space-y-4 uppercase">
+                <h1 className="bg-gradient-to-br from-orange-500 via-orange-400 to-yellow-400 bg-clip-text text-4xl font-bold tracking-tight text-transparent">
                   Take Control of Your Money
                 </h1>
-                <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl">
+                <p className="max-w-2xl leading-relaxed text-neutral-400">
                   Syphon centralizes cash flow, spending velocity, debt load,
                   and savings momentum into a single operational cockpit.
                 </p>
                 <div className="flex flex-wrap gap-4 pt-2">
-                  <Button asChild className="bg-orange-600 hover:bg-orange-500">
-                    <Link href="/sign-up">Get Started</Link>
-                  </Button>
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="border-neutral-700 bg-neutral-800/40 hover:bg-neutral-800 text-neutral-200"
-                  >
-                    <Link href="/sign-in">Sign In</Link>
-                  </Button>
+                  <SignUpButton mode="modal">
+                    <Button className="bg-orange-600 hover:bg-orange-500 text-white">
+                      Get Started
+                    </Button>
+                  </SignUpButton>
                 </div>
               </div>
             </CardContent>

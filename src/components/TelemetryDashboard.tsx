@@ -10,7 +10,24 @@ export function TelemetryDashboard({ className }: TelemetryDashboardProps) {
   const telemetryEnabled = process.env.OTEL_SDK_DISABLED !== "true";
 
   return (
-    <Card className={`bg-neutral-800 border-neutral-700 ${className}`}>
+    <Card
+      className={`bg-neutral-900 border-neutral-700 relative overflow-hidden ${className}`}
+    >
+      {/* Diagonal hatched lines background */}
+      <div className="absolute inset-0 overflow-hidden  ">
+        <div
+          className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage: `repeating-linear-gradient(
+              45deg,
+              transparent,
+              transparent 2px,
+              rgb(115, 280, 115) 2px,
+              rgb(115, 280, 115) 4px
+            )`,
+          }}
+        />
+      </div>
       <CardHeader>
         <CardTitle className="text-purple-500 flex items-center gap-2">
           📊 Telemetry Status

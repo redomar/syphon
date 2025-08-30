@@ -75,7 +75,7 @@ export default function RootLayout({
                       </p>
                     </div>
                   </div>
-                  <Navigation active={0} />
+                  <Navigation />
                   <div className="flex flex-col gap-1 border border-neutral-800 bg-neutral-600/5 p-4 text-xs mt-auto">
                     <div className="flex gap-2 items-center">
                       <div className="size-2 bg-red-500 animate-pulse"></div>

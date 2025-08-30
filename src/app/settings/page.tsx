@@ -28,7 +28,7 @@ export default async function Settings() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="bg-neutral-800 border-neutral-700">
+        <Card className="bg-neutral-900 border-neutral-700">
           <CardHeader>
             <CardTitle className="text-orange-500">User Profile</CardTitle>
           </CardHeader>
@@ -58,7 +58,7 @@ export default async function Settings() {
           </CardContent>
         </Card>
 
-        <Card className="bg-neutral-800 border-neutral-700">
+        <Card className="bg-neutral-900 border-neutral-700">
           <CardHeader>
             <CardTitle className="text-green-500">Quick Stats</CardTitle>
           </CardHeader>
@@ -70,7 +70,7 @@ export default async function Settings() {
           </CardContent>
         </Card>
 
-        <Card className="bg-neutral-800 border-neutral-700">
+        <Card className="bg-neutral-900 border-neutral-700">
           <CardHeader>
             <CardTitle className="text-blue-500">Recent Activity</CardTitle>
           </CardHeader>
