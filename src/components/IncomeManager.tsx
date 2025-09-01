@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,22 +13,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, DollarSign, CalendarDays, Tag } from "lucide-react";
-import React from "react";
-import { CategoryKind, TransactionType } from "../../generated/prisma";
-import { formatCurrency, formatDate } from "@/lib/types";
 import {
   useCategories,
-  useIncomeSources,
-  useIncomeTransactions,
-  useIncomeCategories,
   useCreateCategory,
   useCreateIncomeSource,
   useCreateTransaction,
+  useIncomeCategories,
+  useIncomeSources,
+  useIncomeTransactions,
   useSetupDefaults,
 } from "@/hooks/useFinancialData";
 import { tracer } from "@/lib/telemetry";
+import { formatCurrency, formatDate } from "@/lib/types";
+import { CalendarDays, DollarSign, Edit, Plus, Tag } from "lucide-react";
+import React from "react";
+import { CategoryKind, TransactionType } from "../../generated/prisma";
 
 function IncomeManager() {
   const [showIncomeForm, setShowIncomeForm] = React.useState(false);
@@ -264,7 +264,7 @@ function IncomeManager() {
               <Edit className="h-4 w-4 mr-1" />
               Add Source
             </Button>
-            <Button onClick={() => setShowIncomeForm(true)}  size="sm">
+            <Button onClick={() => setShowIncomeForm(true)} size="sm">
               <Plus className="h-4 w-4 mr-1" />
               Add Income
             </Button>
@@ -315,7 +315,7 @@ function IncomeManager() {
                       color: e.target.value,
                     }))
                   }
-                  className="w-12 h-10 border rounded-md"
+                  className="w-12 h-10 border"
                 />
               </div>
               <Button type="submit" disabled={isLoading} className="w-24">
@@ -526,15 +526,22 @@ function IncomeManager() {
               {transactions.map((transaction) => (
                 <div
                   key={transaction.id}
-                  className="flex items-center justify-between p-3 border rounded-lg"
+                  className="flex items-center justify-between p-3 bg-neutral-800 hover:bg-neutral-700 transition-colors"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium">
+                      <span className="font-medium min-w-32">
                         {formatCurrency(transaction.amount)}
                       </span>
                       {transaction.category && (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge
+                          variant="secondary"
+                          style={{
+                            backgroundColor: `${transaction.category.color}99`,
+                            borderColor: transaction.category.color,
+                          }}
+                          className="text-xs inset-shadow-sm  inset-shadow-neutral-900"
+                        >
                           {transaction.category.name}
                         </Badge>
                       )}
