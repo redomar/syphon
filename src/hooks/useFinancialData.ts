@@ -19,7 +19,11 @@ import type {
   Transaction,
   SetupResult,
 } from "@/lib/types";
-import { CategoryKind, TransactionType } from "../../generated/prisma";
+import {
+  CategoryKind,
+  TransactionType,
+  CurrencyCode,
+} from "../../generated/prisma";
 
 // Categories Hooks
 export function useCategories(options?: UseQueryOptions<Category[], Error>) {
@@ -59,6 +63,11 @@ export function useCreateCategory(
   >
 ) {
   const queryClient = useQueryClient();
+  const {
+    onSuccess: userOnSuccess,
+    onError: userOnError,
+    ...rest
+  } = options ?? {};
 
   return useMutation({
     mutationFn: (data) =>
@@ -85,14 +94,19 @@ export function useCreateCategory(
           throw error;
         }
       }),
-    onSuccess: (newCategory) => {
+    onSuccess: (newCategory, variables, context) => {
       // Optimistically update the cache
       queryClient.setQueryData(queryKeys.categories, (old: Category[] = []) => [
         ...old,
         newCategory,
       ]);
+      // Call user callback after our default behavior
+      userOnSuccess?.(newCategory, variables, context);
     },
-    ...options,
+    onError: (error, variables, context) => {
+      userOnError?.(error, variables, context);
+    },
+    ...rest,
   });
 }
 
@@ -132,6 +146,11 @@ export function useCreateIncomeSource(
   options?: UseMutationOptions<IncomeSource, Error, { name: string }>
 ) {
   const queryClient = useQueryClient();
+  const {
+    onSuccess: userOnSuccess,
+    onError: userOnError,
+    ...rest
+  } = options ?? {};
 
   return useMutation({
     mutationFn: (data) =>
@@ -157,13 +176,17 @@ export function useCreateIncomeSource(
           throw error;
         }
       }),
-    onSuccess: (newSource) => {
+    onSuccess: (newSource, variables, context) => {
       queryClient.setQueryData(
         queryKeys.incomeSources,
         (old: IncomeSource[] = []) => [...old, newSource]
       );
+      userOnSuccess?.(newSource, variables, context);
     },
-    ...options,
+    onError: (error, variables, context) => {
+      userOnError?.(error, variables, context);
+    },
+    ...rest,
   });
 }
 
@@ -217,6 +240,24 @@ export function useCreateTransaction(
   >
 ) {
   const queryClient = useQueryClient();
+  const {
+    onSuccess: userOnSuccess,
+    onError: userOnError,
+    onMutate: userOnMutate,
+    ...rest
+  } = options ?? {};
+
+  type TxVars = {
+    type: TransactionType;
+    amount: number;
+    occurredAt: string;
+    description?: string;
+    categoryId?: string;
+    incomeSourceId?: string;
+  };
+  type TxRollbackCtx = {
+    previous: Array<[readonly unknown[], Transaction[] | undefined]>;
+  };
 
   return useMutation({
     mutationFn: (data) =>
@@ -243,11 +284,73 @@ export function useCreateTransaction(
           throw error;
         }
       }),
-    onSuccess: () => {
-      // Update all transaction queries that might include this new transaction
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    // Optimistic update for visible transaction lists
+    onMutate: async (newTx: TxVars): Promise<TxRollbackCtx | void> => {
+      // Allow caller to run their onMutate first
+      if (userOnMutate) {
+        await userOnMutate(newTx);
+      }
+
+      // Cancel outgoing refetches for transactions
+      await queryClient.cancelQueries({ queryKey: ["transactions"] });
+
+      // Snapshot current data for rollback
+      const previous = queryClient.getQueriesData<Transaction[]>({
+        queryKey: ["transactions"],
+      });
+
+      // Create an optimistic transaction placeholder
+      const optimistic: Transaction = {
+        id: `optimistic-${Date.now()}`,
+        userId: "optimistic",
+        type: newTx.type,
+        amount: newTx.amount.toString(),
+        occurredAt: newTx.occurredAt,
+        description: newTx.description,
+        currency: "GBP" as unknown as CurrencyCode,
+        categoryId: newTx.categoryId,
+        incomeSourceId: newTx.incomeSourceId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      // Apply optimistic item to all relevant transaction queries
+      for (const [key] of previous) {
+        const k = key as ReturnType<typeof queryKeys.transactions>;
+        const filters = (k?.[1] ?? {}) as {
+          type?: TransactionType;
+          limit?: number;
+        };
+        const include = !filters.type || filters.type === newTx.type;
+        if (!include) continue;
+
+        queryClient.setQueryData<Transaction[]>(k, (old = []) => {
+          const next = [optimistic, ...old];
+          return typeof filters.limit === "number"
+            ? next.slice(0, filters.limit)
+            : next;
+        });
+      }
+
+      // Return context for rollback
+      return { previous };
     },
-    ...options,
+    onError: (error, _vars: TxVars, ctx) => {
+      // Rollback on failure
+      const context = ctx as TxRollbackCtx | undefined;
+      context?.previous.forEach(([key, data]) => {
+        queryClient.setQueryData<Transaction[] | undefined>(key, data);
+      });
+      userOnError?.(error, _vars, ctx);
+    },
+    onSuccess: async (created, variables, context) => {
+      // Force immediate refetch of all transaction queries to reconcile server state
+      await queryClient.refetchQueries({
+        predicate: (q) => q.queryKey[0] === "transactions",
+      });
+      userOnSuccess?.(created, variables, context);
+    },
+    ...rest,
   });
 }
 
@@ -256,6 +359,12 @@ export function useSetupDefaults(
   options?: UseMutationOptions<SetupResult, Error, void>
 ) {
   const queryClient = useQueryClient();
+  const {
+    onSuccess: userOnSuccess,
+    onError: userOnError,
+    onMutate: userOnMutate,
+    ...rest
+  } = options ?? {};
 
   return useMutation({
     mutationFn: () =>
@@ -282,12 +391,21 @@ export function useSetupDefaults(
           throw error;
         }
       }),
-    onSuccess: () => {
-      // Invalidate and refetch categories and income sources
-      queryClient.invalidateQueries({ queryKey: queryKeys.categories });
-      queryClient.invalidateQueries({ queryKey: queryKeys.incomeSources });
+    onMutate: async (vars) => {
+      if (userOnMutate) return userOnMutate(vars);
     },
-    ...options,
+    onError: (error, variables, context) => {
+      userOnError?.(error, variables, context);
+    },
+    onSuccess: async (result, variables, context) => {
+      // Refetch active queries immediately so UI updates
+      await Promise.all([
+        queryClient.refetchQueries({ queryKey: queryKeys.categories }),
+        queryClient.refetchQueries({ queryKey: queryKeys.incomeSources }),
+      ]);
+      userOnSuccess?.(result, variables, context);
+    },
+    ...rest,
   });
 }
 
