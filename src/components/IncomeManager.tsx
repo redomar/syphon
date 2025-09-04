@@ -28,6 +28,7 @@ import { formatCurrency, formatDate } from "@/lib/types";
 import { CalendarDays, DollarSign, Edit, Plus, Tag } from "lucide-react";
 import React from "react";
 import { CategoryKind, TransactionType } from "../../generated/prisma";
+// removed unused imports
 
 function IncomeManager() {
   const [showIncomeForm, setShowIncomeForm] = React.useState(false);
@@ -227,17 +228,17 @@ function IncomeManager() {
     setupMutation.isPending;
 
   return (
-    <div className="space-y-6">
+    <div className="grid gap-6">
       {/* Header */}
       <Card>
-        <CardContent className="flex items-end w-full">
-          <div className="flex-1">
+        <CardContent className="grid grid-cols-[1fr_auto] items-end w-full">
+          <div>
             <h2 className="text-lg font-semibold">Income Management</h2>
             <p className="text-sm text-neutral-500">
               Manage your income sources, categories, and transactions.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="grid grid-flow-col auto-cols-max gap-2">
             {(categories.length === 0 || incomeSources.length === 0) && (
               <Button
                 onClick={handleSetupDefaults}
@@ -281,9 +282,9 @@ function IncomeManager() {
           <CardContent>
             <form
               onSubmit={handleCreateCategory}
-              className="flex flex-row space-x-4 items-end w-full"
+              className="grid grid-cols-[1fr_auto_auto_auto] items-end gap-4 w-full"
             >
-              <div className="flex flex-col flex-1">
+              <div className="grid gap-1">
                 <Label htmlFor="category-name" className="text-sm mb-1">
                   Category Name
                 </Label>
@@ -301,7 +302,7 @@ function IncomeManager() {
                   required
                 />
               </div>
-              <div className="flex flex-col">
+              <div className="grid gap-1">
                 <Label htmlFor="category-color" className="text-sm mb-1">
                   Color
                 </Label>
@@ -343,9 +344,9 @@ function IncomeManager() {
           <CardContent>
             <form
               onSubmit={handleCreateIncomeSource}
-              className="flex flex-row space-x-4 items-end w-full"
+              className="grid grid-cols-[1fr_auto_auto] items-end gap-4 w-full"
             >
-              <div className="flex flex-col flex-1">
+              <div className="grid gap-1">
                 <Label htmlFor="source-name" className="text-sm mb-1">
                   Source Name
                 </Label>
@@ -486,15 +487,14 @@ function IncomeManager() {
                 />
               </div>
 
-              <div className="col-span-2 flex gap-2">
-                <Button type="submit" disabled={isLoading} className="flex-1">
+              <div className="col-span-2 grid grid-cols-2 gap-2">
+                <Button type="submit" disabled={isLoading}>
                   {isLoading ? "Adding..." : "Add Income"}
                 </Button>
                 <Button
                   type="button"
                   variant="secondary"
                   onClick={() => setShowIncomeForm(false)}
-                  className="flex-1"
                 >
                   Cancel
                 </Button>
@@ -507,7 +507,7 @@ function IncomeManager() {
       {/* Recent Transactions */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-md flex items-center gap-2">
+          <CardTitle className="text-md grid grid-flow-col auto-cols-max items-center gap-2">
             <DollarSign className="h-5 w-5" />
             Recent Income Transactions
           </CardTitle>
@@ -522,14 +522,14 @@ function IncomeManager() {
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="flex flex-col gap-3 p-3 border max-h-96 overflow-auto">
               {transactions.map((transaction) => (
                 <div
                   key={transaction.id}
-                  className="flex items-center justify-between p-3 bg-neutral-800 hover:bg-neutral-700 transition-colors"
+                  className="grid p-3 bg-neutral-800 hover:bg-neutral-700 transition-colors"
                 >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                  <div className="grid gap-1">
+                    <div className="grid grid-flow-col auto-cols-max items-center gap-2 mb-1">
                       <span className="font-medium min-w-32">
                         {formatCurrency(transaction.amount)}
                       </span>
@@ -540,7 +540,7 @@ function IncomeManager() {
                             backgroundColor: `${transaction.category.color}99`,
                             borderColor: transaction.category.color,
                           }}
-                          className="text-xs inset-shadow-sm  inset-shadow-neutral-900"
+                          className="text-xs inset-shadow-sm inset-shadow-neutral-900"
                         >
                           {transaction.category.name}
                         </Badge>
@@ -602,6 +602,21 @@ function IncomeManager() {
                 <p className="text-2xl font-bold">{transactions.length}</p>
               </div>
             </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Income</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">
+              {transactions
+                .reduce(
+                  (acc, transaction) => acc + parseFloat(transaction.amount),
+                  0
+                )
+                .toLocaleString()}
+            </p>
           </CardContent>
         </Card>
       </div>
