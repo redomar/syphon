@@ -1,3 +1,4 @@
+import CurrentFinances from "@/components/dashboard/CurrentFinaces";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -160,7 +161,7 @@ export default async function Home() {
                         availableBalance >= 0 ? "text-white" : "text-red-500"
                       }`}
                     >
-                      £{availableBalance.toLocaleString()}
+                      £{<CurrentFinances />}
                     </p>
                   </div>
                   <PoundSterling

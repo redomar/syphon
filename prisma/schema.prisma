@@ -23,6 +23,16 @@ enum CurrencyCode {
   AUD
 }
 
+enum AccountType {
+  CHECKING
+  SAVINGS
+  CREDIT_CARD
+  DEBIT_CARD
+  INVESTMENT
+  CASH
+  OTHER
+}
+
 enum CategoryKind {
   INCOME
   EXPENSE
@@ -55,21 +65,22 @@ enum PayFrequency {
 // ---------- Core ----------
 model User {
   // Use Clerk user id as the primary key
-  id        String       @id
+  id        String  @id
   email     String?
   firstName String?
   lastName  String?
 
-  currency  CurrencyCode @default(GBP)
-  timezone  String       @default("Europe/London")
+  currency CurrencyCode @default(GBP)
+  timezone String       @default("Europe/London")
 
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
   categories        Category[]
   transactions      Transaction[]
   incomeSources     IncomeSource[]
+  accounts          Account[]
   budgets           Budget[]
   savingsGoals      SavingsGoal[]
   goalContributions SavingsGoalContribution[]
@@ -80,34 +91,53 @@ model User {
 
 // ---------- Categorization ----------
 model Category {
-  id         String        @id @default(cuid())
+  id         String       @id @default(cuid())
   userId     String
   name       String
   kind       CategoryKind
   color      String?
   icon       String?
-  isArchived Boolean       @default(false)
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  isArchived Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
 
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions     Transaction[]
   budgetCategories BudgetCategory[]
 
   @@unique([userId, name, kind])
   @@index([userId])
 }
 
+// ---------- Accounts ----------
+model Account {
+  id             String      @id @default(cuid())
+  userId         String
+  name           String // e.g., "Chase Checking", "Amex Credit Card"
+  type           AccountType
+  provider       String? // e.g., "Chase", "Amex", "Monzo"
+  lastFourDigits String? // Last 4 digits for privacy
+  isArchived     Boolean     @default(false)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
 // Optional named income sources (e.g., "Salary", "Freelance")
 model IncomeSource {
-  id         String        @id @default(cuid())
+  id         String   @id @default(cuid())
   userId     String
   name       String
-  isArchived Boolean       @default(false)
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  isArchived Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
 
   @@unique([userId, name])
@@ -116,44 +146,47 @@ model IncomeSource {
 
 // ---------- Money movement ----------
 model Transaction {
-  id             String          @id @default(cuid())
-  userId         String
-  type           TransactionType
-  amount         Decimal         @db.Decimal(14, 2)
-  occurredAt     DateTime
-  description    String?
-  currency       CurrencyCode    @default(GBP)
+  id          String          @id @default(cuid())
+  userId      String
+  type        TransactionType
+  amount      Decimal         @db.Decimal(14, 2)
+  occurredAt  DateTime
+  description String?
+  currency    CurrencyCode    @default(GBP)
 
   // Optional classification
   categoryId     String?
   incomeSourceId String?
+  accountId      String?
 
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category     Category?    @relation(fields: [categoryId], references: [id])
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category     Category?     @relation(fields: [categoryId], references: [id])
   incomeSource IncomeSource? @relation(fields: [incomeSourceId], references: [id])
+  account      Account?      @relation(fields: [accountId], references: [id])
 
   @@index([userId, occurredAt])
   @@index([userId, type, occurredAt])
   @@index([userId, categoryId])
+  @@index([userId, accountId])
 }
 
 // ---------- Savings ----------
 model SavingsGoal {
-  id            String                   @id @default(cuid())
+  id            String    @id @default(cuid())
   userId        String
   name          String
-  targetAmount  Decimal                  @db.Decimal(14, 2)
+  targetAmount  Decimal   @db.Decimal(14, 2)
   // Keep a cached currentAmount if you want quick reads
-  currentAmount Decimal                  @db.Decimal(14, 2) @default(0)
+  currentAmount Decimal   @default(0) @db.Decimal(14, 2)
   deadline      DateTime?
-  isArchived    Boolean                  @default(false)
-  createdAt     DateTime                 @default(now())
-  updatedAt     DateTime                 @updatedAt
+  isArchived    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  user          User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
   contributions SavingsGoalContribution[]
 
   @@unique([userId, name])
@@ -161,10 +194,10 @@ model SavingsGoal {
 }
 
 model SavingsGoalContribution {
-  id         String      @id @default(cuid())
+  id         String   @id @default(cuid())
   userId     String
   goalId     String
-  amount     Decimal     @db.Decimal(14, 2)
+  amount     Decimal  @db.Decimal(14, 2)
   occurredAt DateTime
   note       String?
 
@@ -177,20 +210,20 @@ model SavingsGoalContribution {
 
 // ---------- Debt ----------
 model Debt {
-  id          String     @id @default(cuid())
-  userId      String
-  name        String
-  type        DebtType   @default(OTHER)
-  balance     Decimal    @db.Decimal(14, 2)
-  apr         Decimal?   @db.Decimal(5, 2)
-  minPayment  Decimal    @db.Decimal(14, 2)
-  lender      String?
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  type          DebtType @default(OTHER)
+  balance       Decimal  @db.Decimal(14, 2)
+  apr           Decimal? @db.Decimal(5, 2)
+  minPayment    Decimal  @db.Decimal(14, 2)
+  lender        String?
   dueDayOfMonth Int?
-  isClosed    Boolean    @default(false)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  isClosed      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   payments DebtPayment[]
 
   @@unique([userId, name])
@@ -216,15 +249,15 @@ model DebtPayment {
 
 // ---------- Budgeting ----------
 model Budget {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   userId      String
-  periodStart DateTime  // e.g., 2025-08-01T00:00:00Z
-  periodEnd   DateTime  // e.g., 2025-08-31T23:59:59Z
-  totalAmount Decimal   @db.Decimal(14, 2) // your monthlyBudget
-  rollOver    Boolean   @default(false)
+  periodStart DateTime // e.g., 2025-08-01T00:00:00Z
+  periodEnd   DateTime // e.g., 2025-08-31T23:59:59Z
+  totalAmount Decimal  @db.Decimal(14, 2) // your monthlyBudget
+  rollOver    Boolean  @default(false)
   note        String?
 
-  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   categories BudgetCategory[]
 
   @@unique([userId, periodStart])
@@ -232,10 +265,10 @@ model Budget {
 }
 
 model BudgetCategory {
-  id         String   @id @default(cuid())
+  id         String  @id @default(cuid())
   budgetId   String
   categoryId String
-  amount     Decimal  @db.Decimal(14, 2)
+  amount     Decimal @db.Decimal(14, 2)
 
   budget   Budget   @relation(fields: [budgetId], references: [id], onDelete: Cascade)
   category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
@@ -250,7 +283,7 @@ model PaySchedule {
   frequency  PayFrequency
   nextPayday DateTime
   anchorDate DateTime?
-  dayOfMonth Int?         // for monthly/semi-monthly
+  dayOfMonth Int? // for monthly/semi-monthly
   timezone   String       @default("Europe/London")
   active     Boolean      @default(true)
 
