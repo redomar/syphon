@@ -1,0 +1,31 @@
+# Nixpacks configuration for Syphon deployment on Dokploy
+[providers]
+nodejs = "20"
+
+[variables]
+# Node.js configuration
+NODE_ENV = "production"
+NPM_CONFIG_CACHE = "/tmp/.npm"
+NPM_CONFIG_PRODUCTION = "false"
+
+# Next.js configuration
+NEXT_TELEMETRY_DISABLED = "1"
+
+[phases.build]
+dependsOn = ["install"]
+cmds = [
+    "npx prisma generate",
+    "npm run build"
+]
+
+[phases.install]
+cmds = [
+    "npm ci --include=dev"
+]
+
+[start]
+cmd = "npm start"
+
+# Health check configuration
+[healthcheck]
+path = "/api/health"

@@ -41,3 +41,17 @@ yarn-error.log*
 next-env.d.ts
 
 /generated/prisma
+
+# deployment and production
+docker-compose.override.yml
+.dockerignore
+
+# telemetry data
+jaeger_data/
+prometheus_data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
