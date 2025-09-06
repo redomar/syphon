@@ -520,3 +520,90 @@ export function useExpenseCategories() {
 export function useIncomeTransactions() {
   return useTransactions({ type: TransactionType.INCOME, limit: 10 });
 }
+
+export function useExpenseTransactions() {
+  return useTransactions({ type: TransactionType.EXPENSE, limit: 10 });
+}
+
+// CSV Import Hook
+export function useImportExpenses(
+  options?: UseMutationOptions<
+    {
+      success: boolean;
+      imported: number;
+      skipped: number;
+      skippedReasons: string[];
+      categoriesCreated: number;
+      message: string;
+    },
+    Error,
+    {
+      csvData: string;
+      dateColumn: string;
+      amountColumn: string;
+      categoryColumn: string;
+      merchantColumn?: string;
+      descriptionColumn?: string;
+    }
+  >
+) {
+  const queryClient = useQueryClient();
+  const {
+    onSuccess: userOnSuccess,
+    onError: userOnError,
+    ...rest
+  } = options ?? {};
+
+  return useMutation({
+    mutationFn: (data) =>
+      tracer.startActiveSpan("hook.importExpenses", async (span) => {
+        span.setAttributes({
+          "hook.name": "useImportExpenses",
+          operation: "import",
+          "csv.date_column": data.dateColumn,
+          "csv.amount_column": data.amountColumn,
+          "csv.category_column": data.categoryColumn,
+        });
+
+        try {
+          const response = await fetch("/api/expenses/import", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to import expenses");
+          }
+
+          const result = await response.json();
+          span.setAttributes({
+            "import.transactions_imported": result.imported,
+            "import.transactions_skipped": result.skipped,
+            "import.categories_created": result.categoriesCreated,
+            success: true,
+          });
+          span.end();
+          return result;
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setAttributes({ error: true });
+          span.end();
+          throw error;
+        }
+      }),
+    onSuccess: (result, variables, context) => {
+      // Invalidate relevant queries to refresh data
+      queryClient.invalidateQueries({ queryKey: queryKeys.transactions() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.categories });
+      userOnSuccess?.(result, variables, context);
+    },
+    onError: (error, variables, context) => {
+      userOnError?.(error, variables, context);
+    },
+    ...rest,
+  });
+}
