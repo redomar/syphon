@@ -249,3 +249,86 @@ export async function POST(request: NextRequest) {
     }
   });
 }
+
+export async function DELETE(request: NextRequest) {
+  return tracer.startActiveSpan("api.transactions.DELETE", async (span) => {
+    try {
+      span.setAttributes({
+        "http.method": "DELETE",
+        "http.route": "/api/transactions",
+      });
+
+      const user = await getCurrentUser();
+      if (!user) {
+        span.setAttributes({
+          "http.status_code": 401,
+          "auth.result": "unauthorized",
+        });
+        span.end();
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      const { searchParams } = new URL(request.url);
+      const transactionId = searchParams.get("id");
+
+      if (!transactionId) {
+        span.setAttributes({
+          "http.status_code": 400,
+          "error.type": "validation",
+          "validation.field": "id",
+        });
+        span.end();
+        return NextResponse.json(
+          { error: "Transaction ID is required" },
+          { status: 400 }
+        );
+      }
+
+      const transaction = await db.transaction.findFirst({
+        where: {
+          id: transactionId,
+          userId: user.id,
+        },
+      });
+
+      if (!transaction) {
+        span.setAttributes({
+          "http.status_code": 404,
+          "error.type": "not_found",
+          "validation.field": "id",
+        });
+        span.end();
+        return NextResponse.json(
+          { error: "Transaction not found" },
+          { status: 404 }
+        );
+      }
+
+      await db.transaction.delete({
+        where: {
+          id: transaction.id,
+        },
+      });
+
+      span.setAttributes({
+        "http.status_code": 200,
+        "transaction.id": transaction.id,
+        "user.id": user.id,
+        deletion: "successful",
+      });
+      span.end();
+      return NextResponse.json({ success: true }, { status: 200 });
+    } catch (error) {
+      span.recordException(error as Error);
+      span.setAttributes({
+        "http.status_code": 500,
+        "error.message": (error as Error).message,
+      });
+      span.end();
+      return NextResponse.json(
+        { error: "Failed to delete transaction" },
+        { status: 500 }
+      );
+    }
+  });
+}

@@ -18,6 +18,7 @@ import {
 import { shadcn } from "@clerk/themes";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const VERSION = process.env.VERSION || "0.1.0L";
 const BRANCH = process.env.BRANCH || "dev";
@@ -136,6 +137,7 @@ export default function RootLayout({
                   <div className="p-6">{children}</div>
                 </div>
               </div>
+              <Toaster />
             </QueryProvider>
           </ThemeProvider>
         </body>

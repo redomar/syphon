@@ -142,6 +142,11 @@ export const transactionsApi = {
       method: "POST",
       body: data,
     }),
+
+  delete: (id: string): Promise<{ success: boolean }> =>
+    apiRequest<{ success: boolean }>(`/api/transactions?id=${id}`, {
+      method: "DELETE",
+    }),
 };
 
 // Setup API

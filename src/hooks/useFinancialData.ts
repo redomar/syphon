@@ -354,6 +354,95 @@ export function useCreateTransaction(
   });
 }
 
+export function useDeleteTransaction(
+  options?: UseMutationOptions<
+    { id: Transaction["id"] },
+    Error,
+    { id: Transaction["id"] }
+  >
+) {
+  const queryClient = useQueryClient();
+
+  const {
+    onSuccess: userOnSuccess,
+    onError: userOnError,
+    onMutate: userOnMutate,
+    ...rest
+  } = options ?? {};
+
+  type DeleteVars = { id: Transaction["id"] };
+  type DeleteRollbackCtx = {
+    previous: Array<[readonly unknown[], Transaction[] | undefined]>;
+  };
+
+  return useMutation({
+    mutationFn: (data) =>
+      tracer.startActiveSpan("hook.deleteTransaction", async (span) => {
+        span.setAttributes({
+          "hook.name": "useDeleteTransaction",
+          operation: "delete",
+          "transaction.id": data.id,
+        });
+
+        try {
+          await transactionsApi.delete(data.id);
+          span.setAttributes({
+            "transaction.id": data.id,
+            success: true,
+          });
+          span.end();
+          return { id: data.id };
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setAttributes({ error: true });
+          span.end();
+          throw error;
+        }
+      }),
+    // Optimistic removal from all transaction lists
+    onMutate: async (vars: DeleteVars): Promise<DeleteRollbackCtx | void> => {
+      // Allow caller to run their onMutate first
+      if (userOnMutate) {
+        await userOnMutate(vars);
+      }
+
+      // Cancel outgoing refetches for transactions
+      await queryClient.cancelQueries({ queryKey: ["transactions"] });
+
+      // Snapshot current data for rollback
+      const previous = queryClient.getQueriesData<Transaction[]>({
+        queryKey: ["transactions"],
+      });
+
+      // Remove the transaction from all relevant queries
+      for (const [key] of previous) {
+        queryClient.setQueryData<Transaction[]>(key, (old = []) =>
+          old.filter((tx) => tx.id !== vars.id)
+        );
+      }
+
+      // Return context for rollback
+      return { previous };
+    },
+    onError: (error, vars: DeleteVars, ctx) => {
+      // Rollback on failure
+      const context = ctx as DeleteRollbackCtx | undefined;
+      context?.previous.forEach(([key, data]) => {
+        queryClient.setQueryData<Transaction[] | undefined>(key, data);
+      });
+      userOnError?.(error, vars, ctx);
+    },
+    onSuccess: async (deleted, variables, context) => {
+      // Force immediate refetch of all transaction queries to reconcile server state
+      await queryClient.refetchQueries({
+        predicate: (q) => q.queryKey[0] === "transactions",
+      });
+      userOnSuccess?.(deleted, variables, context);
+    },
+    ...rest,
+  });
+}
+
 // Setup Hook
 export function useSetupDefaults(
   options?: UseMutationOptions<SetupResult, Error, void>

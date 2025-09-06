@@ -18,6 +18,7 @@ import {
   useCreateCategory,
   useCreateIncomeSource,
   useCreateTransaction,
+  useDeleteTransaction,
   useIncomeCategories,
   useIncomeSources,
   useIncomeTransactions,
@@ -25,10 +26,32 @@ import {
 } from "@/hooks/useFinancialData";
 import { tracer } from "@/lib/telemetry";
 import { formatCurrency, formatDate } from "@/lib/types";
-import { CalendarDays, DollarSign, Edit, Plus, Tag } from "lucide-react";
+import {
+  CalendarDays,
+  DollarSign,
+  Edit,
+  Info,
+  Plus,
+  Tag,
+  Trash,
+} from "lucide-react";
 import React from "react";
 import { CategoryKind, TransactionType } from "../../generated/prisma";
+import { toast } from "sonner";
 // removed unused imports
+
+function recentlyUpdated(
+  timeThresholdInMinutes: number,
+  sourceDate: Date,
+  referenceDate: Date = new Date()
+): boolean {
+  const sourceTime = new Date(sourceDate).getTime();
+  const referenceTime = referenceDate.getTime();
+
+  const thresholdMs = timeThresholdInMinutes * 60 * 1000;
+
+  return referenceTime - sourceTime <= thresholdMs;
+}
 
 function IncomeManager() {
   const [showIncomeForm, setShowIncomeForm] = React.useState(false);
@@ -126,6 +149,33 @@ function IncomeManager() {
         span.end();
       });
       console.error("Failed to create transaction:", error);
+    },
+  });
+
+  const deleteTransactionMutation = useDeleteTransaction({
+    onSuccess: () => {
+      tracer.startActiveSpan("ui.transaction_deleted", (span) => {
+        span.setAttributes({
+          component: "IncomeManager",
+          action: "transaction_deleted",
+        });
+        span.end();
+      });
+
+      toast.success("Transaction deleted");
+    },
+    onError: (error) => {
+      tracer.startActiveSpan("ui.transaction_deletion_failed", (span) => {
+        span.recordException(error);
+        span.setAttributes({
+          component: "IncomeManager",
+          action: "transaction_deletion_failed",
+          "error.message": error.message,
+        });
+        span.end();
+      });
+      console.error("Failed to delete transaction:", error);
+      toast.error("Failed to delete transaction");
     },
   });
 
@@ -526,9 +576,9 @@ function IncomeManager() {
               {transactions.map((transaction) => (
                 <div
                   key={transaction.id}
-                  className="grid p-3 bg-neutral-800 hover:bg-neutral-700 transition-colors"
+                  className="grid grid-cols-3 p-3 bg-neutral-800 hover:bg-neutral-700 transition-colors"
                 >
-                  <div className="grid gap-1">
+                  <div className="grid gap-1 col-span-2">
                     <div className="grid grid-flow-col auto-cols-max items-center gap-2 mb-1">
                       <span className="font-medium min-w-32">
                         {formatCurrency(transaction.amount)}
@@ -559,6 +609,44 @@ function IncomeManager() {
                     <p className="text-xs text-neutral-500">
                       {formatDate(transaction.occurredAt)}
                     </p>
+                  </div>
+                  <div className="justify-self-end self-center space-x-2">
+                    {recentlyUpdated(24 * 60, transaction.createdAt) ? (
+                      <>
+                        <Button
+                          className="bg-red-800/5 border-2 border-red-600 hover:bg-red-600"
+                          size="sm"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            if (
+                              window.confirm(
+                                "Are you sure you want to delete this transaction?"
+                              )
+                            ) {
+                              deleteTransactionMutation.mutate({
+                                id: transaction.id,
+                              });
+                            }
+                          }}
+                        >
+                          <Trash className="size-3" />
+                          Delete
+                        </Button>
+                      </>
+                    ) : (
+                      <div title="Older transaction - actions disabled">
+                        <Info
+                          className="size-5"
+                          onClick={() => {
+                            toast("No longer editable", {
+                              icon: <Info className="size-5" />,
+                              description:
+                                "Transactions can only be edited or deleted within a day of creation.",
+                            });
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
