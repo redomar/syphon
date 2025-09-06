@@ -134,7 +134,7 @@ export default function RootLayout({
                       </SignedIn>
                     </div>
                   </div>
-                  <div className="p-6">{children}</div>
+                  <div className="flex-1 p-6 overflow-auto">{children}</div>
                 </div>
               </div>
               <Toaster />
