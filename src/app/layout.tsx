@@ -4,6 +4,7 @@ import "./globals.css";
 
 import Navigation from "@/components/Navigation";
 import { DynamicBreadcrumb } from "@/components/DynamicBreadcrumb";
+import { SystemStatus } from "@/components/SystemStatus";
 import { Bell, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,9 +20,6 @@ import { shadcn } from "@clerk/themes";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
-
-const VERSION = process.env.VERSION || "0.1.0L";
-const BRANCH = process.env.BRANCH || "dev";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -70,27 +68,13 @@ export default function RootLayout({
                           PROJECT SYPHON
                         </h1>
                         <p className="text-neutral-500 text-xs">
-                          {VERSION} {BRANCH}
-                        </p>
-                        <p className="text-neutral-500 text-xs">
                           Track your spending, manage your finances, and gain
                           insights
                         </p>
                       </div>
                     </div>
                     <Navigation />
-                    <div className="flex flex-col gap-1 border border-neutral-800 bg-neutral-600/5 p-4 text-xs mt-auto">
-                      <div className="flex gap-2 items-center">
-                        <div className="size-2 bg-red-500 animate-pulse"></div>
-                        <span className="text-red-400">SYSTEM OFFLINE</span>
-                      </div>
-                      <div className="text-neutral-500">
-                        <p>
-                          The system is currently being built. Please wait
-                          patiently.
-                        </p>
-                      </div>
-                    </div>
+                    <SystemStatus />
                   </div>
                 </div>
                 <div className="flex-1 flex flex-col">
