@@ -12,10 +12,9 @@ function CurrentFinances() {
 
   return (
     <span>
-      {transactions.reduce(
-        (acc, transaction) => acc + parseInt(transaction.amount),
-        0
-      ).toLocaleString()}
+      {transactions
+        .reduce((acc, transaction) => acc + parseFloat(transaction.amount), 0)
+        .toLocaleString()}
     </span>
   );
 }

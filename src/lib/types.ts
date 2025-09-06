@@ -3,6 +3,7 @@ import {
   CategoryKind,
   TransactionType,
   CurrencyCode,
+  AccountType,
 } from "../../generated/prisma";
 
 export interface Category {
@@ -26,6 +27,18 @@ export interface IncomeSource {
   updatedAt: Date;
 }
 
+export interface Account {
+  id: string;
+  userId: string;
+  name: string;
+  type: AccountType;
+  provider?: string;
+  lastFourDigits?: string;
+  isArchived: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Transaction {
   id: string;
   userId: string;
@@ -36,10 +49,12 @@ export interface Transaction {
   currency: CurrencyCode;
   categoryId?: string;
   incomeSourceId?: string;
+  accountId?: string;
   createdAt: Date;
   updatedAt: Date;
   category?: Category;
   incomeSource?: IncomeSource;
+  account?: Account;
 }
 
 export interface TransactionFormData {
@@ -48,6 +63,7 @@ export interface TransactionFormData {
   description: string;
   categoryId: string;
   incomeSourceId: string;
+  accountId: string;
 }
 
 export interface CategoryFormData {
@@ -57,6 +73,13 @@ export interface CategoryFormData {
 
 export interface IncomeSourceFormData {
   name: string;
+}
+
+export interface AccountFormData {
+  name: string;
+  type: AccountType;
+  provider: string;
+  lastFourDigits: string;
 }
 
 export interface SetupResult {

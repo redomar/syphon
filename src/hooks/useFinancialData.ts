@@ -9,6 +9,7 @@ import { tracer } from "@/lib/telemetry";
 import {
   categoriesApi,
   incomeSourcesApi,
+  accountsApi,
   transactionsApi,
   setupApi,
   queryKeys,
@@ -16,12 +17,14 @@ import {
 import type {
   Category,
   IncomeSource,
+  Account,
   Transaction,
   SetupResult,
 } from "@/lib/types";
 import {
   CategoryKind,
   TransactionType,
+  AccountType,
   CurrencyCode,
 } from "../../generated/prisma";
 
@@ -190,6 +193,94 @@ export function useCreateIncomeSource(
   });
 }
 
+// Accounts Hooks
+export function useAccounts(options?: UseQueryOptions<Account[], Error>) {
+  return useQuery({
+    queryKey: queryKeys.accounts,
+    queryFn: () =>
+      tracer.startActiveSpan("hook.useAccounts", async (span) => {
+        span.setAttributes({
+          "hook.name": "useAccounts",
+          operation: "fetch",
+        });
+
+        try {
+          const data = await accountsApi.getAll();
+          span.setAttributes({
+            "accounts.count": data.length,
+            success: true,
+          });
+          span.end();
+          return data;
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setAttributes({ error: true });
+          span.end();
+          throw error;
+        }
+      }),
+    ...options,
+  });
+}
+
+export function useCreateAccount(
+  options?: UseMutationOptions<
+    Account,
+    Error,
+    {
+      name: string;
+      type: AccountType;
+      provider?: string;
+      lastFourDigits?: string;
+    }
+  >
+) {
+  const queryClient = useQueryClient();
+  const {
+    onSuccess: userOnSuccess,
+    onError: userOnError,
+    ...rest
+  } = options ?? {};
+
+  return useMutation({
+    mutationFn: (data) =>
+      tracer.startActiveSpan("hook.createAccount", async (span) => {
+        span.setAttributes({
+          "hook.name": "useCreateAccount",
+          operation: "create",
+          "account.name": data.name,
+          "account.type": data.type,
+        });
+
+        try {
+          const result = await accountsApi.create(data);
+          span.setAttributes({
+            "account.id": result.id,
+            success: true,
+          });
+          span.end();
+          return result;
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setAttributes({ error: true });
+          span.end();
+          throw error;
+        }
+      }),
+    onSuccess: (newAccount, variables, context) => {
+      queryClient.setQueryData(queryKeys.accounts, (old: Account[] = []) => [
+        ...old,
+        newAccount,
+      ]);
+      userOnSuccess?.(newAccount, variables, context);
+    },
+    onError: (error, variables, context) => {
+      userOnError?.(error, variables, context);
+    },
+    ...rest,
+  });
+}
+
 // Transactions Hooks
 export function useTransactions(
   filters?: { type?: TransactionType; limit?: number },
@@ -236,6 +327,7 @@ export function useCreateTransaction(
       description?: string;
       categoryId?: string;
       incomeSourceId?: string;
+      accountId?: string;
     }
   >
 ) {
@@ -254,6 +346,7 @@ export function useCreateTransaction(
     description?: string;
     categoryId?: string;
     incomeSourceId?: string;
+    accountId?: string;
   };
   type TxRollbackCtx = {
     previous: Array<[readonly unknown[], Transaction[] | undefined]>;
@@ -534,6 +627,7 @@ export function useImportExpenses(
       skipped: number;
       skippedReasons: string[];
       categoriesCreated: number;
+      accountsCreated: number;
       message: string;
     },
     Error,
@@ -544,6 +638,7 @@ export function useImportExpenses(
       categoryColumn: string;
       merchantColumn?: string;
       descriptionColumn?: string;
+      accountColumn?: string;
     }
   >
 ) {
@@ -584,6 +679,7 @@ export function useImportExpenses(
             "import.transactions_imported": result.imported,
             "import.transactions_skipped": result.skipped,
             "import.categories_created": result.categoriesCreated,
+            "import.accounts_created": result.accountsCreated,
             success: true,
           });
           span.end();
@@ -599,6 +695,7 @@ export function useImportExpenses(
       // Invalidate relevant queries to refresh data
       queryClient.invalidateQueries({ queryKey: queryKeys.transactions() });
       queryClient.invalidateQueries({ queryKey: queryKeys.categories });
+      queryClient.invalidateQueries({ queryKey: queryKeys.accounts });
       userOnSuccess?.(result, variables, context);
     },
     onError: (error, variables, context) => {

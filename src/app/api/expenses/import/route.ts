@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { TransactionType, CategoryKind } from "../../../../../generated/prisma";
+import {
+  TransactionType,
+  CategoryKind,
+  AccountType,
+} from "../../../../../generated/prisma";
 import { tracer } from "@/lib/telemetry";
 import { Decimal } from "@prisma/client/runtime/library";
 
@@ -12,6 +16,7 @@ interface CSVImportRequest {
   categoryColumn: string;
   merchantColumn?: string;
   descriptionColumn?: string;
+  accountColumn?: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -39,6 +44,7 @@ export async function POST(request: NextRequest) {
         categoryColumn,
         merchantColumn,
         descriptionColumn,
+        accountColumn,
       }: CSVImportRequest = await request.json();
 
       // Parse CSV data
@@ -59,6 +65,9 @@ export async function POST(request: NextRequest) {
         : -1;
       const descriptionColumnIndex = descriptionColumn
         ? headers.indexOf(descriptionColumn)
+        : -1;
+      const accountColumnIndex = accountColumn
+        ? headers.indexOf(accountColumn)
         : -1;
 
       if (
@@ -82,11 +91,12 @@ export async function POST(request: NextRequest) {
       const dataLines = lines.slice(1);
       const transactions = [];
       const categoriesMap = new Map<string, string>();
+      const accountsMap = new Map<string, string>();
       const skippedRows: string[] = [];
 
       // Get current date for filtering (last 90 days)
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 90);
+      const ninetyDaysAgo = new Date();
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
       span.setAttributes({
         "csv.total_rows": dataLines.length,
@@ -112,8 +122,8 @@ export async function POST(request: NextRequest) {
             continue;
           }
 
-          // Only import transactions from the last 30 days
-          if (transactionDate < thirtyDaysAgo) {
+          // Only import transactions from the last 90 days
+          if (transactionDate < ninetyDaysAgo) {
             continue;
           }
 
@@ -140,6 +150,8 @@ export async function POST(request: NextRequest) {
             descriptionColumnIndex !== -1
               ? columns[descriptionColumnIndex]
               : undefined;
+          const accountName =
+            accountColumnIndex !== -1 ? columns[accountColumnIndex] : undefined;
 
           // Create or find category
           let categoryId: string | undefined;
@@ -171,6 +183,35 @@ export async function POST(request: NextRequest) {
             categoryId = categoriesMap.get(categoryName);
           }
 
+          // Create or find account
+          let accountId: string | undefined;
+          if (accountName && accountName !== "") {
+            if (!accountsMap.has(accountName)) {
+              // Create account if it doesn't exist
+              const existingAccount = await db.account.findFirst({
+                where: {
+                  userId: user.id,
+                  name: accountName,
+                },
+              });
+
+              if (existingAccount) {
+                accountsMap.set(accountName, existingAccount.id);
+              } else {
+                const newAccount = await db.account.create({
+                  data: {
+                    userId: user.id,
+                    name: accountName,
+                    type: AccountType.OTHER, // Default type for imported accounts
+                    provider: accountName, // Use the account name as provider
+                  },
+                });
+                accountsMap.set(accountName, newAccount.id);
+              }
+            }
+            accountId = accountsMap.get(accountName);
+          }
+
           transactions.push({
             userId: user.id,
             type: TransactionType.EXPENSE,
@@ -179,6 +220,7 @@ export async function POST(request: NextRequest) {
             description:
               [merchant, description].filter(Boolean).join(" - ") || undefined,
             categoryId,
+            accountId,
           });
         } catch (error) {
           skippedRows.push(`Row ${i + 2}: ${(error as Error).message}`);
@@ -200,6 +242,7 @@ export async function POST(request: NextRequest) {
         "transactions.created": importedCount,
         "transactions.skipped": skippedRows.length,
         "categories.created": categoriesMap.size,
+        "accounts.created": accountsMap.size,
         success: true,
       });
 
@@ -211,7 +254,8 @@ export async function POST(request: NextRequest) {
         skipped: skippedRows.length,
         skippedReasons: skippedRows,
         categoriesCreated: categoriesMap.size,
-        message: `Successfully imported ${importedCount} expense transactions from the last 30 days`,
+        accountsCreated: accountsMap.size,
+        message: `Successfully imported ${importedCount} expense transactions from the last 90 days`,
       });
     } catch (error) {
       span.recordException(error as Error);

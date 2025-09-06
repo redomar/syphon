@@ -53,6 +53,13 @@ function recentlyUpdated(
   return referenceTime - sourceTime <= thresholdMs;
 }
 
+function getTotalIncome(transactions: { amount: number | string }[]): number {
+  return transactions.reduce(
+    (acc, transaction) => acc + parseFloat(transaction.amount as string),
+    0
+  );
+}
+
 function IncomeManager() {
   const [showIncomeForm, setShowIncomeForm] = React.useState(false);
   const [showCategoryForm, setShowCategoryForm] = React.useState(false);
@@ -698,12 +705,7 @@ function IncomeManager() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">
-              {transactions
-                .reduce(
-                  (acc, transaction) => acc + parseFloat(transaction.amount),
-                  0
-                )
-                .toLocaleString()}
+              {getTotalIncome(transactions).toLocaleString()}
             </p>
           </CardContent>
         </Card>

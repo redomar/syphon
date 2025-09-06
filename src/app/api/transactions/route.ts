@@ -47,6 +47,7 @@ export async function GET(request: NextRequest) {
         include: {
           category: true,
           incomeSource: true,
+          account: true,
         },
         orderBy: {
           occurredAt: "desc",
@@ -107,6 +108,7 @@ export async function POST(request: NextRequest) {
         description,
         categoryId,
         incomeSourceId,
+        accountId,
       } = body;
 
       // Validate required fields
@@ -208,6 +210,28 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // Validate account if provided
+      if (accountId) {
+        const account = await db.account.findFirst({
+          where: {
+            id: accountId,
+            userId: user.id,
+          },
+        });
+        if (!account) {
+          span.setAttributes({
+            "http.status_code": 400,
+            "error.type": "validation",
+            "validation.field": "accountId",
+          });
+          span.end();
+          return NextResponse.json(
+            { error: "Invalid account" },
+            { status: 400 }
+          );
+        }
+      }
+
       const transaction = await db.transaction.create({
         data: {
           userId: user.id,
@@ -217,11 +241,13 @@ export async function POST(request: NextRequest) {
           description,
           categoryId,
           incomeSourceId,
+          accountId,
           currency: user.currency,
         },
         include: {
           category: true,
           incomeSource: true,
+          account: true,
         },
       });
 

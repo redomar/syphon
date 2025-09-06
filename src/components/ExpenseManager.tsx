@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +12,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { ColumnMappingField } from "@/components/ColumnMappingField";
+import { SummaryCard } from "@/components/SummaryCard";
+import { TransactionItem } from "@/components/TransactionItem";
 import {
   useCategories,
   useCreateCategory,
@@ -22,18 +24,18 @@ import {
   useExpenseTransactions,
   useImportExpenses,
   useSetupDefaults,
+  useAccounts,
+  useCreateAccount,
 } from "@/hooks/useFinancialData";
 import { tracer } from "@/lib/telemetry";
-import { formatCurrency, formatDate } from "@/lib/types";
+import { formatCurrency } from "@/lib/types";
 import {
   CalendarDays,
   DollarSign,
-  Info,
+  FileSpreadsheet,
   Plus,
   Tag,
-  Trash,
   Upload,
-  FileSpreadsheet,
 } from "lucide-react";
 import React from "react";
 import { CategoryKind, TransactionType } from "../../generated/prisma";
@@ -59,12 +61,53 @@ function ExpenseManager() {
 
   const fileRef = React.useRef<HTMLInputElement | null>(null);
 
+  // Column mapping configuration
+  const columnMappings = [
+    {
+      id: "dateColumn",
+      label: "Date Column Name",
+      placeholder: "e.g., Date",
+      required: true,
+    },
+    {
+      id: "amountColumn",
+      label: "Amount Column Name",
+      placeholder: "e.g., Amount",
+      required: true,
+    },
+    {
+      id: "categoryColumn",
+      label: "Category Column Name",
+      placeholder: "e.g., Category",
+      required: true,
+    },
+    {
+      id: "merchantColumn",
+      label: "Merchant Column (Optional)",
+      placeholder: "e.g., Merchant Name",
+      required: false,
+    },
+    {
+      id: "descriptionColumn",
+      label: "Description Column (Optional)",
+      placeholder: "e.g., Description",
+      required: false,
+    },
+    {
+      id: "accountColumn",
+      label: "Account Column (Optional)",
+      placeholder: "e.g., Account Provider",
+      required: false,
+    },
+  ];
+
   // TanStack Query hooks
   const { data: categories = [], isLoading: categoriesLoading } =
     useCategories();
   const { data: transactions = [], isLoading: transactionsLoading } =
     useExpenseTransactions();
   const { data: expenseCategories = [] } = useExpenseCategories();
+  const { data: accounts = [], isLoading: accountsLoading } = useAccounts();
 
   // Mutations
   const createCategoryMutation = useCreateCategory({
@@ -95,6 +138,32 @@ function ExpenseManager() {
     },
   });
 
+  const createAccountMutation = useCreateAccount({
+    onSuccess: () => {
+      tracer.startActiveSpan("ui.expense_account_created", (span) => {
+        span.setAttributes({
+          component: "ExpenseManager",
+          action: "account_created",
+        });
+        span.end();
+      });
+      toast.success("Account created successfully");
+    },
+    onError: (error) => {
+      tracer.startActiveSpan("ui.expense_account_creation_failed", (span) => {
+        span.recordException(error);
+        span.setAttributes({
+          component: "ExpenseManager",
+          action: "account_creation_failed",
+          "error.message": error.message,
+        });
+        span.end();
+      });
+      console.error("Failed to create account:", error);
+      toast.error("Failed to create account");
+    },
+  });
+
   const createTransactionMutation = useCreateTransaction({
     onSuccess: () => {
       tracer.startActiveSpan("ui.expense_transaction_created", (span) => {
@@ -109,6 +178,7 @@ function ExpenseManager() {
         occurredAt: new Date().toISOString().split("T")[0],
         description: "",
         categoryId: "",
+        accountId: "",
       });
       setShowExpenseForm(false);
       toast.success("Expense added successfully");
@@ -179,6 +249,7 @@ function ExpenseManager() {
         categoryColumn: "Category",
         merchantColumn: "",
         descriptionColumn: "",
+        accountColumn: "",
       });
       if (fileRef.current) fileRef.current.value = "";
       toast.success(result.message);
@@ -232,6 +303,7 @@ function ExpenseManager() {
     occurredAt: new Date().toISOString().split("T")[0],
     description: "",
     categoryId: "",
+    accountId: "",
   });
 
   const [categoryForm, setCategoryForm] = React.useState({
@@ -245,6 +317,7 @@ function ExpenseManager() {
     categoryColumn: "Category",
     merchantColumn: "Merchant Name",
     descriptionColumn: "Description",
+    accountColumn: "Account Provider",
   });
 
   // Track component mounting for telemetry
@@ -277,6 +350,7 @@ function ExpenseManager() {
       occurredAt: new Date(transactionForm.occurredAt).toISOString(),
       description: transactionForm.description || undefined,
       categoryId: transactionForm.categoryId || undefined,
+      accountId: transactionForm.accountId || undefined,
     });
   };
 
@@ -304,6 +378,7 @@ function ExpenseManager() {
         categoryColumn: importForm.categoryColumn,
         merchantColumn: importForm.merchantColumn || undefined,
         descriptionColumn: importForm.descriptionColumn || undefined,
+        accountColumn: importForm.accountColumn || undefined,
       });
     };
 
@@ -317,10 +392,45 @@ function ExpenseManager() {
   const isLoading =
     categoriesLoading ||
     transactionsLoading ||
+    accountsLoading ||
     createCategoryMutation.isPending ||
+    createAccountMutation.isPending ||
     createTransactionMutation.isPending ||
     importExpensesMutation.isPending ||
     setupMutation.isPending;
+
+  // Summary card data configuration
+  const summaryCards = [
+    {
+      icon: Tag,
+      iconColor: "text-red-500",
+      title: "Expense Categories",
+      value: expenseCategories.length.toString(),
+    },
+    {
+      icon: CalendarDays,
+      iconColor: "text-orange-500",
+      title: "Recent Transactions",
+      value: transactions.length.toString(),
+    },
+    {
+      icon: DollarSign,
+      iconColor: "text-blue-500",
+      title: "Accounts",
+      value: accounts.length.toString(),
+    },
+    {
+      icon: DollarSign,
+      iconColor: "text-red-400",
+      title: "Total Expenses",
+      value: formatCurrency(
+        transactions
+          .reduce((acc, transaction) => acc + parseFloat(transaction.amount), 0)
+          .toString()
+      ),
+      prefix: "-",
+    },
+  ];
 
   return (
     <div className="grid gap-6">
@@ -502,6 +612,30 @@ function ExpenseManager() {
                 </Select>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="account">Account (Optional)</Label>
+                <Select
+                  value={transactionForm.accountId}
+                  onValueChange={(value) =>
+                    setTransactionForm((prev) => ({
+                      ...prev,
+                      accountId: value,
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {accounts.map((account) => (
+                      <SelectItem key={account.id} value={account.id}>
+                        {account.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="space-y-2 col-span-2">
                 <Label htmlFor="description">Description (Optional)</Label>
                 <Textarea
@@ -560,107 +694,72 @@ function ExpenseManager() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="dateColumn" className="text-sm font-medium">
-                    Date Column Name
-                  </Label>
-                  <Input
-                    type="text"
-                    id="dateColumn"
-                    value={importForm.dateColumn}
-                    onChange={(e) =>
+                {columnMappings.slice(0, 2).map((mapping) => (
+                  <ColumnMappingField
+                    key={mapping.id}
+                    id={mapping.id}
+                    label={mapping.label}
+                    placeholder={mapping.placeholder}
+                    required={mapping.required}
+                    value={
+                      importForm[
+                        mapping.id as keyof typeof importForm
+                      ] as string
+                    }
+                    onChange={(value) =>
                       setImportForm((prev) => ({
                         ...prev,
-                        dateColumn: e.target.value,
+                        [mapping.id]: value,
                       }))
                     }
-                    placeholder="e.g., Date"
-                    required
                   />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="amountColumn" className="text-sm font-medium">
-                    Amount Column Name
-                  </Label>
-                  <Input
-                    type="text"
-                    id="amountColumn"
-                    value={importForm.amountColumn}
-                    onChange={(e) =>
-                      setImportForm((prev) => ({
-                        ...prev,
-                        amountColumn: e.target.value,
-                      }))
-                    }
-                    placeholder="e.g., Amount"
-                    required
-                  />
-                </div>
+                ))}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label
-                    htmlFor="categoryColumn"
-                    className="text-sm font-medium"
-                  >
-                    Category Column Name
-                  </Label>
-                  <Input
-                    type="text"
-                    id="categoryColumn"
-                    value={importForm.categoryColumn}
-                    onChange={(e) =>
+                {columnMappings.slice(2, 4).map((mapping) => (
+                  <ColumnMappingField
+                    key={mapping.id}
+                    id={mapping.id}
+                    label={mapping.label}
+                    placeholder={mapping.placeholder}
+                    required={mapping.required}
+                    value={
+                      importForm[
+                        mapping.id as keyof typeof importForm
+                      ] as string
+                    }
+                    onChange={(value) =>
                       setImportForm((prev) => ({
                         ...prev,
-                        categoryColumn: e.target.value,
+                        [mapping.id]: value,
                       }))
                     }
-                    placeholder="e.g., Category"
-                    required
                   />
-                </div>
-                <div className="grid gap-2">
-                  <Label
-                    htmlFor="merchantColumn"
-                    className="text-sm font-medium"
-                  >
-                    Merchant Column (Optional)
-                  </Label>
-                  <Input
-                    type="text"
-                    id="merchantColumn"
-                    value={importForm.merchantColumn}
-                    onChange={(e) =>
-                      setImportForm((prev) => ({
-                        ...prev,
-                        merchantColumn: e.target.value,
-                      }))
-                    }
-                    placeholder="e.g., Merchant Name"
-                  />
-                </div>
+                ))}
               </div>
 
-              <div className="grid gap-2">
-                <Label
-                  htmlFor="descriptionColumn"
-                  className="text-sm font-medium"
-                >
-                  Description Column (Optional)
-                </Label>
-                <Input
-                  type="text"
-                  id="descriptionColumn"
-                  value={importForm.descriptionColumn}
-                  onChange={(e) =>
-                    setImportForm((prev) => ({
-                      ...prev,
-                      descriptionColumn: e.target.value,
-                    }))
-                  }
-                  placeholder="e.g., Description"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                {columnMappings.slice(4, 6).map((mapping) => (
+                  <ColumnMappingField
+                    key={mapping.id}
+                    id={mapping.id}
+                    label={mapping.label}
+                    placeholder={mapping.placeholder}
+                    required={mapping.required}
+                    value={
+                      importForm[
+                        mapping.id as keyof typeof importForm
+                      ] as string
+                    }
+                    onChange={(value) =>
+                      setImportForm((prev) => ({
+                        ...prev,
+                        [mapping.id]: value,
+                      }))
+                    }
+                  />
+                ))}
               </div>
 
               <div className="bg-neutral-900 p-3 rounded-md border">
@@ -712,76 +811,12 @@ function ExpenseManager() {
           ) : (
             <div className="flex flex-col gap-3 p-3 border max-h-96 overflow-auto">
               {transactions.map((transaction) => (
-                <div
+                <TransactionItem
                   key={transaction.id}
-                  className="grid grid-cols-3 p-3 bg-neutral-800 hover:bg-neutral-700 transition-colors"
-                >
-                  <div className="grid gap-1 col-span-2">
-                    <div className="grid grid-flow-col auto-cols-max items-center gap-2 mb-1">
-                      <span className="font-medium min-w-32 text-red-400">
-                        -{formatCurrency(transaction.amount)}
-                      </span>
-                      {transaction.category && (
-                        <Badge
-                          variant="secondary"
-                          style={{
-                            backgroundColor: `${transaction.category.color}99`,
-                            borderColor: transaction.category.color,
-                          }}
-                          className="text-xs inset-shadow-sm inset-shadow-neutral-900"
-                        >
-                          {transaction.category.name}
-                        </Badge>
-                      )}
-                    </div>
-                    {transaction.description && (
-                      <p className="text-sm text-neutral-600">
-                        {transaction.description}
-                      </p>
-                    )}
-                    <p className="text-xs text-neutral-500">
-                      {formatDate(transaction.occurredAt)}
-                    </p>
-                  </div>
-                  <div className="justify-self-end self-center space-x-2">
-                    {recentlyUpdated(24 * 60, transaction.createdAt) ? (
-                      <>
-                        <Button
-                          className="bg-red-800/5 border-2 border-red-600 hover:bg-red-600"
-                          size="sm"
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            if (
-                              window.confirm(
-                                "Are you sure you want to delete this transaction?"
-                              )
-                            ) {
-                              deleteTransactionMutation.mutate({
-                                id: transaction.id,
-                              });
-                            }
-                          }}
-                        >
-                          <Trash className="size-3" />
-                          Delete
-                        </Button>
-                      </>
-                    ) : (
-                      <div title="Older transaction - actions disabled">
-                        <Info
-                          className="size-5"
-                          onClick={() => {
-                            toast("No longer editable", {
-                              icon: <Info className="size-5" />,
-                              description:
-                                "Transactions can only be edited or deleted within a day of creation.",
-                            });
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
+                  transaction={transaction}
+                  onDelete={(id) => deleteTransactionMutation.mutate({ id })}
+                  recentlyUpdated={recentlyUpdated}
+                />
               ))}
             </div>
           )}
@@ -789,49 +824,17 @@ function ExpenseManager() {
       </Card>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Tag className="h-5 w-5 text-red-500" />
-              <div>
-                <p className="text-sm text-neutral-600">Expense Categories</p>
-                <p className="text-2xl font-bold">{expenseCategories.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <CalendarDays className="h-5 w-5 text-orange-500" />
-              <div>
-                <p className="text-sm text-neutral-600">Recent Transactions</p>
-                <p className="text-2xl font-bold">{transactions.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Expenses</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-red-400">
-              -
-              {formatCurrency(
-                transactions
-                  .reduce(
-                    (acc, transaction) => acc + parseFloat(transaction.amount),
-                    0
-                  )
-                  .toString()
-              )}
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {summaryCards.map((card, index) => (
+          <SummaryCard
+            key={index}
+            icon={card.icon}
+            iconColor={card.iconColor}
+            title={card.title}
+            value={card.value}
+            {...(card.prefix && { prefix: card.prefix })}
+          />
+        ))}
       </div>
     </div>
   );

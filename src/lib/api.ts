@@ -2,10 +2,15 @@ import { tracer } from "@/lib/telemetry";
 import type {
   Category,
   IncomeSource,
+  Account,
   Transaction,
   SetupResult,
 } from "@/lib/types";
-import { CategoryKind, TransactionType } from "../../generated/prisma";
+import {
+  CategoryKind,
+  TransactionType,
+  AccountType,
+} from "../../generated/prisma";
 
 // Base API configuration
 const API_BASE_URL = process.env.NODE_ENV === "production" ? "" : "";
@@ -112,6 +117,22 @@ export const incomeSourcesApi = {
     }),
 };
 
+// Accounts API
+export const accountsApi = {
+  getAll: (): Promise<Account[]> => apiRequest<Account[]>("/api/accounts"),
+
+  create: (data: {
+    name: string;
+    type: AccountType;
+    provider?: string;
+    lastFourDigits?: string;
+  }): Promise<Account> =>
+    apiRequest<Account>("/api/accounts", {
+      method: "POST",
+      body: data,
+    }),
+};
+
 // Transactions API
 export const transactionsApi = {
   getAll: (params?: {
@@ -137,6 +158,7 @@ export const transactionsApi = {
     description?: string;
     categoryId?: string;
     incomeSourceId?: string;
+    accountId?: string;
   }): Promise<Transaction> =>
     apiRequest<Transaction>("/api/transactions", {
       method: "POST",
@@ -161,6 +183,7 @@ export const setupApi = {
 export const queryKeys = {
   categories: ["categories"] as const,
   incomeSources: ["income-sources"] as const,
+  accounts: ["accounts"] as const,
   transactions: (filters?: { type?: TransactionType; limit?: number }) =>
     ["transactions", filters] as const,
   all: ["api"] as const,

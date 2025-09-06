@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useIncomeTransactions } from "@/hooks/useFinancialData";
 import { SignedIn, SignedOut, SignUpButton } from "@clerk/nextjs";
 import { currentUser } from "@clerk/nextjs/server";
 import { Calendar, PoundSterling, Target, TrendingDown } from "lucide-react";
