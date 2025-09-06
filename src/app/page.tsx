@@ -1,3 +1,4 @@
+import CurrentFinances from "@/components/dashboard/CurrentFinaces";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -6,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useIncomeTransactions } from "@/hooks/useFinancialData";
 import { SignedIn, SignedOut, SignUpButton } from "@clerk/nextjs";
 import { currentUser } from "@clerk/nextjs/server";
 import { Calendar, PoundSterling, Target, TrendingDown } from "lucide-react";
@@ -160,7 +162,7 @@ export default async function Home() {
                         availableBalance >= 0 ? "text-white" : "text-red-500"
                       }`}
                     >
-                      £{availableBalance.toLocaleString()}
+                      £{<CurrentFinances />}
                     </p>
                   </div>
                   <PoundSterling
