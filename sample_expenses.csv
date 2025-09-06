@@ -1,0 +1,9 @@
+Date,Merchant Name,Description,Amount,Category,Notes,Account Provider,Account Name,Status,Sub Type
+2025-09-05,Tesco,TESCO EXTRA BIRMINGHAM,-45.67,Shopping,,Monzo,Monzo,,
+2025-09-04,Costa Coffee,COSTA COFFEE BIRMINGHAM,-3.85,Food & Drink,,Monzo,Monzo,,
+2025-09-03,Uber,UBER TRIP 12345,-12.50,Transportation,,Monzo,Monzo,,
+2025-09-02,Amazon,AMAZON PRIME VIDEO,-8.99,Entertainment,,Monzo,Monzo,,
+2025-09-01,Sainsbury's,SAINSBURYS BIRMINGHAM,-23.45,Shopping,,Monzo,Monzo,,
+2025-08-31,McDonald's,MCDONALDS RESTAURANT,-7.89,Food & Drink,,Monzo,Monzo,,
+2025-08-30,Shell,SHELL PETROL STATION,-55.00,Transportation,,TSB,TSB,,
+2025-08-29,Netflix,NETFLIX SUBSCRIPTION,-11.99,Entertainment,,TSB,TSB,,
