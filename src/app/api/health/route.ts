@@ -19,7 +19,7 @@ export async function GET() {
   try {
     // Check database connectivity
     try {
-      await db.$queryRaw`SELECT 1`;
+      await db.$connect();
       checks.checks.database = "healthy";
     } catch (dbError) {
       console.error("Database health check failed:", dbError);

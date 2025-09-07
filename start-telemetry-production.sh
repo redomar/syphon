@@ -19,30 +19,35 @@ fi
 echo "📊 Starting production observability stack..."
 docker compose -f docker-compose.production.yml up -d
 
-# Wait for services to start
+# Wait for services to become healthy with retries
 echo "⏳ Waiting for services to become healthy..."
-sleep 10
 
-# Health check for Jaeger
-if curl -s http://localhost:16686/api/services > /dev/null; then
-    echo "✅ Jaeger UI is running at: http://localhost:16686"
-else
-    echo "⚠️  Jaeger might still be starting up..."
-fi
+MAX_RETRIES=30
+SLEEP_SECONDS=2
 
-# Health check for OTLP endpoint
-if curl -s http://localhost:4318/v1/traces > /dev/null 2>&1; then
-    echo "✅ OTLP HTTP endpoint is ready at: http://localhost:4318"
-else
-    echo "⚠️  OTLP endpoint might still be starting up..."
-fi
+wait_for_service() {
+    local name="$1"
+    local url="$2"
+    local optional="$3"
+    local retries=0
+    while [ $retries -lt $MAX_RETRIES ]; do
+        if curl -s "$url" > /dev/null 2>&1; then
+            echo "✅ $name is running at: $url"
+            return 0
+        fi
+        retries=$((retries+1))
+        sleep $SLEEP_SECONDS
+    done
+    if [ "$optional" = "true" ]; then
+        echo "ℹ️  $name is not accessible (this is optional)"
+    else
+        echo "⚠️  $name did not become healthy after $((MAX_RETRIES * SLEEP_SECONDS)) seconds."
+    fi
+}
 
-# Check Prometheus (if enabled)
-if curl -s http://localhost:9090/-/healthy > /dev/null 2>&1; then
-    echo "✅ Prometheus is running at: http://localhost:9090"
-else
-    echo "ℹ️  Prometheus is not accessible (this is optional)"
-fi
+wait_for_service "Jaeger UI" "http://localhost:16686/api/services" "false"
+wait_for_service "OTLP HTTP endpoint" "http://localhost:4318/v1/traces" "false"
+wait_for_service "Prometheus" "http://localhost:9090/-/healthy" "true"
 
 echo ""
 echo "🔧 Production Environment Configuration:"

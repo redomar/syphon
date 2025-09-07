@@ -1,6 +1,9 @@
 // This file is required for Next.js instrumentation
 // It must be in the root directory and export a register function
 
+// Regex for ignored paths (health checks, static assets)
+const IGNORED_PATHS_REGEX = /^\/api\/health|^\/_next\/|\/favicon\.ico$/;
+
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
     // Dynamic import to avoid loading OpenTelemetry in edge runtime
@@ -46,9 +49,7 @@ export async function register() {
             ignoreIncomingRequestHook: (req) => {
               // Ignore health checks and static assets in production
               // Use regex for efficient matching of health checks and static assets
-              return /^\/api\/health|^\/_next\/|\/favicon\.ico$/.test(
-                req.url || ""
-              );
+              return IGNORED_PATHS_REGEX.test(req.url || "");
             },
           },
         }),
