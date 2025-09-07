@@ -17,7 +17,7 @@ fi
 
 # Start production telemetry stack
 echo "📊 Starting production observability stack..."
-docker-compose -f docker-compose.production.yml up -d
+docker compose -f docker-compose.production.yml up -d
 
 # Wait for services to start
 echo "⏳ Waiting for services to become healthy..."
@@ -58,7 +58,7 @@ echo "   - OTLP gRPC: http://localhost:4317"
 echo "   - Prometheus: http://localhost:9090 (optional)"
 echo ""
 echo "🛑 To stop the telemetry stack:"
-echo "   docker-compose -f docker-compose.production.yml down"
+echo "   docker compose -f docker-compose.production.yml down"
 echo ""
 echo "🔍 To view logs:"
-echo "   docker-compose -f docker-compose.production.yml logs -f"
+echo "   docker compose -f docker-compose.production.yml logs -f"

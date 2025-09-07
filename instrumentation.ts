@@ -15,14 +15,17 @@ export async function register() {
     // Configure exporter with production-ready settings
     let traceExporter;
     if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
-      const exporterConfig: any = {
-        url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
-      };
+      const exporterConfig: { url: string; headers?: Record<string, string> } =
+        {
+          url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+        };
 
       // Parse headers if provided (for services like Honeycomb, DataDog)
       if (process.env.OTEL_EXPORTER_OTLP_HEADERS) {
         try {
-          exporterConfig.headers = JSON.parse(process.env.OTEL_EXPORTER_OTLP_HEADERS);
+          exporterConfig.headers = JSON.parse(
+            process.env.OTEL_EXPORTER_OTLP_HEADERS
+          );
         } catch (error) {
           console.error("Failed to parse OTEL_EXPORTER_OTLP_HEADERS:", error);
         }
@@ -42,10 +45,10 @@ export async function register() {
           "@opentelemetry/instrumentation-http": {
             ignoreIncomingRequestHook: (req) => {
               // Ignore health checks and static assets in production
-              const url = req.url || '';
-              return url.includes('/api/health') || 
-                     url.includes('/_next/') ||
-                     url.includes('/favicon.ico');
+              // Use regex for efficient matching of health checks and static assets
+              return /^\/api\/health|^\/_next\/|\/favicon\.ico$/.test(
+                req.url || ""
+              );
             },
           },
         }),
@@ -55,9 +58,9 @@ export async function register() {
     sdk.start();
 
     // Enhanced logging for production
-    const environment = process.env.NODE_ENV || 'development';
-    const serviceName = process.env.OTEL_SERVICE_NAME || 'syphon-app';
-    const serviceVersion = process.env.OTEL_SERVICE_VERSION || '0.1.0';
+    const environment = process.env.NODE_ENV || "development";
+    const serviceName = process.env.OTEL_SERVICE_NAME || "syphon-app";
+    const serviceVersion = process.env.OTEL_SERVICE_VERSION || "0.1.0";
 
     if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
       console.log(

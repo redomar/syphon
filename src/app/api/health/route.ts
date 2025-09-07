@@ -47,12 +47,12 @@ export async function GET() {
   }
 
   // Return appropriate HTTP status
-  const statusCode =
-    checks.status === "healthy"
-      ? 200
-      : checks.status === "degraded"
-        ? 200
-        : 503;
+  let statusCode: number;
+  if (checks.status === "healthy" || checks.status === "degraded") {
+    statusCode = 200;
+  } else {
+    statusCode = 503;
+  }
 
   return NextResponse.json(checks, { status: statusCode });
 }
