@@ -27,13 +27,50 @@ export async function GET() {
       checks.status = "degraded";
     }
 
-    // Check OpenTelemetry status
+    // Check OpenTelemetry status with actual heartbeat
     const telemetryEnabled = process.env.OTEL_SDK_DISABLED !== "true";
     const telemetryEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
 
     if (telemetryEnabled) {
       if (telemetryEndpoint) {
-        checks.checks.telemetry = "healthy";
+        try {
+          // Attempt to ping the OpenTelemetry endpoint
+          const telemetryUrl = telemetryEndpoint.replace("/v1/traces", "");
+          const healthUrl = `${telemetryUrl}/v1/traces`;
+
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+
+          const response = await fetch(healthUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              resourceSpans: [],
+            }),
+            signal: controller.signal,
+          });
+
+          clearTimeout(timeoutId);
+
+          // OpenTelemetry collector typically returns 200 for valid requests
+          // or 4xx for malformed requests, both indicate the service is up
+          if (response.status < 500) {
+            checks.checks.telemetry = "healthy";
+          } else {
+            checks.checks.telemetry = "unhealthy";
+            checks.status = "degraded";
+          }
+        } catch (error) {
+          console.error("OpenTelemetry heartbeat failed:", error);
+          if (error instanceof Error && error.name === "AbortError") {
+            checks.checks.telemetry = "timeout";
+          } else {
+            checks.checks.telemetry = "unreachable";
+          }
+          checks.status = "degraded";
+        }
       } else {
         checks.checks.telemetry = "console-only";
       }

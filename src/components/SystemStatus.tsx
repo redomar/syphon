@@ -11,7 +11,14 @@ interface HealthCheck {
   service: string;
   checks: {
     database: string;
-    telemetry: string;
+    telemetry:
+      | "healthy"
+      | "console-only"
+      | "disabled"
+      | "timeout"
+      | "unreachable"
+      | "unhealthy"
+      | string;
   };
 }
 
@@ -145,10 +152,17 @@ export function SystemStatus() {
           </span>
           <span
             className={`${
-              health?.checks.telemetry === "healthy" ||
-              health?.checks.telemetry === "console-only"
+              health?.checks.telemetry === "healthy"
                 ? "text-green-400"
-                : "text-yellow-400"
+                : health?.checks.telemetry === "console-only"
+                  ? "text-green-400"
+                  : health?.checks.telemetry === "timeout"
+                    ? "text-yellow-400"
+                    : health?.checks.telemetry === "unreachable"
+                      ? "text-red-400"
+                      : health?.checks.telemetry === "disabled"
+                        ? "text-gray-400"
+                        : "text-yellow-400"
             }`}
           >
             SYS: {health?.checks.telemetry}
