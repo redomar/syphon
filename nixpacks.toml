@@ -1,9 +1,9 @@
 # Nixpacks configuration for Syphon deployment on Dokploy
-[providers]
-nodejs = "20"
+providers = ["nodejs"]
 
 [variables]
 # Node.js configuration
+NODE_VERSION = "20"
 NODE_ENV = "production"
 NPM_CONFIG_CACHE = "/tmp/.npm"
 NPM_CONFIG_PRODUCTION = "false"
