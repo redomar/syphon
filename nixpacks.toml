@@ -1,12 +1,12 @@
 # Nixpacks configuration for Syphon deployment on Dokploy
-providers = ["nodejs"]
+# Removed explicit providers as Nixpacks should autodetect with a package.json
+# If autodection fails, we'll re-add it.
 
 [variables]
 # Node.js configuration
 NODE_VERSION = "20"
 NODE_ENV = "production"
-NPM_CONFIG_CACHE = "/tmp/.npm"
-NPM_CONFIG_PRODUCTION = "false"
+# Temporarily removed NPM_CONFIG_CACHE and NPM_CONFIG_PRODUCTION to simplify
 
 # Next.js configuration
 NEXT_TELEMETRY_DISABLED = "1"
@@ -20,7 +20,8 @@ cmds = [
 
 [phases.install]
 cmds = [
-    "npm ci --include=dev"
+    "npm ci" # 'ci' implies installing prod dependencies and dev dependencies for development context
+            # Removed --include=dev as 'ci' often includes dev by default or for its specific purpose
 ]
 
 [start]
