@@ -7,13 +7,16 @@ WORKDIR /app
 
 # Copy package files
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm ci --omit=dev
 
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Install dev dependencies for build
+RUN npm ci
 
 # Generate Prisma client and build application
 RUN npx prisma generate
@@ -31,9 +34,12 @@ RUN adduser --system --uid 1001 nextjs
 
 # Copy built application
 COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+
+RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
@@ -41,4 +47,4 @@ EXPOSE 3000
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["npm", "start"]
