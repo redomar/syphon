@@ -61,7 +61,7 @@ export async function register() {
     // Enhanced logging for production
     const environment = process.env.NODE_ENV || "development";
     const serviceName = process.env.OTEL_SERVICE_NAME || "syphon-app";
-    const serviceVersion = process.env.OTEL_SERVICE_VERSION || "0.1.0";
+    const serviceVersion = process.env.OTEL_SERVICE_VERSION || process.env.VERSION || "0.2.0";
 
     if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
       console.log(

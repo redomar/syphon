@@ -59,8 +59,8 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
 ```bash
 OTEL_SDK_DISABLED=false
 OTEL_SERVICE_NAME=syphon-app
-OTEL_SERVICE_VERSION=0.1.0
-OTEL_RESOURCE_ATTRIBUTES=service.name=syphon-app,service.version=0.1.0
+OTEL_SERVICE_VERSION=0.2.0
+OTEL_RESOURCE_ATTRIBUTES=service.name=syphon-app,service.version=0.2.0
 ```
 
 **Choose one telemetry option:**
@@ -119,7 +119,7 @@ The application provides a health check endpoint at `/api/health`:
   "timestamp": "2024-01-01T00:00:00.000Z",
   "status": "healthy",
   "environment": "production",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "service": "syphon-app",
   "checks": {
     "database": "healthy",

@@ -43,7 +43,7 @@ export async function register() {
 
 ```typescript
 import { trace } from "@opentelemetry/api";
-export const tracer = trace.getTracer("syphon-app", "0.1.0");
+export const tracer = trace.getTracer("syphon-app", process.env.OTEL_SERVICE_VERSION || process.env.VERSION || "0.2.0");
 ```
 
 **Purpose**: Provides the tracer instance used throughout your application
@@ -190,7 +190,7 @@ export async function GET() {
 OTEL_SDK_DISABLED=false
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces
 OTEL_SERVICE_NAME=syphon-app
-OTEL_SERVICE_VERSION=0.1.0
+OTEL_SERVICE_VERSION=0.2.0
 ```
 
 ### 5. Development Tools

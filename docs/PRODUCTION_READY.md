@@ -34,7 +34,7 @@ Your Syphon application is now configured for production deployment with the fol
   "timestamp": "2025-09-06T20:53:05.764Z",
   "status": "healthy",
   "environment": "development",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "branch": "dev",
   "service": "syphon-app",
   "checks": {
@@ -68,7 +68,7 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_xxxxx
 CLERK_SECRET_KEY=sk_live_xxxxx
 
 # Optional (for versioning)
-VERSION=0.1.0
+VERSION=0.2.0
 BRANCH=production
 
 # Telemetry (choose one option below)
