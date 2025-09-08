@@ -38,7 +38,8 @@ COPY . .
 # Install all dependencies (including dev) for build
 RUN npm ci --frozen-lockfile
 
-# Generate Prisma client for build
+# Generate Prisma client for Alpine Linux with proper engine
+ENV PRISMA_CLI_BINARY_TARGETS="linux-musl-openssl-3.0.x,native"
 RUN npx prisma generate
 
 # Build application with telemetry support
@@ -49,6 +50,10 @@ ENV NODE_ENV=${NODE_ENV}
 ENV VERSION=${VERSION}
 
 RUN npm run build
+
+# Verify Prisma client and engine are properly generated
+RUN ls -la node_modules/.prisma/client/
+RUN ls -la generated/prisma/ || echo "Generated prisma directory not found"
 
 # Verify build artifacts exist
 RUN ls -la .next/
@@ -73,8 +78,12 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nextjs:nodejs /app/generated ./generated
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+
+# Ensure Prisma engine binaries are executable
+RUN find /app -name "*query_engine*" -exec chmod +x {} \; || echo "No query engines found to make executable"
 
 # Copy instrumentation file for OpenTelemetry
 COPY --from=builder --chown=nextjs:nodejs /app/instrumentation.ts ./instrumentation.ts

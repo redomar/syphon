@@ -18,9 +18,12 @@ export async function register() {
     // Configure exporter with production-ready settings
     let traceExporter;
     if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
+      const baseUrl = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
+      const tracesUrl = baseUrl.endsWith('/v1/traces') ? baseUrl : `${baseUrl}/v1/traces`;
+      
       const exporterConfig: { url: string; headers?: Record<string, string> } =
         {
-          url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+          url: tracesUrl,
         };
 
       // Parse headers if provided (for services like Honeycomb, DataDog)
@@ -34,7 +37,10 @@ export async function register() {
         }
       }
 
+      console.log(`🔧 OpenTelemetry exporter configured for: ${tracesUrl}`);
       traceExporter = new OTLPTraceExporter(exporterConfig);
+    } else {
+      console.log("⚠️  No OTEL_EXPORTER_OTLP_ENDPOINT configured - traces will go to console");
     }
 
     const sdk = new NodeSDK({
