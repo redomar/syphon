@@ -34,28 +34,48 @@ export async function GET() {
     if (telemetryEnabled) {
       if (telemetryEndpoint) {
         try {
-          // Attempt to ping the OpenTelemetry endpoint
-          const telemetryUrl = telemetryEndpoint.replace("/v1/traces", "");
-          const healthUrl = `${telemetryUrl}/v1/traces`;
+          // Better telemetry endpoint health check
+          let healthUrl: string;
+          
+          if (telemetryEndpoint.includes("/v1/traces")) {
+            // Remove /v1/traces suffix to get base URL, then add health endpoint
+            healthUrl = telemetryEndpoint.replace("/v1/traces", "/v1/health");
+          } else {
+            // Assume base URL, add health endpoint
+            healthUrl = `${telemetryEndpoint}/v1/health`;
+          }
 
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-          const response = await fetch(healthUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              resourceSpans: [],
-            }),
-            signal: controller.signal,
-          });
+          // Try health endpoint first (better for Jaeger)
+          let response;
+          try {
+            response = await fetch(healthUrl, {
+              method: "GET",
+              signal: controller.signal,
+            });
+          } catch (healthError) {
+            // Fallback: try a lightweight traces endpoint test
+            const tracesUrl = telemetryEndpoint.includes("/v1/traces") 
+              ? telemetryEndpoint 
+              : `${telemetryEndpoint}/v1/traces`;
+              
+            response = await fetch(tracesUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                resourceSpans: [],
+              }),
+              signal: controller.signal,
+            });
+          }
 
           clearTimeout(timeoutId);
 
-          // OpenTelemetry collector typically returns 200 for valid requests
-          // or 4xx for malformed requests, both indicate the service is up
+          // Check if telemetry service is responding
           if (response.status < 500) {
             checks.checks.telemetry = "healthy";
           } else {
@@ -63,13 +83,17 @@ export async function GET() {
             checks.status = "degraded";
           }
         } catch (error) {
-          console.error("OpenTelemetry heartbeat failed:", error);
+          console.error("OpenTelemetry connectivity check failed:", error);
           if (error instanceof Error && error.name === "AbortError") {
             checks.checks.telemetry = "timeout";
           } else {
             checks.checks.telemetry = "unreachable";
           }
-          checks.status = "degraded";
+          // Don't mark as degraded for telemetry issues in production
+          // App can still function without telemetry
+          if (process.env.NODE_ENV !== "production") {
+            checks.status = "degraded";
+          }
         }
       } else {
         checks.checks.telemetry = "console-only";

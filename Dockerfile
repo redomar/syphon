@@ -1,53 +1,99 @@
-FROM node:20-alpine AS base
+# =============================================================================
+# SYPHON PRODUCTION DOCKERFILE WITH TELEMETRY SUPPORT
+# =============================================================================
 
-# Install dependencies only when needed
+FROM node:20-alpine AS base
+# Install security updates and required packages
+RUN apk update && apk upgrade && apk add --no-cache \
+    libc6-compat \
+    dumb-init \
+    wget \
+    curl \
+    ca-certificates
+
+# =============================================================================
+# DEPENDENCIES STAGE - Install only production dependencies
+# =============================================================================
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy package files
+# Copy package files with better caching
 COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev
 
-# Rebuild the source code only when needed
+# Install dependencies with npm ci for reproducible builds
+RUN npm ci --omit=dev --frozen-lockfile && npm cache clean --force
+
+# =============================================================================
+# BUILDER STAGE - Build application with dev dependencies
+# =============================================================================
 FROM base AS builder
 WORKDIR /app
+
+# Copy node_modules from deps stage
 COPY --from=deps /app/node_modules ./node_modules
+
+# Copy source code
 COPY . .
 
-# Install dev dependencies for build
-RUN npm ci
+# Install all dependencies (including dev) for build
+RUN npm ci --frozen-lockfile
 
-# Generate Prisma client and build application
+# Generate Prisma client for build
 RUN npx prisma generate
+
+# Build application with telemetry support
+ENV NEXT_TELEMETRY_DISABLED=1
+ARG NODE_ENV=production
+ARG VERSION=0.2.0
+ENV NODE_ENV=${NODE_ENV}
+ENV VERSION=${VERSION}
+
 RUN npm run build
 
-# Production image
+# Verify build artifacts exist
+RUN ls -la .next/
+
+# =============================================================================
+# PRODUCTION RUNTIME STAGE
+# =============================================================================
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+# Set production environment variables
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3001
+ENV HOSTNAME="0.0.0.0"
 
-# Install wget for health checks
-RUN apk add --no-cache wget
+# Create non-root user for security
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# Copy built application with proper ownership
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 
-# Copy built application
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+# Copy instrumentation file for OpenTelemetry
+COPY --from=builder --chown=nextjs:nodejs /app/instrumentation.ts ./instrumentation.ts
 
-RUN chown -R nextjs:nodejs /app
+# Create logs directory for telemetry
+RUN mkdir -p /app/logs && chown -R nextjs:nodejs /app/logs
 
+# Switch to non-root user
 USER nextjs
 
-EXPOSE 3001
-ENV PORT 3001
-ENV HOSTNAME "0.0.0.0"
+# Health check configuration
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3001/api/health || exit 1
 
+# Expose application port
+EXPOSE 3001
+
+# Use dumb-init for proper signal handling in containers
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start application
 CMD ["npm", "start"]
