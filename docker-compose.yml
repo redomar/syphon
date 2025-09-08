@@ -109,10 +109,6 @@ services:
 volumes:
   jaeger_data:
     driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./data/jaeger
 
 networks:
   syphon-network:
