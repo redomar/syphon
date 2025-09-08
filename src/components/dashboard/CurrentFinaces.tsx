@@ -7,7 +7,7 @@ function CurrentFinances() {
     useIncomeTransactions();
 
   if (transactionsLoading) {
-    return <div>Loading...</div>;
+    return <span>Loading...</span>;
   }
 
   return (
