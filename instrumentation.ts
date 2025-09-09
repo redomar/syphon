@@ -14,8 +14,8 @@ export async function register() {
     const { OTLPTraceExporter } = await import(
       "@opentelemetry/exporter-trace-otlp-http"
     );
-    const { Resource } = await import("@opentelemetry/resources");
-    const { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } = await import("@opentelemetry/semantic-conventions");
+    const resourceModule = await import("@opentelemetry/resources");
+    const { resourceFromAttributes } = resourceModule;
 
     // Configure exporter with production-ready settings
     let traceExporter;
@@ -51,9 +51,9 @@ export async function register() {
     const serviceVersion = process.env.OTEL_SERVICE_VERSION || process.env.VERSION || "0.2.0";
 
     // Configure service resource with proper attributes
-    const resource = new Resource({
-      [ATTR_SERVICE_NAME]: serviceName,
-      [ATTR_SERVICE_VERSION]: serviceVersion,
+    const resource = resourceFromAttributes({
+      "service.name": serviceName,
+      "service.version": serviceVersion,
       "service.instance.id": process.env.HOSTNAME || "unknown",
       "deployment.environment": environment,
     });
