@@ -39,7 +39,7 @@ COPY . .
 RUN npm ci --frozen-lockfile
 
 # Generate Prisma client for Alpine Linux with proper engine
-ENV PRISMA_CLI_BINARY_TARGETS="linux-musl-openssl-3.0.x,native"
+ENV PRISMA_CLI_BINARY_TARGETS="linux-musl-openssl-3.0.x"
 RUN npx prisma generate
 
 # Build application with telemetry support
