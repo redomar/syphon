@@ -2,13 +2,17 @@ import { trace } from "@opentelemetry/api";
 
 // Test utility to generate sample traces
 export function generateTestTrace() {
-  const tracer = trace.getTracer("syphon-app", process.env.OTEL_SERVICE_VERSION || "0.2.0");
+  const serviceName = process.env.OTEL_SERVICE_NAME || "syphon-app";
+  const serviceVersion = process.env.OTEL_SERVICE_VERSION || process.env.VERSION || "0.2.0";
+  const tracer = trace.getTracer(serviceName, serviceVersion);
   
-  const span = tracer.startSpan("test-trace", {
+  const span = tracer.startSpan("health-check-test", {
     attributes: {
-      "test.type": "manual",
-      "service.name": "syphon-app",
-      "environment": process.env.NODE_ENV || "development"
+      "test.type": "health-check",
+      "service.name": serviceName,
+      "service.version": serviceVersion,
+      "deployment.environment": process.env.NODE_ENV || "development",
+      "test.source": "api-health-endpoint"
     }
   });
   

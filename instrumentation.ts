@@ -14,6 +14,8 @@ export async function register() {
     const { OTLPTraceExporter } = await import(
       "@opentelemetry/exporter-trace-otlp-http"
     );
+    const { Resource } = await import("@opentelemetry/resources");
+    const { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } = await import("@opentelemetry/semantic-conventions");
 
     // Configure exporter with production-ready settings
     let traceExporter;
@@ -43,7 +45,21 @@ export async function register() {
       console.log("⚠️  No OTEL_EXPORTER_OTLP_ENDPOINT configured - traces will go to console");
     }
 
+    // Enhanced logging for production
+    const environment = process.env.NODE_ENV || "development";
+    const serviceName = process.env.OTEL_SERVICE_NAME || "syphon-app";
+    const serviceVersion = process.env.OTEL_SERVICE_VERSION || process.env.VERSION || "0.2.0";
+
+    // Configure service resource with proper attributes
+    const resource = new Resource({
+      [ATTR_SERVICE_NAME]: serviceName,
+      [ATTR_SERVICE_VERSION]: serviceVersion,
+      "service.instance.id": process.env.HOSTNAME || "unknown",
+      "deployment.environment": environment,
+    });
+
     const sdk = new NodeSDK({
+      resource,
       traceExporter,
       instrumentations: [
         getNodeAutoInstrumentations({
@@ -63,11 +79,6 @@ export async function register() {
     });
 
     sdk.start();
-
-    // Enhanced logging for production
-    const environment = process.env.NODE_ENV || "development";
-    const serviceName = process.env.OTEL_SERVICE_NAME || "syphon-app";
-    const serviceVersion = process.env.OTEL_SERVICE_VERSION || process.env.VERSION || "0.2.0";
 
     if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
       console.log(
