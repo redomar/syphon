@@ -37,20 +37,20 @@ export async function GET() {
 
     // Check OpenTelemetry status with actual heartbeat
     const telemetryEnabled = process.env.OTEL_SDK_DISABLED !== "true";
-    const telemetryEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
+    const telemetryEndpoint = process.env.OTEL_EXPORTER_ZIPKIN_ENDPOINT;
 
     if (telemetryEnabled) {
       if (telemetryEndpoint) {
         try {
-          // Better telemetry endpoint health check
+          // Better telemetry endpoint health check for Zipkin
           let healthUrl: string;
           
-          if (telemetryEndpoint.includes("/v1/traces")) {
-            // Remove /v1/traces suffix to get base URL, then add health endpoint
-            healthUrl = telemetryEndpoint.replace("/v1/traces", "/v1/health");
+          if (telemetryEndpoint.includes("/api/v2/spans")) {
+            // Remove /api/v2/spans suffix to get base URL, then add health endpoint
+            healthUrl = telemetryEndpoint.replace("/api/v2/spans", "/health");
           } else {
             // Assume base URL, add health endpoint
-            healthUrl = `${telemetryEndpoint}/v1/health`;
+            healthUrl = `${telemetryEndpoint}/health`;
           }
 
           const controller = new AbortController();
@@ -64,19 +64,17 @@ export async function GET() {
               signal: controller.signal,
             });
           } catch {
-            // Fallback: try a lightweight traces endpoint test
-            const tracesUrl = telemetryEndpoint.includes("/v1/traces") 
+            // Fallback: try a lightweight Zipkin spans endpoint test
+            const spansUrl = telemetryEndpoint.includes("/api/v2/spans") 
               ? telemetryEndpoint 
-              : `${telemetryEndpoint}/v1/traces`;
+              : `${telemetryEndpoint}/api/v2/spans`;
               
-            response = await fetch(tracesUrl, {
+            response = await fetch(spansUrl, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({
-                resourceSpans: [],
-              }),
+              body: JSON.stringify([]),
               signal: controller.signal,
             });
           }

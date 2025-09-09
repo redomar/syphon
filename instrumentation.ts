@@ -11,38 +11,23 @@ export async function register() {
     const { getNodeAutoInstrumentations } = await import(
       "@opentelemetry/auto-instrumentations-node"
     );
-    const { OTLPTraceExporter } = await import(
-      "@opentelemetry/exporter-trace-otlp-http"
+    const { ZipkinExporter } = await import(
+      "@opentelemetry/exporter-zipkin"
     );
     const resourceModule = await import("@opentelemetry/resources");
     const { resourceFromAttributes } = resourceModule;
 
     // Configure exporter with production-ready settings
     let traceExporter;
-    if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
-      const baseUrl = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
-      const tracesUrl = baseUrl.endsWith('/v1/traces') ? baseUrl : `${baseUrl}/v1/traces`;
+    if (process.env.OTEL_EXPORTER_ZIPKIN_ENDPOINT) {
+      const zipkinUrl = process.env.OTEL_EXPORTER_ZIPKIN_ENDPOINT;
       
-      const exporterConfig: { url: string; headers?: Record<string, string> } =
-        {
-          url: tracesUrl,
-        };
-
-      // Parse headers if provided (for services like Honeycomb, DataDog)
-      if (process.env.OTEL_EXPORTER_OTLP_HEADERS) {
-        try {
-          exporterConfig.headers = JSON.parse(
-            process.env.OTEL_EXPORTER_OTLP_HEADERS
-          );
-        } catch (error) {
-          console.error("Failed to parse OTEL_EXPORTER_OTLP_HEADERS:", error);
-        }
-      }
-
-      console.log(`🔧 OpenTelemetry exporter configured for: ${tracesUrl}`);
-      traceExporter = new OTLPTraceExporter(exporterConfig);
+      console.log(`🔧 OpenTelemetry Zipkin exporter configured for: ${zipkinUrl}`);
+      traceExporter = new ZipkinExporter({
+        url: zipkinUrl,
+      });
     } else {
-      console.log("⚠️  No OTEL_EXPORTER_OTLP_ENDPOINT configured - traces will go to console");
+      console.log("⚠️  No OTEL_EXPORTER_ZIPKIN_ENDPOINT configured - traces will go to console");
     }
 
     // Enhanced logging for production
@@ -80,12 +65,12 @@ export async function register() {
 
     sdk.start();
 
-    if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
+    if (process.env.OTEL_EXPORTER_ZIPKIN_ENDPOINT) {
       console.log(
         `📊 OpenTelemetry started - Service: ${serviceName}@${serviceVersion} (${environment})`
       );
       console.log(
-        `   Sending traces to: ${process.env.OTEL_EXPORTER_OTLP_ENDPOINT}`
+        `   Sending traces to Zipkin: ${process.env.OTEL_EXPORTER_ZIPKIN_ENDPOINT}`
       );
     } else {
       console.log(
