@@ -1,25 +1,43 @@
 services:
-  # Telemetry Service - Zipkin (More reliable alternative)
-  zipkin:
-    image: openzipkin/zipkin:3
-    container_name: syphon-zipkin
+  # Telemetry Service - Jaeger All-in-One
+  jaeger:
+    image: jaegertracing/all-in-one:1.62
+    container_name: syphon-jaeger
     restart: unless-stopped
+    environment:
+      # Core Jaeger configuration
+      - COLLECTOR_OTLP_ENABLED=true
+      - JAEGER_DISABLED=false
+      - MEMORY_MAX_TRACES=${JAEGER_MAX_TRACES:-50000}
+      - METRICS_BACKEND=prometheus
+      # Query configuration
+      - QUERY_BASE_PATH=/
+      # Collector configuration for better reliability
+      - COLLECTOR_QUEUE_SIZE=2000
+      - COLLECTOR_NUM_WORKERS=50
+      # Storage configuration
+      - SPAN_STORAGE_TYPE=memory
     ports:
-      - "9411:9411"  # Zipkin UI and API
+      - "16686:16686"  # Jaeger UI
+      - "4317:4317"    # OTLP gRPC receiver
+      - "4318:4318"    # OTLP HTTP receiver
+      - "14268:14268"  # Jaeger HTTP Thrift receiver
+    volumes:
+      - jaeger_data:/tmp
     networks:
       - syphon-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9411/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:16686/api/services"]
       interval: 20s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 30s
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 512M
         reservations:
-          memory: 128M
+          memory: 256M
 
   # Main Application Service - Runs last for proper dependency order
   app:
@@ -49,11 +67,12 @@ services:
       - NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=${NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL:-/dashboard}
       - NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=${NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL:-/dashboard}
       
-      # OpenTelemetry configuration - Local Zipkin service
+      # OpenTelemetry configuration - Local Jaeger service
       - OTEL_SDK_DISABLED=${OTEL_SDK_DISABLED:-false}
       - OTEL_SERVICE_NAME=syphon-app
       - OTEL_SERVICE_VERSION=${VERSION:-0.2.0}
-      - OTEL_EXPORTER_ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4318/v1/traces
       - OTEL_RESOURCE_ATTRIBUTES=service.name=syphon-app,service.version=${VERSION:-0.2.0},deployment.environment=${NODE_ENV:-production}
       
       # Additional OpenTelemetry settings for robustness
@@ -65,7 +84,7 @@ services:
     ports:
       - "3001:3001"
     depends_on:
-      zipkin:
+      jaeger:
         condition: service_healthy
     networks:
       - syphon-network
@@ -88,7 +107,9 @@ services:
         max-size: "10m"
         max-file: "3"
 
-volumes: {}
+volumes:
+  jaeger_data:
+    driver: local
 
 networks:
   syphon-network:
