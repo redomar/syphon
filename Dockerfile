@@ -90,9 +90,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/instrumentation.ts ./instrumentat
 
 # Fix standalone server.js to load instrumentation for OpenTelemetry
 RUN cp .next/standalone/server.js .next/standalone/server.js.backup && \
-    awk '!/^const path = require/ { print } /^const path = require/ { \
+    awk '/^const dir = path.join/ { \
       print; \
-      print "const dir = path.join(__dirname)"; \
       print ""; \
       print "// Load instrumentation for OpenTelemetry"; \
       print "const instrumentationPath = path.join(__dirname, \"..\", \"..\", \"instrumentation.ts\")"; \
@@ -103,7 +102,8 @@ RUN cp .next/standalone/server.js .next/standalone/server.js.backup && \
       print "  console.log(\"⚠️ No instrumentation file found at:\", instrumentationPath)"; \
       print "}"; \
       print ""; \
-    }' .next/standalone/server.js.backup > .next/standalone/server.js
+      next \
+    } { print }' .next/standalone/server.js.backup > .next/standalone/server.js
 
 # Create logs directory for telemetry
 RUN mkdir -p /app/logs && chown -R nextjs:nodejs /app/logs
