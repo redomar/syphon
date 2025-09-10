@@ -88,22 +88,6 @@ RUN find /app -name "*query_engine*" -exec chmod +x {} \; || echo "No query engi
 # Copy instrumentation file for OpenTelemetry
 COPY --from=builder --chown=nextjs:nodejs /app/instrumentation.ts ./instrumentation.ts
 
-# Fix standalone server.js to load instrumentation for OpenTelemetry
-RUN cp .next/standalone/server.js .next/standalone/server.js.backup && \
-    awk '/^const dir = path.join/ { \
-      print; \
-      print ""; \
-      print "// Load instrumentation for OpenTelemetry"; \
-      print "const instrumentationPath = path.join(__dirname, \"..\", \"..\", \"instrumentation.ts\")"; \
-      print "if (require(\"fs\").existsSync(instrumentationPath)) {"; \
-      print "  console.log(\"🔧 Loading instrumentation from:\", instrumentationPath)"; \
-      print "  require(instrumentationPath).register()"; \
-      print "} else {"; \
-      print "  console.log(\"⚠️ No instrumentation file found at:\", instrumentationPath)"; \
-      print "}"; \
-      print ""; \
-      next \
-    } { print }' .next/standalone/server.js.backup > .next/standalone/server.js
 
 # Create logs directory for telemetry
 RUN mkdir -p /app/logs && chown -R nextjs:nodejs /app/logs
@@ -121,5 +105,5 @@ EXPOSE 3001
 # Use dumb-init for proper signal handling in containers
 ENTRYPOINT ["dumb-init", "--"]
 
-# Start application using standalone server with instrumentation
-CMD ["node", ".next/standalone/server.js"]
+# Start application
+CMD ["npm", "start"]

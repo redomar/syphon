@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "npx prisma generate && next build",
-    "start": "next start",
+    "start": "node --require ./instrumentation.ts ./node_modules/.bin/next start",
     "lint": "next lint"
   },
   "dependencies": {
