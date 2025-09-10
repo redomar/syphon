@@ -1,7 +1,7 @@
 services:
   # Telemetry Service - Jaeger All-in-One
   jaeger:
-    image: jaegertracing/all-in-one:1.73
+    image: jaegertracing/all-in-one:latest
     container_name: syphon-jaeger
     restart: unless-stopped
     environment:
