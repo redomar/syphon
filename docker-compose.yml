@@ -6,11 +6,11 @@ services:
   # =============================================================================
   # TELEMETRY SERVICE - JAEGER ALL-IN-ONE
   # =============================================================================
-  syphon-jaeger:
+  jaeger:
     image: jaegertracing/all-in-one:${JAEGER_VERSION:-1.73}
     container_name: syphon-jaeger
     restart: unless-stopped
-    hostname: syphon-jaeger
+    hostname: jaeger
     networks:
       - syphon-network
     environment:
@@ -98,8 +98,8 @@ services:
       - OTEL_SERVICE_VERSION=${OTEL_SERVICE_VERSION:-${VERSION:-0.2.0}}
       
       # Docker network endpoints (defaults to internal service names)
-      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://syphon-jaeger:4318}
-      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://syphon-jaeger:4318/v1/traces}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://jaeger:4318}
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://jaeger:4318/v1/traces}
       
       # Resource attributes for service identification
       - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES:-service.name=syphon-app,service.version=${VERSION:-0.2.0},deployment.environment=${NODE_ENV:-production}}
@@ -115,7 +115,7 @@ services:
     ports:
       - "${APP_PORT:-3001}:3001"
     depends_on:
-      syphon-jaeger:
+      jaeger:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/health"]
