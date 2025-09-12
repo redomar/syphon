@@ -144,9 +144,6 @@ networks:
   syphon-network:
     driver: bridge
     name: syphon-network
-    ipam:
-      config:
-        - subnet: ${DOCKER_SUBNET:-172.20.0.0/16}
 
 # =============================================================================
 # PERSISTENT VOLUMES

@@ -51,13 +51,6 @@ ENV VERSION=${VERSION}
 
 RUN npm run build
 
-# Verify Prisma client and engine are properly generated
-RUN ls -la node_modules/.prisma/client/
-RUN ls -la generated/prisma/ || echo "Generated prisma directory not found"
-
-# Verify build artifacts exist
-RUN ls -la .next/
-
 # =============================================================================
 # PRODUCTION RUNTIME STAGE
 # =============================================================================
