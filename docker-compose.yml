@@ -54,7 +54,7 @@ services:
   # =============================================================================
   # MAIN APPLICATION SERVICE - SYPHON APP
   # =============================================================================
-  syphon-app:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
@@ -63,7 +63,7 @@ services:
         - VERSION=${VERSION:-0.2.0}
     container_name: syphon-app
     restart: unless-stopped
-    hostname: syphon-app
+    hostname: app
     networks:
       - syphon-network
     environment:
