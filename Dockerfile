@@ -85,8 +85,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 # Ensure Prisma engine binaries are executable
 RUN find /app -name "*query_engine*" -exec chmod +x {} \; || echo "No query engines found to make executable"
 
-# Copy instrumentation file for OpenTelemetry
-COPY --from=builder --chown=nextjs:nodejs /app/instrumentation.ts ./instrumentation.ts
+# Copy instrumentation file for OpenTelemetry (from src directory)
+COPY --from=builder --chown=nextjs:nodejs /app/src/instrumentation.ts ./src/instrumentation.ts
 
 
 # Create logs directory for telemetry

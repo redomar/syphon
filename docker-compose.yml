@@ -1,116 +1,157 @@
+# =============================================================================
+# SYPHON PRODUCTION DOCKER COMPOSE - DOKPLOY OPTIMIZED v0.2.0
+# =============================================================================
+
 services:
-  # Telemetry Service - Jaeger All-in-One
-  jaeger:
-    image: jaegertracing/all-in-one:latest
+  # =============================================================================
+  # TELEMETRY SERVICE - JAEGER ALL-IN-ONE
+  # =============================================================================
+  syphon-jaeger:
+    image: jaegertracing/all-in-one:${JAEGER_VERSION:-1.73}
     container_name: syphon-jaeger
     restart: unless-stopped
+    hostname: syphon-jaeger
+    networks:
+      - syphon-network
     environment:
-      # Core Jaeger configuration
+      # Core Jaeger configuration - prioritize environment variables
       - COLLECTOR_OTLP_ENABLED=true
       - JAEGER_DISABLED=false
       - MEMORY_MAX_TRACES=${JAEGER_MAX_TRACES:-50000}
       - METRICS_BACKEND=prometheus
-      # Query configuration
       - QUERY_BASE_PATH=/
-      # Collector configuration for better reliability
-      - COLLECTOR_QUEUE_SIZE=2000
-      - COLLECTOR_NUM_WORKERS=50
-      # Storage configuration
+      # Performance configuration
+      - COLLECTOR_QUEUE_SIZE=${JAEGER_COLLECTOR_QUEUE_SIZE:-2000}
+      - COLLECTOR_NUM_WORKERS=${JAEGER_COLLECTOR_WORKERS:-50}
       - SPAN_STORAGE_TYPE=memory
     ports:
-      - "16686:16686"  # Jaeger UI
-      - "4317:4317"    # OTLP gRPC receiver
-      - "4318:4318"    # OTLP HTTP receiver
-      - "14268:14268"  # Jaeger HTTP Thrift receiver
+      - "${JAEGER_UI_PORT:-16686}:16686"     # Jaeger UI
+      - "${JAEGER_THRIFT_PORT:-14268}:14268" # HTTP Thrift receiver
+      - "${JAEGER_OTLP_GRPC_PORT:-4317}:4317" # OTLP gRPC receiver
+      - "${JAEGER_OTLP_HTTP_PORT:-4318}:4318" # OTLP HTTP receiver
     volumes:
       - jaeger_data:/tmp
-    networks:
-      - syphon-network
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:16686/api/services"]
-      interval: 20s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      interval: ${HEALTHCHECK_INTERVAL:-20s}
+      timeout: ${HEALTHCHECK_TIMEOUT:-5s}
+      retries: ${HEALTHCHECK_RETRIES:-5}
+      start_period: ${HEALTHCHECK_START_PERIOD:-30s}
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: ${JAEGER_MEMORY_LIMIT:-512M}
+          cpus: ${JAEGER_CPU_LIMIT:-1.0}
         reservations:
-          memory: 256M
+          memory: ${JAEGER_MEMORY_RESERVATION:-256M}
+          cpus: ${JAEGER_CPU_RESERVATION:-0.25}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "${LOG_MAX_SIZE:-10m}"
+        max-file: "${LOG_MAX_FILES:-3}"
 
-  # Main Application Service - Runs last for proper dependency order
-  app:
+  # =============================================================================
+  # MAIN APPLICATION SERVICE - SYPHON APP
+  # =============================================================================
+  syphon-app:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        - NODE_ENV=production
+        - NODE_ENV=${NODE_ENV:-production}
         - VERSION=${VERSION:-0.2.0}
     container_name: syphon-app
     restart: unless-stopped
+    hostname: syphon-app
+    networks:
+      - syphon-network
     environment:
-      # Core application environment
+      # =======================================================================
+      # CORE APPLICATION ENVIRONMENT - PRIORITIZE ENV VARIABLES
+      # =======================================================================
       - NODE_ENV=${NODE_ENV:-production}
       - VERSION=${VERSION:-0.2.0}
       - BRANCH=${BRANCH:-main}
-      - PORT=3001
-      - HOSTNAME=0.0.0.0
-      - NEXT_TELEMETRY_DISABLED=1
+      - PORT=${PORT:-3001}
+      - HOSTNAME=${HOSTNAME:-0.0.0.0}
+      - NEXT_TELEMETRY_DISABLED=${NEXT_TELEMETRY_DISABLED:-1}
       
-      # Database configuration - Using external Neon DB
+      # =======================================================================
+      # DATABASE CONFIGURATION - EXTERNAL NEON DATABASE
+      # =======================================================================
       - DATABASE_URL=${DATABASE_URL}
       
-      # Authentication configuration
+      # =======================================================================
+      # AUTHENTICATION - CLERK CONFIGURATION
+      # =======================================================================
       - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
       - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
-      - NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=${NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL:-/dashboard}
-      - NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=${NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL:-/dashboard}
+      - NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=${NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL:-/}
+      - NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=${NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL:-/}
       
-      # OpenTelemetry configuration - Local Jaeger service
+      # =======================================================================
+      # OPENTELEMETRY - LOCAL JAEGER CONTAINER (DOCKER NETWORK)
+      # =======================================================================
       - OTEL_SDK_DISABLED=${OTEL_SDK_DISABLED:-false}
-      - OTEL_SERVICE_NAME=syphon-app
-      - OTEL_SERVICE_VERSION=${VERSION:-0.2.0}
-      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
-      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}
-      - OTEL_RESOURCE_ATTRIBUTES=service.name=syphon-app,service.version=${VERSION:-0.2.0},deployment.environment=${NODE_ENV:-production}
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-syphon-app}
+      - OTEL_SERVICE_VERSION=${OTEL_SERVICE_VERSION:-${VERSION:-0.2.0}}
       
-      # Additional OpenTelemetry settings for robustness
-      - OTEL_EXPORTER_OTLP_TIMEOUT=10000
-      - OTEL_EXPORTER_OTLP_COMPRESSION=gzip
-      - OTEL_BSP_MAX_EXPORT_BATCH_SIZE=512
-      - OTEL_BSP_EXPORT_TIMEOUT=30000
-      - OTEL_BSP_SCHEDULE_DELAY=5000
+      # Docker network endpoints (defaults to internal service names)
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://syphon-jaeger:4318}
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://syphon-jaeger:4318/v1/traces}
+      
+      # Resource attributes for service identification
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES:-service.name=syphon-app,service.version=${VERSION:-0.2.0},deployment.environment=${NODE_ENV:-production}}
+      
+      # =======================================================================
+      # OPENTELEMETRY PERFORMANCE SETTINGS
+      # =======================================================================
+      - OTEL_EXPORTER_OTLP_TIMEOUT=${OTEL_EXPORTER_OTLP_TIMEOUT:-10000}
+      - OTEL_EXPORTER_OTLP_COMPRESSION=${OTEL_EXPORTER_OTLP_COMPRESSION:-gzip}
+      - OTEL_BSP_MAX_EXPORT_BATCH_SIZE=${OTEL_BSP_MAX_EXPORT_BATCH_SIZE:-512}
+      - OTEL_BSP_EXPORT_TIMEOUT=${OTEL_BSP_EXPORT_TIMEOUT:-30000}
+      - OTEL_BSP_SCHEDULE_DELAY=${OTEL_BSP_SCHEDULE_DELAY:-5000}
     ports:
-      - "3001:3001"
+      - "${APP_PORT:-3001}:3001"
     depends_on:
-      jaeger:
+      syphon-jaeger:
         condition: service_healthy
-    networks:
-      - syphon-network
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
+      interval: ${APP_HEALTHCHECK_INTERVAL:-30s}
+      timeout: ${APP_HEALTHCHECK_TIMEOUT:-10s}
+      retries: ${APP_HEALTHCHECK_RETRIES:-5}
+      start_period: ${APP_HEALTHCHECK_START_PERIOD:-60s}
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: ${APP_MEMORY_LIMIT:-1G}
+          cpus: ${APP_CPU_LIMIT:-2.0}
         reservations:
-          memory: 512M
-    # Enhanced logging configuration
+          memory: ${APP_MEMORY_RESERVATION:-512M}
+          cpus: ${APP_CPU_RESERVATION:-0.5}
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: "${LOG_MAX_SIZE:-10m}"
+        max-file: "${LOG_MAX_FILES:-3}"
 
-volumes:
-  jaeger_data:
-    driver: local
-
+# =============================================================================
+# DOCKER NETWORKS - BRIDGE NETWORK FOR CONTAINER COMMUNICATION
+# =============================================================================
 networks:
   syphon-network:
     driver: bridge
+    name: syphon-network
+    ipam:
+      config:
+        - subnet: ${DOCKER_SUBNET:-172.20.0.0/16}
+
+# =============================================================================
+# PERSISTENT VOLUMES
+# =============================================================================
+volumes:
+  jaeger_data:
+    driver: local
+    name: syphon-jaeger-data
