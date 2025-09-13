@@ -8,7 +8,7 @@ export interface RouteConfig {
 }
 
 // Currently accessible routes
-export const enabledRoutes = ["/", "/settings", "/income", "/expense"];
+export const enabledRoutes = ["/", "/settings", "/income", "/expense", "/goals"];
 
 export const routes: RouteConfig[] = [
   // Budget Control Items
