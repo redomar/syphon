@@ -1,8 +1,10 @@
-import IncomeManager from "@/components/IncomeManager";
+import IncomeManager from "@/components/income/IncomeManager";
+import IncomeTotal from "@/components/income/IncomeTotal";
 
 function Income() {
   return (
-    <div className="uppercase">
+    <div className="space-y-6">
+      <IncomeTotal />
       <IncomeManager />
     </div>
   );

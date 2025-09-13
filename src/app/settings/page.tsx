@@ -4,6 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TelemetryDashboard } from "@/components/TelemetryDashboard";
 
+// This page requires authentication, so it must be dynamically rendered
+export const dynamic = 'force-dynamic';
+
 export default async function Settings() {
   // This will automatically create the user in our database if they don't exist
   const user = await getCurrentUser();

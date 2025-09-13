@@ -15,11 +15,11 @@ scrape_configs:
   # Jaeger metrics
   - job_name: 'jaeger'
     static_configs:
-      - targets: ['jaeger-all-in-one:14269']
+      - targets: ['jaeger:14269']
     metrics_path: /metrics
 
   # Syphon application metrics (if you add them later)
   # - job_name: 'syphon-app'
   #   static_configs:
-  #     - targets: ['syphon-app:3000']
+  #     - targets: ['app:3001']
   #   metrics_path: /api/metrics

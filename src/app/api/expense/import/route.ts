@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     try {
       span.setAttributes({
         "http.method": "POST",
-        "http.route": "/api/expenses/import",
+        "http.route": "/api/expense/import",
       });
 
       const user = await getCurrentUser();

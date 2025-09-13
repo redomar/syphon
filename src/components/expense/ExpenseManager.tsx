@@ -12,9 +12,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ColumnMappingField } from "@/components/ColumnMappingField";
-import { SummaryCard } from "@/components/SummaryCard";
-import { TransactionItem } from "@/components/TransactionItem";
+import { ColumnMappingField } from "@/components/forms/ColumnMappingField";
+import { SummaryCard } from "@/components/common/SummaryCard";
+import { TransactionItem } from "@/components/common/TransactionItem";
 import {
   useCategories,
   useCreateCategory,
@@ -28,7 +28,6 @@ import {
   useCreateAccount,
 } from "@/hooks/useFinancialData";
 import { tracer } from "@/lib/telemetry";
-import { formatCurrency } from "@/lib/types";
 import {
   CalendarDays,
   DollarSign,
@@ -38,7 +37,7 @@ import {
   Upload,
 } from "lucide-react";
 import React from "react";
-import { CategoryKind, TransactionType } from "../../generated/prisma";
+import { CategoryKind, TransactionType } from "../../../generated/prisma";
 import { toast } from "sonner";
 
 function recentlyUpdated(
@@ -418,17 +417,6 @@ function ExpenseManager() {
       iconColor: "text-blue-500",
       title: "Accounts",
       value: accounts.length.toString(),
-    },
-    {
-      icon: DollarSign,
-      iconColor: "text-red-400",
-      title: "Total Expenses",
-      value: formatCurrency(
-        transactions
-          .reduce((acc, transaction) => acc + parseFloat(transaction.amount), 0)
-          .toString()
-      ),
-      prefix: "-",
     },
   ];
 
@@ -824,7 +812,7 @@ function ExpenseManager() {
       </Card>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {summaryCards.map((card, index) => (
           <SummaryCard
             key={index}
@@ -832,7 +820,6 @@ function ExpenseManager() {
             iconColor={card.iconColor}
             title={card.title}
             value={card.value}
-            {...(card.prefix && { prefix: card.prefix })}
           />
         ))}
       </div>
