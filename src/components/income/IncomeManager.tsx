@@ -36,7 +36,7 @@ import {
   Trash,
 } from "lucide-react";
 import React from "react";
-import { CategoryKind, TransactionType } from "../../generated/prisma";
+import { CategoryKind, TransactionType } from "../../../generated/prisma";
 import { toast } from "sonner";
 // removed unused imports
 
@@ -53,12 +53,6 @@ function recentlyUpdated(
   return referenceTime - sourceTime <= thresholdMs;
 }
 
-function getTotalIncome(transactions: { amount: number | string }[]): number {
-  return transactions.reduce(
-    (acc, transaction) => acc + parseFloat(transaction.amount as string),
-    0
-  );
-}
 
 function IncomeManager() {
   const [showIncomeForm, setShowIncomeForm] = React.useState(false);
@@ -697,16 +691,6 @@ function IncomeManager() {
                 <p className="text-2xl font-bold">{transactions.length}</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Income</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">
-              {getTotalIncome(transactions).toLocaleString()}
-            </p>
           </CardContent>
         </Card>
       </div>

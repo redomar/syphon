@@ -661,7 +661,7 @@ export function useImportExpenses(
         });
 
         try {
-          const response = await fetch("/api/expenses/import", {
+          const response = await fetch("/api/expense/import", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
