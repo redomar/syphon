@@ -52,6 +52,51 @@ services:
         max-file: "${LOG_MAX_FILES:-3}"
 
   # =============================================================================
+  # METRICS SERVICE - PROMETHEUS
+  # =============================================================================
+  prometheus:
+    image: prom/prometheus:${PROMETHEUS_VERSION:-latest}
+    container_name: syphon-prometheus
+    restart: unless-stopped
+    hostname: prometheus
+    networks:
+      - syphon-network
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./deployment/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-200h}'
+      - '--web.enable-lifecycle'
+    depends_on:
+      jaeger:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: ${PROMETHEUS_HEALTHCHECK_INTERVAL:-30s}
+      timeout: ${PROMETHEUS_HEALTHCHECK_TIMEOUT:-10s}
+      retries: ${PROMETHEUS_HEALTHCHECK_RETRIES:-3}
+      start_period: ${PROMETHEUS_HEALTHCHECK_START_PERIOD:-40s}
+    deploy:
+      resources:
+        limits:
+          memory: ${PROMETHEUS_MEMORY_LIMIT:-1G}
+          cpus: ${PROMETHEUS_CPU_LIMIT:-1.0}
+        reservations:
+          memory: ${PROMETHEUS_MEMORY_RESERVATION:-512M}
+          cpus: ${PROMETHEUS_CPU_RESERVATION:-0.25}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "${LOG_MAX_SIZE:-10m}"
+        max-file: "${LOG_MAX_FILES:-3}"
+
+  # =============================================================================
   # MAIN APPLICATION SERVICE - SYPHON APP
   # =============================================================================
   app:
@@ -152,3 +197,6 @@ volumes:
   jaeger_data:
     driver: local
     name: syphon-jaeger-data
+  prometheus_data:
+    driver: local
+    name: syphon-prometheus-data
