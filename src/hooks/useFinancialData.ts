@@ -704,3 +704,328 @@ export function useImportExpenses(
     ...rest,
   });
 }
+
+// =============================================================================
+// GOALS API FUNCTIONS
+// =============================================================================
+
+interface SavingsGoal {
+  id: string;
+  userId: string;
+  name: string;
+  targetAmount: number;
+  currentAmount: number;
+  deadline?: string;
+  isArchived: boolean;
+  createdAt: string;
+  updatedAt: string;
+  contributions: SavingsGoalContribution[];
+}
+
+interface SavingsGoalContribution {
+  id: string;
+  userId: string;
+  goalId: string;
+  amount: number;
+  occurredAt: string;
+  note?: string;
+}
+
+const goalsApi = {
+  async getAll(): Promise<SavingsGoal[]> {
+    const response = await fetch("/api/goals");
+    if (!response.ok) {
+      throw new Error("Failed to fetch goals");
+    }
+    return response.json();
+  },
+
+  async create(data: {
+    name: string;
+    targetAmount: number;
+    deadline?: string;
+  }): Promise<SavingsGoal> {
+    const response = await fetch("/api/goals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to create goal");
+    }
+    return response.json();
+  },
+
+  async update(goalId: string, data: {
+    name?: string;
+    targetAmount?: number;
+    deadline?: string;
+    isArchived?: boolean;
+  }): Promise<SavingsGoal> {
+    const response = await fetch(`/api/goals/${goalId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to update goal");
+    }
+    return response.json();
+  },
+
+  async delete(goalId: string): Promise<void> {
+    const response = await fetch(`/api/goals/${goalId}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) {
+      throw new Error("Failed to delete goal");
+    }
+  },
+};
+
+const contributionsApi = {
+  async create(data: {
+    goalId: string;
+    amount: number;
+    occurredAt: string;
+    note?: string;
+  }): Promise<SavingsGoalContribution> {
+    const response = await fetch("/api/goals/contributions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to create contribution");
+    }
+    return response.json();
+  },
+
+  async delete(contributionId: string): Promise<void> {
+    const response = await fetch(`/api/goals/contributions/${contributionId}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) {
+      throw new Error("Failed to delete contribution");
+    }
+  },
+};
+
+// =============================================================================
+// GOALS HOOKS
+// =============================================================================
+
+const goalsQueryKeys = {
+  all: ['goals'] as const,
+  lists: () => [...goalsQueryKeys.all, 'list'] as const,
+  list: (filters: string) => [...goalsQueryKeys.lists(), { filters }] as const,
+  details: () => [...goalsQueryKeys.all, 'detail'] as const,
+  detail: (id: string) => [...goalsQueryKeys.details(), id] as const,
+}
+
+export function useGoals(options?: UseQueryOptions<SavingsGoal[]>) {
+  return useQuery({
+    queryKey: goalsQueryKeys.lists(),
+    queryFn: () =>
+      tracer.startActiveSpan("hook.useGoals", async (span) => {
+        span.setAttributes({
+          "hook.name": "useGoals",
+          operation: "fetch",
+        });
+
+        try {
+          const data = await goalsApi.getAll();
+          span.setAttributes({
+            "goals.count": data.length,
+            success: true,
+          });
+          span.end();
+          return data;
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setAttributes({ success: false });
+          span.end();
+          throw error;
+        }
+      }),
+    ...options,
+  });
+}
+
+export function useCreateGoal(
+  options?: UseMutationOptions<
+    SavingsGoal,
+    Error,
+    { name: string; targetAmount: number; deadline?: string }
+  >
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data) =>
+      tracer.startActiveSpan("hook.createGoal", async (span) => {
+        span.setAttributes({
+          "hook.name": "useCreateGoal",
+          "goal.name": data.name,
+          "goal.target_amount": data.targetAmount,
+        });
+
+        try {
+          const result = await goalsApi.create(data);
+          span.setAttributes({
+            "goal.id": result.id,
+            success: true,
+          });
+          span.end();
+          return result;
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setAttributes({ success: false });
+          span.end();
+          throw error;
+        }
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: goalsQueryKeys.lists() });
+    },
+    ...options,
+  });
+}
+
+export function useUpdateGoal(
+  options?: UseMutationOptions<
+    SavingsGoal,
+    Error,
+    { goalId: string; data: { name?: string; targetAmount?: number; deadline?: string; isArchived?: boolean } }
+  >
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ goalId, data }) =>
+      tracer.startActiveSpan("hook.updateGoal", async (span) => {
+        span.setAttributes({
+          "hook.name": "useUpdateGoal",
+          "goal.id": goalId,
+        });
+
+        try {
+          const result = await goalsApi.update(goalId, data);
+          span.setAttributes({ success: true });
+          span.end();
+          return result;
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setAttributes({ success: false });
+          span.end();
+          throw error;
+        }
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: goalsQueryKeys.lists() });
+    },
+    ...options,
+  });
+}
+
+export function useDeleteGoal(
+  options?: UseMutationOptions<void, Error, { goalId: string }>
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ goalId }) =>
+      tracer.startActiveSpan("hook.deleteGoal", async (span) => {
+        span.setAttributes({
+          "hook.name": "useDeleteGoal",
+          "goal.id": goalId,
+        });
+
+        try {
+          await goalsApi.delete(goalId);
+          span.setAttributes({ success: true });
+          span.end();
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setAttributes({ success: false });
+          span.end();
+          throw error;
+        }
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: goalsQueryKeys.lists() });
+    },
+    ...options,
+  });
+}
+
+export function useCreateContribution(
+  options?: UseMutationOptions<
+    SavingsGoalContribution,
+    Error,
+    { goalId: string; amount: number; occurredAt: string; note?: string }
+  >
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data) =>
+      tracer.startActiveSpan("hook.createContribution", async (span) => {
+        span.setAttributes({
+          "hook.name": "useCreateContribution",
+          "contribution.goal_id": data.goalId,
+          "contribution.amount": data.amount,
+        });
+
+        try {
+          const result = await contributionsApi.create(data);
+          span.setAttributes({
+            "contribution.id": result.id,
+            success: true,
+          });
+          span.end();
+          return result;
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setAttributes({ success: false });
+          span.end();
+          throw error;
+        }
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: goalsQueryKeys.lists() });
+    },
+    ...options,
+  });
+}
+
+export function useDeleteContribution(
+  options?: UseMutationOptions<void, Error, { contributionId: string }>
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ contributionId }) =>
+      tracer.startActiveSpan("hook.deleteContribution", async (span) => {
+        span.setAttributes({
+          "hook.name": "useDeleteContribution",
+          "contribution.id": contributionId,
+        });
+
+        try {
+          await contributionsApi.delete(contributionId);
+          span.setAttributes({ success: true });
+          span.end();
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setAttributes({ success: false });
+          span.end();
+          throw error;
+        }
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: goalsQueryKeys.lists() });
+    },
+    ...options,
+  });
+}
