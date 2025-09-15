@@ -42,44 +42,24 @@ export async function GET() {
     if (telemetryEnabled) {
       if (telemetryEndpoint) {
         try {
-          // Better telemetry endpoint health check for Jaeger
-          let healthUrl: string;
-          
-          if (telemetryEndpoint.includes("/v1/traces")) {
-            // Remove /v1/traces suffix to get base URL, then add health endpoint
-            healthUrl = telemetryEndpoint.replace("/v1/traces", "/v1/health");
-          } else {
-            // Assume base URL, add health endpoint
-            healthUrl = `${telemetryEndpoint}/v1/health`;
-          }
-
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-          // Try health endpoint first (better for Jaeger)
-          let response;
-          try {
-            response = await fetch(healthUrl, {
-              method: "GET",
-              signal: controller.signal,
-            });
-          } catch {
-            // Fallback: try a lightweight Jaeger traces endpoint test
-            const tracesUrl = telemetryEndpoint.includes("/v1/traces") 
-              ? telemetryEndpoint 
-              : `${telemetryEndpoint}/v1/traces`;
-              
-            response = await fetch(tracesUrl, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                resourceSpans: [],
-              }),
-              signal: controller.signal,
-            });
-          }
+          // Test Jaeger connectivity with lightweight traces endpoint heartbeat
+          const tracesUrl = telemetryEndpoint.includes("/v1/traces")
+            ? telemetryEndpoint
+            : `${telemetryEndpoint}/v1/traces`;
+
+          const response = await fetch(tracesUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              resourceSpans: [],
+            }),
+            signal: controller.signal,
+          });
 
           clearTimeout(timeoutId);
 
