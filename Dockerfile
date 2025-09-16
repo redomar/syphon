@@ -29,27 +29,28 @@ RUN npm ci --omit=dev --frozen-lockfile && npm cache clean --force
 FROM base AS builder
 WORKDIR /app
 
-# Copy node_modules from deps stage
-COPY --from=deps /app/node_modules ./node_modules
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Install all dependencies (including dev) for build in one step
+RUN npm ci --frozen-lockfile && npm cache clean --force
 
 # Copy source code
 COPY . .
 
-# Install all dependencies (including dev) for build
-RUN npm ci --frozen-lockfile
-
-# Generate Prisma client for Alpine Linux with proper engine
-ENV PRISMA_CLI_BINARY_TARGETS="linux-musl-openssl-3.0.x"
-RUN npx prisma generate
-
-# Build application with telemetry support
+# Set build environment variables
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV PRISMA_CLI_BINARY_TARGETS="linux-musl-openssl-3.0.x"
 ARG NODE_ENV=production
 ARG VERSION=0.2.0
 ENV NODE_ENV=${NODE_ENV}
 ENV VERSION=${VERSION}
 
-RUN npm run build
+# Generate Prisma client and build application in one RUN command to reduce layers
+RUN npx prisma generate && \
+    npm run build && \
+    npm cache clean --force && \
+    rm -rf ~/.npm
 
 # =============================================================================
 # PRODUCTION RUNTIME STAGE
