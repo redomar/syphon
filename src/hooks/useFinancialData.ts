@@ -756,12 +756,15 @@ const goalsApi = {
     return response.json();
   },
 
-  async update(goalId: string, data: {
-    name?: string;
-    targetAmount?: number;
-    deadline?: string;
-    isArchived?: boolean;
-  }): Promise<SavingsGoal> {
+  async update(
+    goalId: string,
+    data: {
+      name?: string;
+      targetAmount?: number;
+      deadline?: string;
+      isArchived?: boolean;
+    }
+  ): Promise<SavingsGoal> {
     const response = await fetch(`/api/goals/${goalId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -816,12 +819,12 @@ const contributionsApi = {
 // =============================================================================
 
 const goalsQueryKeys = {
-  all: ['goals'] as const,
-  lists: () => [...goalsQueryKeys.all, 'list'] as const,
+  all: ["goals"] as const,
+  lists: () => [...goalsQueryKeys.all, "list"] as const,
   list: (filters: string) => [...goalsQueryKeys.lists(), { filters }] as const,
-  details: () => [...goalsQueryKeys.all, 'detail'] as const,
+  details: () => [...goalsQueryKeys.all, "detail"] as const,
   detail: (id: string) => [...goalsQueryKeys.details(), id] as const,
-}
+};
 
 export function useGoals(options?: UseQueryOptions<SavingsGoal[]>) {
   return useQuery({
@@ -896,7 +899,15 @@ export function useUpdateGoal(
   options?: UseMutationOptions<
     SavingsGoal,
     Error,
-    { goalId: string; data: { name?: string; targetAmount?: number; deadline?: string; isArchived?: boolean } }
+    {
+      goalId: string;
+      data: {
+        name?: string;
+        targetAmount?: number;
+        deadline?: string;
+        isArchived?: boolean;
+      };
+    }
   >
 ) {
   const queryClient = useQueryClient();
@@ -1025,6 +1036,485 @@ export function useDeleteContribution(
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: goalsQueryKeys.lists() });
+    },
+    ...options,
+  });
+}
+
+// =============================================================================
+// DEBTS API FUNCTIONS
+// =============================================================================
+
+interface Debt {
+  id: string;
+  userId: string;
+  name: string;
+  type: string;
+  balance: number | string; // Prisma returns Decimal as string
+  apr?: number;
+  minPayment: number | string; // Prisma returns Decimal as string
+  lender?: string;
+  dueDayOfMonth?: number;
+  isClosed: boolean;
+  createdAt: string;
+  updatedAt: string;
+  payments: DebtPayment[];
+}
+
+interface DebtPayment {
+  id: string;
+  userId: string;
+  debtId: string;
+  amount: number | string; // Prisma returns Decimal as string
+  occurredAt: string;
+  principal?: number | string; // Prisma returns Decimal as string
+  interest?: number | string; // Prisma returns Decimal as string
+  note?: string;
+}
+
+const debtsApi = {
+  async getAll(): Promise<Debt[]> {
+    const response = await fetch("/api/debts");
+    if (!response.ok) {
+      throw new Error("Failed to fetch debts");
+    }
+    return response.json();
+  },
+
+  async create(data: {
+    name: string;
+    type: string;
+    balance: number;
+    apr?: number;
+    minPayment: number;
+    lender?: string;
+    dueDayOfMonth?: number;
+  }): Promise<Debt> {
+    const response = await fetch("/api/debts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to create debt");
+    }
+    return response.json();
+  },
+
+  async update(
+    debtId: string,
+    data: {
+      name?: string;
+      type?: string;
+      balance?: number;
+      apr?: number;
+      minPayment?: number;
+      lender?: string;
+      dueDayOfMonth?: number;
+      isClosed?: boolean;
+    }
+  ): Promise<Debt> {
+    const response = await fetch(`/api/debts/${debtId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to update debt");
+    }
+    return response.json();
+  },
+
+  async delete(debtId: string): Promise<void> {
+    const response = await fetch(`/api/debts/${debtId}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) {
+      throw new Error("Failed to delete debt");
+    }
+  },
+};
+
+const debtPaymentsApi = {
+  async create(data: {
+    debtId: string;
+    amount: number;
+    occurredAt: string;
+    principal?: number;
+    interest?: number;
+    note?: string;
+  }): Promise<DebtPayment> {
+    const response = await fetch("/api/debts/payments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to create debt payment");
+    }
+    return response.json();
+  },
+
+  async delete(paymentId: string): Promise<void> {
+    const response = await fetch(`/api/debts/payments/${paymentId}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) {
+      throw new Error("Failed to delete debt payment");
+    }
+  },
+};
+
+// Query keys for debts
+const debtsQueryKeys = {
+  lists: () => ["debts"] as const,
+  list: (filters: Record<string, unknown>) => ["debts", filters] as const,
+  details: () => ["debts", "detail"] as const,
+  detail: (id: string) => ["debts", "detail", id] as const,
+};
+
+// =============================================================================
+// DEBT HOOKS
+// =============================================================================
+
+export function useDebts(options?: UseQueryOptions<Debt[]>) {
+  return useQuery({
+    queryKey: debtsQueryKeys.lists(),
+    queryFn: () =>
+      tracer.startActiveSpan("hook.useDebts", async (span) => {
+        span.setAttributes({
+          "hook.name": "useDebts",
+          operation: "fetch",
+        });
+
+        try {
+          const data = await debtsApi.getAll();
+          span.setAttributes({
+            "debts.count": data.length,
+            success: true,
+          });
+          span.end();
+          return data;
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setAttributes({ success: false });
+          span.end();
+          throw error;
+        }
+      }),
+    ...options,
+  });
+}
+
+export function useCreateDebt(
+  options?: UseMutationOptions<
+    Debt,
+    Error,
+    {
+      name: string;
+      type: string;
+      balance: number;
+      apr?: number;
+      minPayment: number;
+      lender?: string;
+      dueDayOfMonth?: number;
+    }
+  >
+) {
+  const queryClient = useQueryClient();
+  const { onMutate, onError, onSettled, ...rest } = options ?? {};
+
+  return useMutation({
+    mutationFn: (data) =>
+      tracer.startActiveSpan("hook.createDebt", async (span) => {
+        span.setAttributes({
+          "hook.name": "useCreateDebt",
+          "debt.name": data.name,
+          "debt.type": data.type,
+          "debt.balance": data.balance,
+        });
+
+        try {
+          const result = await debtsApi.create(data);
+          span.setAttributes({
+            "debt.id": result.id,
+            success: true,
+          });
+          span.end();
+          return result;
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setAttributes({ success: false });
+          span.end();
+          throw error;
+        }
+      }),
+    onMutate: async (newDebt) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: debtsQueryKeys.lists() });
+
+      // Snapshot the previous value
+      const previousDebts = queryClient.getQueryData<Debt[]>(debtsQueryKeys.lists());
+
+      // Optimistically update to the new value
+      if (previousDebts) {
+        const optimisticDebt: Debt = {
+          id: `temp-${Date.now()}`, // Temporary ID
+          userId: '', // Will be set by server
+          name: newDebt.name,
+          type: newDebt.type,
+          balance: newDebt.balance,
+          apr: newDebt.apr,
+          minPayment: newDebt.minPayment,
+          lender: newDebt.lender,
+          dueDayOfMonth: newDebt.dueDayOfMonth,
+          isClosed: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          payments: [],
+        };
+
+        queryClient.setQueryData<Debt[]>(
+          debtsQueryKeys.lists(),
+          [...previousDebts, optimisticDebt]
+        );
+      }
+
+      // Call user's onMutate if provided
+      const userContext = onMutate ? await onMutate(newDebt) : undefined;
+
+      // Return context with our previous data
+      return { previousDebts, userContext };
+    },
+    onError: (err, newDebt, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousDebts) {
+        queryClient.setQueryData<Debt[]>(debtsQueryKeys.lists(), context.previousDebts);
+      }
+
+      // Call user's onError if provided
+      onError?.(err, newDebt, context);
+    },
+    onSettled: (data, error, variables, context) => {
+      // Always refetch after error or success to ensure server state
+      queryClient.invalidateQueries({ queryKey: debtsQueryKeys.lists() });
+
+      // Call user's onSettled if provided
+      onSettled?.(data, error, variables, context);
+    },
+    ...rest,
+  });
+}
+
+export function useUpdateDebt(
+  options?: UseMutationOptions<
+    Debt,
+    Error,
+    {
+      debtId: string;
+      data: {
+        name?: string;
+        type?: string;
+        balance?: number;
+        apr?: number;
+        minPayment?: number;
+        lender?: string;
+        dueDayOfMonth?: number;
+        isClosed?: boolean;
+      };
+    }
+  >
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ debtId, data }) =>
+      tracer.startActiveSpan("hook.updateDebt", async (span) => {
+        span.setAttributes({
+          "hook.name": "useUpdateDebt",
+          "debt.id": debtId,
+        });
+
+        try {
+          const result = await debtsApi.update(debtId, data);
+          span.setAttributes({ success: true });
+          span.end();
+          return result;
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setAttributes({ success: false });
+          span.end();
+          throw error;
+        }
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: debtsQueryKeys.lists() });
+    },
+    ...options,
+  });
+}
+
+export function useDeleteDebt(
+  options?: UseMutationOptions<void, Error, { debtId: string }>
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ debtId }) =>
+      tracer.startActiveSpan("hook.deleteDebt", async (span) => {
+        span.setAttributes({
+          "hook.name": "useDeleteDebt",
+          "debt.id": debtId,
+        });
+
+        try {
+          await debtsApi.delete(debtId);
+          span.setAttributes({ success: true });
+          span.end();
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setAttributes({ success: false });
+          span.end();
+          throw error;
+        }
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: debtsQueryKeys.lists() });
+    },
+    ...options,
+  });
+}
+
+export function useCreateDebtPayment(
+  options?: UseMutationOptions<
+    DebtPayment,
+    Error,
+    {
+      debtId: string;
+      amount: number;
+      occurredAt: string;
+      principal?: number;
+      interest?: number;
+      note?: string;
+    }
+  >
+) {
+  const queryClient = useQueryClient();
+  const { onMutate, onError, onSettled, ...rest } = options ?? {};
+
+  return useMutation({
+    mutationFn: (data) =>
+      tracer.startActiveSpan("hook.createDebtPayment", async (span) => {
+        span.setAttributes({
+          "hook.name": "useCreateDebtPayment",
+          "payment.debt_id": data.debtId,
+          "payment.amount": data.amount,
+        });
+
+        try {
+          const result = await debtPaymentsApi.create(data);
+          span.setAttributes({
+            "payment.id": result.id,
+            success: true,
+          });
+          span.end();
+          return result;
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setAttributes({ success: false });
+          span.end();
+          throw error;
+        }
+      }),
+    onMutate: async (newPayment) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: debtsQueryKeys.lists() });
+
+      // Snapshot the previous value
+      const previousDebts = queryClient.getQueryData<Debt[]>(debtsQueryKeys.lists());
+
+      // Optimistically update debt balance
+      if (previousDebts) {
+        const updatedDebts = previousDebts.map(debt => {
+          if (debt.id === newPayment.debtId) {
+            // Create optimistic payment
+            const optimisticPayment: DebtPayment = {
+              id: `temp-payment-${Date.now()}`,
+              userId: '', // Will be set by server
+              debtId: newPayment.debtId,
+              amount: newPayment.amount,
+              occurredAt: newPayment.occurredAt,
+              principal: newPayment.principal,
+              interest: newPayment.interest,
+              note: newPayment.note,
+            };
+
+            // Update debt with new payment and reduced balance
+            const newBalance = Number(debt.balance) - newPayment.amount;
+            return {
+              ...debt,
+              balance: Math.max(0, newBalance), // Don't go below 0
+              payments: [...(debt.payments || []), optimisticPayment]
+            };
+          }
+          return debt;
+        });
+
+        queryClient.setQueryData<Debt[]>(debtsQueryKeys.lists(), updatedDebts);
+      }
+
+      // Call user's onMutate if provided
+      const userContext = onMutate ? await onMutate(newPayment) : undefined;
+
+      // Return context with our previous data
+      return { previousDebts, userContext };
+    },
+    onError: (err, newPayment, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousDebts) {
+        queryClient.setQueryData<Debt[]>(debtsQueryKeys.lists(), context.previousDebts);
+      }
+
+      // Call user's onError if provided
+      onError?.(err, newPayment, context);
+    },
+    onSettled: (data, error, variables, context) => {
+      // Always refetch after error or success to ensure server state
+      queryClient.invalidateQueries({ queryKey: debtsQueryKeys.lists() });
+
+      // Call user's onSettled if provided
+      onSettled?.(data, error, variables, context);
+    },
+    ...rest,
+  });
+}
+
+export function useDeleteDebtPayment(
+  options?: UseMutationOptions<void, Error, { paymentId: string }>
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ paymentId }) =>
+      tracer.startActiveSpan("hook.deleteDebtPayment", async (span) => {
+        span.setAttributes({
+          "hook.name": "useDeleteDebtPayment",
+          "payment.id": paymentId,
+        });
+
+        try {
+          await debtPaymentsApi.delete(paymentId);
+          span.setAttributes({ success: true });
+          span.end();
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setAttributes({ success: false });
+          span.end();
+          throw error;
+        }
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: debtsQueryKeys.lists() });
     },
     ...options,
   });

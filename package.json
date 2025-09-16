@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "dev:telemetry": "docker-compose up jaeger prometheus -d && npm run dev",
     "build": "npx prisma generate && next build",
     "start": "next start",
