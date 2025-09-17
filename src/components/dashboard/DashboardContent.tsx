@@ -2,12 +2,7 @@
 
 import { useTransactions, useGoals, useDebts } from "@/hooks/useFinancialData";
 import { TransactionType } from "../../../generated/prisma";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, PoundSterling, Target, TrendingDown } from "lucide-react";
 import { useMemo } from "react";
 
@@ -18,35 +13,55 @@ interface DashboardContentProps {
 }
 
 export default function DashboardContent({ user }: DashboardContentProps) {
-  const { data: transactions = [], isLoading: transactionsLoading } = useTransactions();
+  const { data: transactions = [], isLoading: transactionsLoading } =
+    useTransactions();
   const { data: goals = [], isLoading: goalsLoading } = useGoals();
   const { data: debts = [], isLoading: debtsLoading } = useDebts();
 
   const dashboardData = useMemo(() => {
     // Calculate income and expenses from transactions
-    const incomeTransactions = transactions.filter(t => t.type === TransactionType.INCOME);
-    const expenseTransactions = transactions.filter(t => t.type === TransactionType.EXPENSE);
+    const incomeTransactions = transactions.filter(
+      (t) => t.type === TransactionType.INCOME
+    );
+    const expenseTransactions = transactions.filter(
+      (t) => t.type === TransactionType.EXPENSE
+    );
 
-    const totalIncome = incomeTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
-    const totalExpenses = expenseTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+    const totalIncome = incomeTransactions.reduce(
+      (sum, t) => sum + parseFloat(t.amount),
+      0
+    );
+    const totalExpenses = expenseTransactions.reduce(
+      (sum, t) => sum + parseFloat(t.amount),
+      0
+    );
 
     // Calculate total debt
-    const totalDebt = debts.reduce((sum, debt) => sum + parseFloat(debt.balance.toString()), 0);
+    const totalDebt = debts.reduce(
+      (sum, debt) => sum + parseFloat(debt.balance.toString()),
+      0
+    );
 
     // Available balance
     const availableBalance = totalIncome - totalExpenses;
 
     // Savings rate
-    const savingsRate = totalIncome > 0 ? ((availableBalance / totalIncome) * 100).toFixed(1) : "0.0";
+    const savingsRate =
+      totalIncome > 0
+        ? ((availableBalance / totalIncome) * 100).toFixed(1)
+        : "0.0";
 
     // Debt-to-income ratio (annual)
     const annualIncome = totalIncome * 12;
-    const debtToIncomeRatio = annualIncome > 0 ? ((totalDebt / annualIncome) * 100).toFixed(1) : "0.0";
+    const debtToIncomeRatio =
+      annualIncome > 0 ? ((totalDebt / annualIncome) * 100).toFixed(1) : "0.0";
 
     // Calculate days until next month (simplified payday logic)
     const today = new Date();
     const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-    const daysUntilPayday = Math.ceil((nextMonth.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const daysUntilPayday = Math.ceil(
+      (nextMonth.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    );
 
     // Project expenses until payday
     const dailyExpenseAverage = totalExpenses / 30;
@@ -100,11 +115,10 @@ export default function DashboardContent({ user }: DashboardContentProps) {
         <Card className="bg-neutral-900 border-neutral-700 md:col-span-2 lg:col-span-4">
           <CardContent className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="space-y-1">
-              <p className="text-xs text-neutral-400 tracking-wider">
-                WELCOME
-              </p>
+              <p className="text-xs text-neutral-400 tracking-wider">WELCOME</p>
               <p className="text-2xl font-semibold">
-                Hi{user?.firstName ? `, ${user.firstName}` : ""} — Here is your snapshot.
+                Hi{user?.firstName ? `, ${user.firstName}` : ""} — Here is your
+                snapshot.
               </p>
             </div>
             <div className="text-xs text-neutral-500 max-w-sm md:text-right">
@@ -123,7 +137,9 @@ export default function DashboardContent({ user }: DashboardContentProps) {
                 </p>
                 <p
                   className={`text-2xl font-bold font-mono ${
-                    dashboardData.availableBalance >= 0 ? "text-white" : "text-red-500"
+                    dashboardData.availableBalance >= 0
+                      ? "text-white"
+                      : "text-red-500"
                   }`}
                 >
                   £{dashboardData.availableBalance.toLocaleString()}
@@ -131,7 +147,9 @@ export default function DashboardContent({ user }: DashboardContentProps) {
               </div>
               <PoundSterling
                 className={`w-8 h-8 ${
-                  dashboardData.availableBalance >= 0 ? "text-white" : "text-red-500"
+                  dashboardData.availableBalance >= 0
+                    ? "text-white"
+                    : "text-red-500"
                 }`}
               />
             </div>
@@ -223,7 +241,12 @@ export default function DashboardContent({ user }: DashboardContentProps) {
                   style={{
                     width: `${
                       dashboardData.totalIncome > 0
-                        ? Math.min(100, (dashboardData.totalExpenses / dashboardData.totalIncome) * 100)
+                        ? Math.min(
+                            100,
+                            (dashboardData.totalExpenses /
+                              dashboardData.totalIncome) *
+                              100
+                          )
                         : 0
                     }%`,
                   }}
@@ -234,7 +257,9 @@ export default function DashboardContent({ user }: DashboardContentProps) {
               <span className="text-neutral-400">Available</span>
               <span
                 className={`font-mono ${
-                  dashboardData.availableBalance >= 0 ? "text-white" : "text-red-500"
+                  dashboardData.availableBalance >= 0
+                    ? "text-white"
+                    : "text-red-500"
                 }`}
               >
                 £{dashboardData.availableBalance.toLocaleString()}
@@ -252,7 +277,8 @@ export default function DashboardContent({ user }: DashboardContentProps) {
           <CardContent className="space-y-4 text-sm">
             {goals.length === 0 ? (
               <div className="text-neutral-400 text-center py-4">
-                No savings goals yet. Create one to start tracking your progress!
+                No savings goals yet. Create one to start tracking your
+                progress!
               </div>
             ) : (
               goals.slice(0, 3).map((goal) => (
@@ -260,14 +286,15 @@ export default function DashboardContent({ user }: DashboardContentProps) {
                   <div className="flex justify-between text-xs">
                     <span className="text-white">{goal.name}</span>
                     <span className="text-neutral-400 font-mono">
-                      £{goal.currentAmount.toLocaleString()} / £{goal.targetAmount.toLocaleString()}
+                      £{goal.currentAmount.toLocaleString()} / £
+                      {goal.targetAmount.toLocaleString()}
                     </span>
                   </div>
                   <div className="w-full bg-neutral-800 h-3">
                     <div
                       className="bg-white h-3"
                       style={{
-                        width: `${Math.min(100, (goal.currentAmount / goal.targetAmount) * 100)}%`
+                        width: `${Math.min(100, (goal.currentAmount / goal.targetAmount) * 100)}%`,
                       }}
                     />
                   </div>
@@ -298,9 +325,14 @@ export default function DashboardContent({ user }: DashboardContentProps) {
             </div>
             {debts.length > 0 && (
               <div className="pt-2 border-t border-neutral-700">
-                <div className="text-xs text-neutral-400 mb-2">Active Debts:</div>
+                <div className="text-xs text-neutral-400 mb-2">
+                  Active Debts:
+                </div>
                 {debts.slice(0, 2).map((debt) => (
-                  <div key={debt.id} className="flex justify-between text-xs mb-1">
+                  <div
+                    key={debt.id}
+                    className="flex justify-between text-xs mb-1"
+                  >
                     <span className="text-neutral-300">{debt.name}</span>
                     <span className="text-red-400 font-mono">
                       £{parseFloat(debt.balance.toString()).toLocaleString()}

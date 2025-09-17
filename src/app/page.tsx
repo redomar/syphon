@@ -14,9 +14,11 @@ export default async function Home() {
   const user = await currentUser().catch(() => null);
 
   // Extract only the data we need for the client component
-  const userData = user ? {
-    firstName: user.firstName,
-  } : null;
+  const userData = user
+    ? {
+        firstName: user.firstName,
+      }
+    : null;
 
   return (
     <div className="space-y-8">

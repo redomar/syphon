@@ -18,10 +18,15 @@ interface ContributionFormProps {
   isLoading?: boolean;
 }
 
-function ContributionForm({ goalName, onSubmit, onCancel, isLoading }: ContributionFormProps) {
+function ContributionForm({
+  goalName,
+  onSubmit,
+  onCancel,
+  isLoading,
+}: ContributionFormProps) {
   const [formData, setFormData] = React.useState({
     amount: "",
-    occurredAt: new Date().toISOString().split('T')[0],
+    occurredAt: new Date().toISOString().split("T")[0],
     note: "",
   });
 
@@ -37,7 +42,9 @@ function ContributionForm({ goalName, onSubmit, onCancel, isLoading }: Contribut
   return (
     <Card className="bg-neutral-900 border-neutral-700">
       <CardHeader>
-        <CardTitle className="text-lg">Add Contribution to &ldquo;{goalName}&rdquo;</CardTitle>
+        <CardTitle className="text-lg">
+          Add Contribution to &ldquo;{goalName}&rdquo;
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -88,11 +95,7 @@ function ContributionForm({ goalName, onSubmit, onCancel, isLoading }: Contribut
 
           {/* Buttons */}
           <div className="flex gap-2">
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="flex-1"
-            >
+            <Button type="submit" disabled={isLoading} className="flex-1">
               {isLoading ? "Adding..." : "Add Contribution"}
             </Button>
             <Button

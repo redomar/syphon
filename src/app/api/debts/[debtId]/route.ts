@@ -47,10 +47,7 @@ export async function GET(
       });
 
       if (!debt) {
-        return NextResponse.json(
-          { error: "Debt not found" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: "Debt not found" }, { status: 404 });
       }
 
       span.setAttributes({
@@ -108,10 +105,7 @@ export async function PUT(
       });
 
       if (!existingDebt) {
-        return NextResponse.json(
-          { error: "Debt not found" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: "Debt not found" }, { status: 404 });
       }
 
       const updatedDebt = await db.debt.update({
@@ -182,10 +176,7 @@ export async function DELETE(
       });
 
       if (!existingDebt) {
-        return NextResponse.json(
-          { error: "Debt not found" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: "Debt not found" }, { status: 404 });
       }
 
       await db.debt.delete({

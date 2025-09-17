@@ -42,7 +42,9 @@ function GoalForm({ goal, onSubmit, onCancel, isLoading }: GoalFormProps) {
   const [formData, setFormData] = React.useState({
     name: goal?.name || "",
     targetAmount: goal?.targetAmount?.toString() || "",
-    deadline: goal?.deadline ? new Date(goal.deadline).toISOString().split('T')[0] : "",
+    deadline: goal?.deadline
+      ? new Date(goal.deadline).toISOString().split("T")[0]
+      : "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -91,7 +93,10 @@ function GoalForm({ goal, onSubmit, onCancel, isLoading }: GoalFormProps) {
               placeholder="0.00"
               value={formData.targetAmount}
               onChange={(e) =>
-                setFormData((prev) => ({ ...prev, targetAmount: e.target.value }))
+                setFormData((prev) => ({
+                  ...prev,
+                  targetAmount: e.target.value,
+                }))
               }
               required
             />
@@ -115,12 +120,12 @@ function GoalForm({ goal, onSubmit, onCancel, isLoading }: GoalFormProps) {
 
           {/* Buttons */}
           <div className="flex gap-2">
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="flex-1"
-            >
-              {isLoading ? "Saving..." : isEditing ? "Update Goal" : "Create Goal"}
+            <Button type="submit" disabled={isLoading} className="flex-1">
+              {isLoading
+                ? "Saving..."
+                : isEditing
+                  ? "Update Goal"
+                  : "Create Goal"}
             </Button>
             <Button
               type="button"

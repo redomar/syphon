@@ -50,13 +50,13 @@ interface Debt {
 }
 
 type FormMode =
-  | { type: 'none' }
-  | { type: 'create-debt' }
-  | { type: 'edit-debt'; debt: Debt }
-  | { type: 'add-payment'; debtId: string; debtName: string };
+  | { type: "none" }
+  | { type: "create-debt" }
+  | { type: "edit-debt"; debt: Debt }
+  | { type: "add-payment"; debtId: string; debtName: string };
 
 function DebtManager() {
-  const [formMode, setFormMode] = React.useState<FormMode>({ type: 'none' });
+  const [formMode, setFormMode] = React.useState<FormMode>({ type: "none" });
 
   // TanStack Query hooks
   const { data: debts = [], isLoading: debtsLoading } = useDebts();
@@ -71,7 +71,7 @@ function DebtManager() {
         });
         span.end();
       });
-      setFormMode({ type: 'none' });
+      setFormMode({ type: "none" });
       toast.success("Debt created successfully!");
     },
     onError: (error) => {
@@ -98,7 +98,7 @@ function DebtManager() {
         });
         span.end();
       });
-      setFormMode({ type: 'none' });
+      setFormMode({ type: "none" });
       toast.success("Debt updated successfully!");
     },
     onError: (error) => {
@@ -151,7 +151,7 @@ function DebtManager() {
         });
         span.end();
       });
-      setFormMode({ type: 'none' });
+      setFormMode({ type: "none" });
       toast.success("Payment added successfully!");
     },
     onError: (error) => {
@@ -193,32 +193,42 @@ function DebtManager() {
     createDebtMutation.mutate(data);
   };
 
-  const handleUpdateDebt = (debtId: string, data: {
-    name?: string;
-    type?: string;
-    balance?: number;
-    apr?: number;
-    minPayment?: number;
-    lender?: string;
-    dueDayOfMonth?: number;
-    isClosed?: boolean;
-  }) => {
+  const handleUpdateDebt = (
+    debtId: string,
+    data: {
+      name?: string;
+      type?: string;
+      balance?: number;
+      apr?: number;
+      minPayment?: number;
+      lender?: string;
+      dueDayOfMonth?: number;
+      isClosed?: boolean;
+    }
+  ) => {
     updateDebtMutation.mutate({ debtId, data });
   };
 
   const handleDeleteDebt = (debtId: string) => {
-    if (window.confirm("Are you sure you want to delete this debt? This action cannot be undone.")) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this debt? This action cannot be undone."
+      )
+    ) {
       deleteDebtMutation.mutate({ debtId });
     }
   };
 
-  const handleAddPayment = (debtId: string, data: {
-    amount: number;
-    occurredAt: string;
-    principal?: number;
-    interest?: number;
-    note?: string;
-  }) => {
+  const handleAddPayment = (
+    debtId: string,
+    data: {
+      amount: number;
+      occurredAt: string;
+      principal?: number;
+      interest?: number;
+      note?: string;
+    }
+  ) => {
     createPaymentMutation.mutate({ debtId, ...data });
   };
 
@@ -230,10 +240,19 @@ function DebtManager() {
     createPaymentMutation.isPending;
 
   // Calculate summary stats - convert Decimal strings to numbers
-  const activeDebts = debts.filter(debt => !debt.isClosed);
-  const totalBalance = activeDebts.reduce((sum, debt) => sum + Number(debt.balance), 0);
-  const totalMinPayment = activeDebts.reduce((sum, debt) => sum + Number(debt.minPayment), 0);
-  const highestAPR = activeDebts.reduce((max, debt) => Math.max(max, debt.apr || 0), 0);
+  const activeDebts = debts.filter((debt) => !debt.isClosed);
+  const totalBalance = activeDebts.reduce(
+    (sum, debt) => sum + Number(debt.balance),
+    0
+  );
+  const totalMinPayment = activeDebts.reduce(
+    (sum, debt) => sum + Number(debt.minPayment),
+    0
+  );
+  const highestAPR = activeDebts.reduce(
+    (max, debt) => Math.max(max, debt.apr || 0),
+    0
+  );
 
   return (
     <div className="grid gap-6">
@@ -243,12 +262,13 @@ function DebtManager() {
           <div>
             <h2 className="text-lg font-semibold">Debt Management</h2>
             <p className="text-sm text-neutral-500">
-              Track your debts and monitor your progress toward becoming debt-free.
+              Track your debts and monitor your progress toward becoming
+              debt-free.
             </p>
           </div>
           <div className="grid grid-flow-col auto-cols-max gap-2">
             <Button
-              onClick={() => setFormMode({ type: 'create-debt' })}
+              onClick={() => setFormMode({ type: "create-debt" })}
               disabled={isLoading}
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -279,7 +299,9 @@ function DebtManager() {
                 <DollarSign className="h-5 w-5 text-orange-500" />
                 <div>
                   <p className="text-sm text-neutral-400">Total Balance</p>
-                  <p className="text-2xl font-bold">£{totalBalance.toLocaleString()}</p>
+                  <p className="text-2xl font-bold">
+                    £{totalBalance.toLocaleString()}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -291,7 +313,9 @@ function DebtManager() {
                 <TrendingDown className="h-5 w-5 text-blue-500" />
                 <div>
                   <p className="text-sm text-neutral-400">Monthly Minimum</p>
-                  <p className="text-2xl font-bold">£{totalMinPayment.toLocaleString()}</p>
+                  <p className="text-2xl font-bold">
+                    £{totalMinPayment.toLocaleString()}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -312,28 +336,28 @@ function DebtManager() {
       )}
 
       {/* Forms */}
-      {formMode.type === 'create-debt' && (
+      {formMode.type === "create-debt" && (
         <DebtForm
           onSubmit={handleCreateDebt}
-          onCancel={() => setFormMode({ type: 'none' })}
+          onCancel={() => setFormMode({ type: "none" })}
           isLoading={createDebtMutation.isPending}
         />
       )}
 
-      {formMode.type === 'edit-debt' && (
+      {formMode.type === "edit-debt" && (
         <DebtForm
           debt={formMode.debt}
           onSubmit={(data) => handleUpdateDebt(formMode.debt.id, data)}
-          onCancel={() => setFormMode({ type: 'none' })}
+          onCancel={() => setFormMode({ type: "none" })}
           isLoading={updateDebtMutation.isPending}
         />
       )}
 
-      {formMode.type === 'add-payment' && (
+      {formMode.type === "add-payment" && (
         <PaymentForm
           debtName={formMode.debtName}
           onSubmit={(data) => handleAddPayment(formMode.debtId, data)}
-          onCancel={() => setFormMode({ type: 'none' })}
+          onCancel={() => setFormMode({ type: "none" })}
           isLoading={createPaymentMutation.isPending}
         />
       )}
@@ -348,7 +372,7 @@ function DebtManager() {
               Add your first debt to start tracking your repayment progress.
             </p>
             <Button
-              onClick={() => setFormMode({ type: 'create-debt' })}
+              onClick={() => setFormMode({ type: "create-debt" })}
               disabled={isLoading}
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -363,16 +387,16 @@ function DebtManager() {
               key={debt.id}
               debt={debt}
               onAddPayment={(debtId) => {
-                const selectedDebt = debts.find(d => d.id === debtId);
+                const selectedDebt = debts.find((d) => d.id === debtId);
                 if (selectedDebt) {
                   setFormMode({
-                    type: 'add-payment',
+                    type: "add-payment",
                     debtId,
-                    debtName: selectedDebt.name
+                    debtName: selectedDebt.name,
                   });
                 }
               }}
-              onEditDebt={(debt) => setFormMode({ type: 'edit-debt', debt })}
+              onEditDebt={(debt) => setFormMode({ type: "edit-debt", debt })}
               onDeleteDebt={handleDeleteDebt}
             />
           ))}

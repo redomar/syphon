@@ -21,8 +21,10 @@ export async function register() {
     let traceExporter;
     if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
       const baseUrl = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
-      const tracesUrl = baseUrl.endsWith('/v1/traces') ? baseUrl : `${baseUrl}/v1/traces`;
-      
+      const tracesUrl = baseUrl.endsWith("/v1/traces")
+        ? baseUrl
+        : `${baseUrl}/v1/traces`;
+
       const exporterConfig: { url: string; headers?: Record<string, string> } =
         {
           url: tracesUrl,
@@ -42,13 +44,16 @@ export async function register() {
       console.log(`🔧 OpenTelemetry exporter configured for: ${tracesUrl}`);
       traceExporter = new OTLPTraceExporter(exporterConfig);
     } else {
-      console.log("⚠️  No OTEL_EXPORTER_OTLP_ENDPOINT configured - traces will go to console");
+      console.log(
+        "⚠️  No OTEL_EXPORTER_OTLP_ENDPOINT configured - traces will go to console"
+      );
     }
 
     // Enhanced logging for production
     const environment = process.env.NODE_ENV || "development";
     const serviceName = process.env.OTEL_SERVICE_NAME || "syphon-app";
-    const serviceVersion = process.env.OTEL_SERVICE_VERSION || process.env.VERSION || "0.2.0";
+    const serviceVersion =
+      process.env.OTEL_SERVICE_VERSION || process.env.VERSION || "0.3.0";
 
     // Configure service resource with proper attributes
     const resource = resourceFromAttributes({

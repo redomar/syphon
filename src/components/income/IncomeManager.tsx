@@ -53,7 +53,6 @@ function recentlyUpdated(
   return referenceTime - sourceTime <= thresholdMs;
 }
 
-
 function IncomeManager() {
   const [showIncomeForm, setShowIncomeForm] = React.useState(false);
   const [showCategoryForm, setShowCategoryForm] = React.useState(false);

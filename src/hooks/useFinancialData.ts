@@ -1254,13 +1254,15 @@ export function useCreateDebt(
       await queryClient.cancelQueries({ queryKey: debtsQueryKeys.lists() });
 
       // Snapshot the previous value
-      const previousDebts = queryClient.getQueryData<Debt[]>(debtsQueryKeys.lists());
+      const previousDebts = queryClient.getQueryData<Debt[]>(
+        debtsQueryKeys.lists()
+      );
 
       // Optimistically update to the new value
       if (previousDebts) {
         const optimisticDebt: Debt = {
           id: `temp-${Date.now()}`, // Temporary ID
-          userId: '', // Will be set by server
+          userId: "", // Will be set by server
           name: newDebt.name,
           type: newDebt.type,
           balance: newDebt.balance,
@@ -1274,10 +1276,10 @@ export function useCreateDebt(
           payments: [],
         };
 
-        queryClient.setQueryData<Debt[]>(
-          debtsQueryKeys.lists(),
-          [...previousDebts, optimisticDebt]
-        );
+        queryClient.setQueryData<Debt[]>(debtsQueryKeys.lists(), [
+          ...previousDebts,
+          optimisticDebt,
+        ]);
       }
 
       // Call user's onMutate if provided
@@ -1289,7 +1291,10 @@ export function useCreateDebt(
     onError: (err, newDebt, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousDebts) {
-        queryClient.setQueryData<Debt[]>(debtsQueryKeys.lists(), context.previousDebts);
+        queryClient.setQueryData<Debt[]>(
+          debtsQueryKeys.lists(),
+          context.previousDebts
+        );
       }
 
       // Call user's onError if provided
@@ -1431,16 +1436,18 @@ export function useCreateDebtPayment(
       await queryClient.cancelQueries({ queryKey: debtsQueryKeys.lists() });
 
       // Snapshot the previous value
-      const previousDebts = queryClient.getQueryData<Debt[]>(debtsQueryKeys.lists());
+      const previousDebts = queryClient.getQueryData<Debt[]>(
+        debtsQueryKeys.lists()
+      );
 
       // Optimistically update debt balance
       if (previousDebts) {
-        const updatedDebts = previousDebts.map(debt => {
+        const updatedDebts = previousDebts.map((debt) => {
           if (debt.id === newPayment.debtId) {
             // Create optimistic payment
             const optimisticPayment: DebtPayment = {
               id: `temp-payment-${Date.now()}`,
-              userId: '', // Will be set by server
+              userId: "", // Will be set by server
               debtId: newPayment.debtId,
               amount: newPayment.amount,
               occurredAt: newPayment.occurredAt,
@@ -1454,7 +1461,7 @@ export function useCreateDebtPayment(
             return {
               ...debt,
               balance: Math.max(0, newBalance), // Don't go below 0
-              payments: [...(debt.payments || []), optimisticPayment]
+              payments: [...(debt.payments || []), optimisticPayment],
             };
           }
           return debt;
@@ -1472,7 +1479,10 @@ export function useCreateDebtPayment(
     onError: (err, newPayment, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousDebts) {
-        queryClient.setQueryData<Debt[]>(debtsQueryKeys.lists(), context.previousDebts);
+        queryClient.setQueryData<Debt[]>(
+          debtsQueryKeys.lists(),
+          context.previousDebts
+        );
       }
 
       // Call user's onError if provided

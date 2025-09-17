@@ -11,13 +11,7 @@ import {
   useCreateContribution,
 } from "@/hooks/useFinancialData";
 import { tracer } from "@/lib/telemetry";
-import {
-  Target,
-  Plus,
-  TrendingUp,
-  Award,
-  AlertCircle,
-} from "lucide-react";
+import { Target, Plus, TrendingUp, Award, AlertCircle } from "lucide-react";
 import GoalCard from "./GoalCard";
 import GoalForm from "./GoalForm";
 import ContributionForm from "./ContributionForm";
@@ -45,13 +39,13 @@ interface SavingsGoal {
 }
 
 type FormMode =
-  | { type: 'none' }
-  | { type: 'create-goal' }
-  | { type: 'edit-goal'; goal: SavingsGoal }
-  | { type: 'add-contribution'; goalId: string; goalName: string };
+  | { type: "none" }
+  | { type: "create-goal" }
+  | { type: "edit-goal"; goal: SavingsGoal }
+  | { type: "add-contribution"; goalId: string; goalName: string };
 
 function GoalsManager() {
-  const [formMode, setFormMode] = React.useState<FormMode>({ type: 'none' });
+  const [formMode, setFormMode] = React.useState<FormMode>({ type: "none" });
 
   // TanStack Query hooks
   const { data: goals = [], isLoading: goalsLoading } = useGoals();
@@ -66,7 +60,7 @@ function GoalsManager() {
         });
         span.end();
       });
-      setFormMode({ type: 'none' });
+      setFormMode({ type: "none" });
       toast.success("Goal created successfully!");
     },
     onError: (error) => {
@@ -93,7 +87,7 @@ function GoalsManager() {
         });
         span.end();
       });
-      setFormMode({ type: 'none' });
+      setFormMode({ type: "none" });
       toast.success("Goal updated successfully!");
     },
     onError: (error) => {
@@ -146,7 +140,7 @@ function GoalsManager() {
         });
         span.end();
       });
-      setFormMode({ type: 'none' });
+      setFormMode({ type: "none" });
       toast.success("Contribution added successfully!");
     },
     onError: (error) => {
@@ -184,25 +178,35 @@ function GoalsManager() {
     createGoalMutation.mutate(data);
   };
 
-  const handleUpdateGoal = (goalId: string, data: {
-    name?: string;
-    targetAmount?: number;
-    deadline?: string;
-  }) => {
+  const handleUpdateGoal = (
+    goalId: string,
+    data: {
+      name?: string;
+      targetAmount?: number;
+      deadline?: string;
+    }
+  ) => {
     updateGoalMutation.mutate({ goalId, data });
   };
 
   const handleDeleteGoal = (goalId: string) => {
-    if (window.confirm("Are you sure you want to delete this goal? This action cannot be undone.")) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this goal? This action cannot be undone."
+      )
+    ) {
       deleteGoalMutation.mutate({ goalId });
     }
   };
 
-  const handleAddContribution = (goalId: string, data: {
-    amount: number;
-    occurredAt: string;
-    note?: string;
-  }) => {
+  const handleAddContribution = (
+    goalId: string,
+    data: {
+      amount: number;
+      occurredAt: string;
+      note?: string;
+    }
+  ) => {
     createContributionMutation.mutate({ goalId, ...data });
   };
 
@@ -214,11 +218,22 @@ function GoalsManager() {
     createContributionMutation.isPending;
 
   // Calculate summary stats
-  const completedGoals = goals.filter(goal => goal.currentAmount >= goal.targetAmount);
-  const activeGoals = goals.filter(goal => goal.currentAmount < goal.targetAmount);
-  const totalTargetAmount = goals.reduce((sum, goal) => sum + goal.targetAmount, 0);
-  const totalCurrentAmount = goals.reduce((sum, goal) => sum + goal.currentAmount, 0);
-  const overallProgress = totalTargetAmount > 0 ? (totalCurrentAmount / totalTargetAmount) * 100 : 0;
+  const completedGoals = goals.filter(
+    (goal) => goal.currentAmount >= goal.targetAmount
+  );
+  const activeGoals = goals.filter(
+    (goal) => goal.currentAmount < goal.targetAmount
+  );
+  const totalTargetAmount = goals.reduce(
+    (sum, goal) => sum + goal.targetAmount,
+    0
+  );
+  const totalCurrentAmount = goals.reduce(
+    (sum, goal) => sum + goal.currentAmount,
+    0
+  );
+  const overallProgress =
+    totalTargetAmount > 0 ? (totalCurrentAmount / totalTargetAmount) * 100 : 0;
 
   return (
     <div className="grid gap-6">
@@ -233,7 +248,7 @@ function GoalsManager() {
           </div>
           <div className="grid grid-flow-col auto-cols-max gap-2">
             <Button
-              onClick={() => setFormMode({ type: 'create-goal' })}
+              onClick={() => setFormMode({ type: "create-goal" })}
               disabled={isLoading}
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -288,7 +303,9 @@ function GoalsManager() {
                 <AlertCircle className="h-5 w-5 text-purple-500" />
                 <div>
                   <p className="text-sm text-neutral-400">Overall Progress</p>
-                  <p className="text-2xl font-bold">{Math.round(overallProgress)}%</p>
+                  <p className="text-2xl font-bold">
+                    {Math.round(overallProgress)}%
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -297,28 +314,28 @@ function GoalsManager() {
       )}
 
       {/* Forms */}
-      {formMode.type === 'create-goal' && (
+      {formMode.type === "create-goal" && (
         <GoalForm
           onSubmit={handleCreateGoal}
-          onCancel={() => setFormMode({ type: 'none' })}
+          onCancel={() => setFormMode({ type: "none" })}
           isLoading={createGoalMutation.isPending}
         />
       )}
 
-      {formMode.type === 'edit-goal' && (
+      {formMode.type === "edit-goal" && (
         <GoalForm
           goal={formMode.goal}
           onSubmit={(data) => handleUpdateGoal(formMode.goal.id, data)}
-          onCancel={() => setFormMode({ type: 'none' })}
+          onCancel={() => setFormMode({ type: "none" })}
           isLoading={updateGoalMutation.isPending}
         />
       )}
 
-      {formMode.type === 'add-contribution' && (
+      {formMode.type === "add-contribution" && (
         <ContributionForm
           goalName={formMode.goalName}
           onSubmit={(data) => handleAddContribution(formMode.goalId, data)}
-          onCancel={() => setFormMode({ type: 'none' })}
+          onCancel={() => setFormMode({ type: "none" })}
           isLoading={createContributionMutation.isPending}
         />
       )}
@@ -333,7 +350,7 @@ function GoalsManager() {
               Create your first goal to start tracking your savings progress.
             </p>
             <Button
-              onClick={() => setFormMode({ type: 'create-goal' })}
+              onClick={() => setFormMode({ type: "create-goal" })}
               disabled={isLoading}
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -348,16 +365,16 @@ function GoalsManager() {
               key={goal.id}
               goal={goal}
               onAddContribution={(goalId) => {
-                const selectedGoal = goals.find(g => g.id === goalId);
+                const selectedGoal = goals.find((g) => g.id === goalId);
                 if (selectedGoal) {
                   setFormMode({
-                    type: 'add-contribution',
+                    type: "add-contribution",
                     goalId,
-                    goalName: selectedGoal.name
+                    goalName: selectedGoal.name,
                   });
                 }
               }}
-              onEditGoal={(goal) => setFormMode({ type: 'edit-goal', goal })}
+              onEditGoal={(goal) => setFormMode({ type: "edit-goal", goal })}
               onDeleteGoal={handleDeleteGoal}
             />
           ))}

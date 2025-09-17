@@ -1,5 +1,5 @@
 # =============================================================================
-# SYPHON PRODUCTION DOCKER COMPOSE - DOKPLOY OPTIMIZED v0.2.0
+# SYPHON PRODUCTION DOCKER COMPOSE - DOKPLOY OPTIMIZED v0.3.0
 # =============================================================================
 
 services:
@@ -105,7 +105,7 @@ services:
       dockerfile: Dockerfile
       args:
         - NODE_ENV=${NODE_ENV:-production}
-        - VERSION=${VERSION:-0.2.0}
+        - VERSION=${VERSION:-0.3.0}
     container_name: syphon-app
     restart: unless-stopped
     hostname: app
@@ -116,7 +116,7 @@ services:
       # CORE APPLICATION ENVIRONMENT - PRIORITIZE ENV VARIABLES
       # =======================================================================
       - NODE_ENV=${NODE_ENV:-production}
-      - VERSION=${VERSION:-0.2.0}
+      - VERSION=${VERSION:-0.3.0}
       - BRANCH=${BRANCH:-main}
       - PORT=${PORT:-3001}
       - HOSTNAME=${HOSTNAME:-0.0.0.0}
@@ -140,14 +140,14 @@ services:
       # =======================================================================
       - OTEL_SDK_DISABLED=${OTEL_SDK_DISABLED:-false}
       - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-syphon-app}
-      - OTEL_SERVICE_VERSION=${OTEL_SERVICE_VERSION:-${VERSION:-0.2.0}}
+      - OTEL_SERVICE_VERSION=${OTEL_SERVICE_VERSION:-${VERSION:-0.3.0}}
       
       # Docker network endpoints (defaults to internal service names)
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://syphon-jaeger:4318}
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://syphon-jaeger:4318/v1/traces}
       
       # Resource attributes for service identification
-      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES:-service.name=syphon-app,service.version=${VERSION:-0.2.0},deployment.environment=${NODE_ENV:-production}}
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES:-service.name=syphon-app,service.version=${VERSION:-0.3.0},deployment.environment=${NODE_ENV:-production}}
       
       # =======================================================================
       # OPENTELEMETRY PERFORMANCE SETTINGS

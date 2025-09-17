@@ -4,39 +4,46 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useDebts } from "@/hooks/useFinancialData";
-import {
-  CreditCard,
-  TrendingDown,
-  Clock,
-  AlertTriangle,
-} from "lucide-react";
+import { CreditCard, TrendingDown, Clock, AlertTriangle } from "lucide-react";
 
 function DebtTotal() {
   const { data: debts = [], isLoading } = useDebts();
 
   // Calculate totals - convert Decimal strings to numbers
-  const activeDebts = debts.filter(debt => !debt.isClosed);
-  const totalBalance = activeDebts.reduce((sum, debt) => sum + Number(debt.balance), 0);
-  const totalMinPayment = activeDebts.reduce((sum, debt) => sum + Number(debt.minPayment), 0);
+  const activeDebts = debts.filter((debt) => !debt.isClosed);
+  const totalBalance = activeDebts.reduce(
+    (sum, debt) => sum + Number(debt.balance),
+    0
+  );
+  const totalMinPayment = activeDebts.reduce(
+    (sum, debt) => sum + Number(debt.minPayment),
+    0
+  );
 
   // Calculate total paid across all debts
-  const totalPaid = debts.reduce((sum, debt) =>
-    sum + debt.payments.reduce((paymentSum, payment) => paymentSum + Number(payment.amount), 0), 0
+  const totalPaid = debts.reduce(
+    (sum, debt) =>
+      sum +
+      debt.payments.reduce(
+        (paymentSum, payment) => paymentSum + Number(payment.amount),
+        0
+      ),
+    0
   );
 
   // Find debt with highest APR
   const highestAPRDebt = activeDebts.reduce(
-    (highest, debt) => (!highest || (debt.apr || 0) > (highest.apr || 0)) ? debt : highest,
-    null as typeof activeDebts[0] | null
+    (highest, debt) =>
+      !highest || (debt.apr || 0) > (highest.apr || 0) ? debt : highest,
+    null as (typeof activeDebts)[0] | null
   );
-
 
   // Find upcoming payments (debts with due dates in the next 7 days)
   const getUpcomingPayments = () => {
     const today = new Date();
     const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-    return activeDebts.filter(debt => {
+    return activeDebts.filter((debt) => {
       if (!debt.dueDayOfMonth) return false;
 
       const currentMonth = today.getMonth();
@@ -76,9 +83,12 @@ function DebtTotal() {
         <CardContent className="p-6">
           <div className="text-center">
             <CreditCard className="h-12 w-12 mx-auto mb-3 opacity-50 text-neutral-500" />
-            <h3 className="text-lg font-semibold text-neutral-300 mb-2">No Active Debts</h3>
+            <h3 className="text-lg font-semibold text-neutral-300 mb-2">
+              No Active Debts
+            </h3>
             <p className="text-neutral-500">
-              You don&apos;t have any active debts tracked. Add your first debt to start managing your repayment journey.
+              You don&apos;t have any active debts tracked. Add your first debt
+              to start managing your repayment journey.
             </p>
           </div>
         </CardContent>
@@ -96,13 +106,16 @@ function DebtTotal() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <CreditCard className="h-5 w-5 text-red-500" />
-                <span className="text-sm text-neutral-400">Total Debt Balance</span>
+                <span className="text-sm text-neutral-400">
+                  Total Debt Balance
+                </span>
               </div>
               <div className="text-3xl font-bold text-white">
                 £{totalBalance.toLocaleString()}
               </div>
               <div className="text-sm text-neutral-500">
-                Across {activeDebts.length} debt{activeDebts.length !== 1 ? 's' : ''}
+                Across {activeDebts.length} debt
+                {activeDebts.length !== 1 ? "s" : ""}
               </div>
             </div>
 
@@ -110,7 +123,9 @@ function DebtTotal() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <TrendingDown className="h-5 w-5 text-blue-500" />
-                <span className="text-sm text-neutral-400">Monthly Minimum</span>
+                <span className="text-sm text-neutral-400">
+                  Monthly Minimum
+                </span>
               </div>
               <div className="text-2xl font-bold text-white">
                 £{totalMinPayment.toLocaleString()}
@@ -146,8 +161,12 @@ function DebtTotal() {
               <div className="flex items-center gap-3">
                 <AlertTriangle className="h-5 w-5 text-red-500" />
                 <div className="flex-1">
-                  <div className="text-sm text-neutral-400">Highest APR Debt</div>
-                  <div className="font-semibold text-white">{highestAPRDebt.name}</div>
+                  <div className="text-sm text-neutral-400">
+                    Highest APR Debt
+                  </div>
+                  <div className="font-semibold text-white">
+                    {highestAPRDebt.name}
+                  </div>
                   <div className="text-sm">
                     <Badge variant="destructive" className="text-xs">
                       {highestAPRDebt.apr}% APR
@@ -173,12 +192,16 @@ function DebtTotal() {
                 <div className="flex-1">
                   <div className="text-sm text-neutral-400">Due This Week</div>
                   <div className="font-semibold text-white">
-                    {upcomingPayments.length} payment{upcomingPayments.length !== 1 ? 's' : ''}
+                    {upcomingPayments.length} payment
+                    {upcomingPayments.length !== 1 ? "s" : ""}
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-lg font-bold text-white">
-                    £{upcomingPayments.reduce((sum, debt) => sum + Number(debt.minPayment), 0).toLocaleString()}
+                    £
+                    {upcomingPayments
+                      .reduce((sum, debt) => sum + Number(debt.minPayment), 0)
+                      .toLocaleString()}
                   </div>
                 </div>
               </div>

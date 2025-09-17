@@ -21,10 +21,15 @@ interface PaymentFormProps {
   isLoading?: boolean;
 }
 
-function PaymentForm({ debtName, onSubmit, onCancel, isLoading }: PaymentFormProps) {
+function PaymentForm({
+  debtName,
+  onSubmit,
+  onCancel,
+  isLoading,
+}: PaymentFormProps) {
   const [amount, setAmount] = React.useState("");
   const [occurredAt, setOccurredAt] = React.useState(
-    new Date().toISOString().split('T')[0]
+    new Date().toISOString().split("T")[0]
   );
   const [principal, setPrincipal] = React.useState("");
   const [interest, setInterest] = React.useState("");
@@ -53,7 +58,11 @@ function PaymentForm({ debtName, onSubmit, onCancel, isLoading }: PaymentFormPro
     if (amount && interest && !principal) {
       const totalAmount = parseFloat(amount);
       const interestAmount = parseFloat(interest);
-      if (!isNaN(totalAmount) && !isNaN(interestAmount) && totalAmount > interestAmount) {
+      if (
+        !isNaN(totalAmount) &&
+        !isNaN(interestAmount) &&
+        totalAmount > interestAmount
+      ) {
         setPrincipal((totalAmount - interestAmount).toFixed(2));
       }
     }
@@ -158,22 +167,30 @@ function PaymentForm({ debtName, onSubmit, onCancel, isLoading }: PaymentFormPro
           {/* Breakdown Display */}
           {amount && (interest || principal) && (
             <div className="p-4 bg-neutral-800 rounded-lg space-y-2">
-              <div className="text-sm font-medium text-neutral-300">Payment Breakdown</div>
+              <div className="text-sm font-medium text-neutral-300">
+                Payment Breakdown
+              </div>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-neutral-400">Total Payment:</span>
-                  <div className="font-medium text-white">£{parseFloat(amount).toLocaleString()}</div>
+                  <div className="font-medium text-white">
+                    £{parseFloat(amount).toLocaleString()}
+                  </div>
                 </div>
                 {interest && (
                   <div>
                     <span className="text-neutral-400">Interest:</span>
-                    <div className="font-medium text-red-400">£{parseFloat(interest).toLocaleString()}</div>
+                    <div className="font-medium text-red-400">
+                      £{parseFloat(interest).toLocaleString()}
+                    </div>
                   </div>
                 )}
                 {principal && (
                   <div>
                     <span className="text-neutral-400">Principal:</span>
-                    <div className="font-medium text-green-400">£{parseFloat(principal).toLocaleString()}</div>
+                    <div className="font-medium text-green-400">
+                      £{parseFloat(principal).toLocaleString()}
+                    </div>
                   </div>
                 )}
               </div>

@@ -112,8 +112,12 @@ export async function PUT(
 
       const updatedPayment = await db.$transaction(async (tx) => {
         // If amount changed, adjust debt balance
-        if (validatedData.amount && validatedData.amount !== Number(existingPayment.amount)) {
-          const amountDifference = validatedData.amount - Number(existingPayment.amount);
+        if (
+          validatedData.amount &&
+          validatedData.amount !== Number(existingPayment.amount)
+        ) {
+          const amountDifference =
+            validatedData.amount - Number(existingPayment.amount);
 
           await tx.debt.update({
             where: { id: existingPayment.debtId },
@@ -129,7 +133,9 @@ export async function PUT(
           where: { id: resolvedParams.paymentId },
           data: {
             ...validatedData,
-            occurredAt: validatedData.occurredAt ? new Date(validatedData.occurredAt) : undefined,
+            occurredAt: validatedData.occurredAt
+              ? new Date(validatedData.occurredAt)
+              : undefined,
           },
           include: {
             debt: true,

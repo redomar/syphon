@@ -92,10 +92,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (!debt) {
-        return NextResponse.json(
-          { error: "Debt not found" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: "Debt not found" }, { status: 404 });
       }
 
       // Create payment and update debt balance

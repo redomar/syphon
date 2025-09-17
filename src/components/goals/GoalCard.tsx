@@ -13,7 +13,7 @@ import {
   Edit,
   Calendar,
   DollarSign,
-  TrendingUp
+  TrendingUp,
 } from "lucide-react";
 
 interface SavingsGoal {
@@ -44,33 +44,42 @@ interface GoalCardProps {
   onDeleteGoal: (goalId: string) => void;
 }
 
-function GoalCard({ goal, onAddContribution, onEditGoal, onDeleteGoal }: GoalCardProps) {
+function GoalCard({
+  goal,
+  onAddContribution,
+  onEditGoal,
+  onDeleteGoal,
+}: GoalCardProps) {
   const progress = (goal.currentAmount / goal.targetAmount) * 100;
   const isCompleted = progress >= 100;
   const remaining = goal.targetAmount - goal.currentAmount;
 
-  const isOverdue = goal.deadline && new Date(goal.deadline) < new Date() && !isCompleted;
+  const isOverdue =
+    goal.deadline && new Date(goal.deadline) < new Date() && !isCompleted;
   const daysUntilDeadline = goal.deadline
-    ? Math.ceil((new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+    ? Math.ceil(
+        (new Date(goal.deadline).getTime() - new Date().getTime()) /
+          (1000 * 60 * 60 * 24)
+      )
     : null;
 
   return (
-    <Card className={`bg-neutral-900 border-neutral-700 ${isCompleted ? 'ring-2 ring-green-500' : ''}`}>
+    <Card
+      className={`bg-neutral-900 border-neutral-700 ${isCompleted ? "ring-2 ring-green-500" : ""}`}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            <Target className={`h-5 w-5 ${isCompleted ? 'text-green-500' : 'text-blue-500'}`} />
+            <Target
+              className={`h-5 w-5 ${isCompleted ? "text-green-500" : "text-blue-500"}`}
+            />
             <CardTitle className="text-lg">{goal.name}</CardTitle>
             {isCompleted && (
               <Badge className="bg-green-500/20 text-green-400 border-green-500">
                 Complete!
               </Badge>
             )}
-            {isOverdue && (
-              <Badge variant="destructive">
-                Overdue
-              </Badge>
-            )}
+            {isOverdue && <Badge variant="destructive">Overdue</Badge>}
           </div>
           <div className="flex gap-1">
             <Button
@@ -100,10 +109,7 @@ function GoalCard({ goal, onAddContribution, onEditGoal, onDeleteGoal }: GoalCar
             <span className="text-neutral-400">Progress</span>
             <span className="font-medium">{Math.round(progress)}%</span>
           </div>
-          <Progress
-            value={Math.min(progress, 100)}
-            className="h-2"
-          />
+          <Progress value={Math.min(progress, 100)} className="h-2" />
           <div className="flex justify-between text-xs text-neutral-500">
             <span>{formatCurrency(goal.currentAmount.toString())}</span>
             <span>{formatCurrency(goal.targetAmount.toString())}</span>
@@ -117,7 +123,9 @@ function GoalCard({ goal, onAddContribution, onEditGoal, onDeleteGoal }: GoalCar
             <div>
               <p className="text-neutral-400">Remaining</p>
               <p className="font-medium">
-                {remaining > 0 ? formatCurrency(remaining.toString()) : "Goal Achieved!"}
+                {remaining > 0
+                  ? formatCurrency(remaining.toString())
+                  : "Goal Achieved!"}
               </p>
             </div>
           </div>
@@ -127,18 +135,14 @@ function GoalCard({ goal, onAddContribution, onEditGoal, onDeleteGoal }: GoalCar
               <Calendar className="h-4 w-4 text-neutral-400" />
               <div>
                 <p className="text-neutral-400">Deadline</p>
-                <p className={`font-medium ${isOverdue ? 'text-red-400' : ''}`}>
-                  {daysUntilDeadline !== null ? (
-                    daysUntilDeadline > 0 ? (
-                      `${daysUntilDeadline} days`
-                    ) : daysUntilDeadline === 0 ? (
-                      'Today'
-                    ) : (
-                      `${Math.abs(daysUntilDeadline)} days ago`
-                    )
-                  ) : (
-                    formatDate(goal.deadline)
-                  )}
+                <p className={`font-medium ${isOverdue ? "text-red-400" : ""}`}>
+                  {daysUntilDeadline !== null
+                    ? daysUntilDeadline > 0
+                      ? `${daysUntilDeadline} days`
+                      : daysUntilDeadline === 0
+                        ? "Today"
+                        : `${Math.abs(daysUntilDeadline)} days ago`
+                    : formatDate(goal.deadline)}
                 </p>
               </div>
             </div>
@@ -150,11 +154,16 @@ function GoalCard({ goal, onAddContribution, onEditGoal, onDeleteGoal }: GoalCar
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-neutral-400" />
-              <span className="text-sm text-neutral-400">Recent Contributions</span>
+              <span className="text-sm text-neutral-400">
+                Recent Contributions
+              </span>
             </div>
             <div className="space-y-1 max-h-20 overflow-y-auto">
               {goal.contributions.slice(0, 3).map((contribution) => (
-                <div key={contribution.id} className="flex justify-between text-xs text-neutral-500">
+                <div
+                  key={contribution.id}
+                  className="flex justify-between text-xs text-neutral-500"
+                >
                   <span>{formatDate(contribution.occurredAt)}</span>
                   <span className="text-green-400">
                     +{formatCurrency(contribution.amount.toString())}

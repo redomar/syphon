@@ -2,7 +2,7 @@
 # SYPHON PRODUCTION DOCKERFILE WITH TELEMETRY SUPPORT
 # =============================================================================
 
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 # Install security updates and required packages
 RUN apk update && apk upgrade && apk add --no-cache \
     libc6-compat \
@@ -42,7 +42,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PRISMA_CLI_BINARY_TARGETS="linux-musl-openssl-3.0.x"
 ARG NODE_ENV=production
-ARG VERSION=0.2.0
+ARG VERSION=0.3.0
 ENV NODE_ENV=${NODE_ENV}
 ENV VERSION=${VERSION}
 

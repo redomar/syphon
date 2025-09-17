@@ -69,9 +69,13 @@ function DebtForm({ debt, onSubmit, onCancel, isLoading }: DebtFormProps) {
   const [type, setType] = React.useState(debt?.type || "CREDIT_CARD");
   const [balance, setBalance] = React.useState(debt?.balance?.toString() || "");
   const [apr, setApr] = React.useState(debt?.apr?.toString() || "");
-  const [minPayment, setMinPayment] = React.useState(debt?.minPayment?.toString() || "");
+  const [minPayment, setMinPayment] = React.useState(
+    debt?.minPayment?.toString() || ""
+  );
   const [lender, setLender] = React.useState(debt?.lender || "");
-  const [dueDayOfMonth, setDueDayOfMonth] = React.useState(debt?.dueDayOfMonth?.toString() || "");
+  const [dueDayOfMonth, setDueDayOfMonth] = React.useState(
+    debt?.dueDayOfMonth?.toString() || ""
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

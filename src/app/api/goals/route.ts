@@ -87,7 +87,9 @@ export async function POST(request: NextRequest) {
           userId: user.id,
           name: validatedData.name,
           targetAmount: validatedData.targetAmount,
-          deadline: validatedData.deadline ? new Date(validatedData.deadline) : null,
+          deadline: validatedData.deadline
+            ? new Date(validatedData.deadline)
+            : null,
         },
         include: {
           contributions: true,

@@ -8,7 +8,7 @@ export async function GET() {
     timestamp: new Date().toISOString(),
     status: "healthy",
     environment: process.env.NODE_ENV || "development",
-    version: process.env.VERSION || process.env.npm_package_version || "0.2.0",
+    version: process.env.VERSION || process.env.npm_package_version || "0.3.0",
     branch: process.env.BRANCH || "dev",
     service: "syphon-app",
     checks: {

@@ -39,11 +39,17 @@ export async function PUT(
         },
         data: {
           ...(validatedData.name && { name: validatedData.name }),
-          ...(validatedData.targetAmount && { targetAmount: validatedData.targetAmount }),
-          ...(validatedData.deadline !== undefined && {
-            deadline: validatedData.deadline ? new Date(validatedData.deadline) : null
+          ...(validatedData.targetAmount && {
+            targetAmount: validatedData.targetAmount,
           }),
-          ...(validatedData.isArchived !== undefined && { isArchived: validatedData.isArchived }),
+          ...(validatedData.deadline !== undefined && {
+            deadline: validatedData.deadline
+              ? new Date(validatedData.deadline)
+              : null,
+          }),
+          ...(validatedData.isArchived !== undefined && {
+            isArchived: validatedData.isArchived,
+          }),
         },
         include: {
           contributions: {

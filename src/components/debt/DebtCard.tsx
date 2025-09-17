@@ -72,15 +72,24 @@ const DEBT_TYPE_LABELS = {
   OTHER: "Other",
 } as const;
 
-function DebtCard({ debt, onAddPayment, onEditDebt, onDeleteDebt }: DebtCardProps) {
+function DebtCard({
+  debt,
+  onAddPayment,
+  onEditDebt,
+  onDeleteDebt,
+}: DebtCardProps) {
   // Calculate total payments made - convert Decimal strings to numbers
-  const totalPaid = debt.payments.reduce((sum, payment) => sum + Number(payment.amount), 0);
+  const totalPaid = debt.payments.reduce(
+    (sum, payment) => sum + Number(payment.amount),
+    0
+  );
 
   // Calculate original balance (current balance + total payments)
   const originalBalance = Number(debt.balance) + totalPaid;
 
   // Calculate progress percentage
-  const progressPercentage = originalBalance > 0 ? (totalPaid / originalBalance) * 100 : 0;
+  const progressPercentage =
+    originalBalance > 0 ? (totalPaid / originalBalance) * 100 : 0;
 
   // Get recent payment
   const recentPayment = debt.payments[0]; // Already sorted by occurredAt desc in API
@@ -124,7 +133,10 @@ function DebtCard({ debt, onAddPayment, onEditDebt, onDeleteDebt }: DebtCardProp
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-white">{debt.name}</h3>
-                <Badge variant="secondary" className={`text-xs ${debtTypeColor} text-white`}>
+                <Badge
+                  variant="secondary"
+                  className={`text-xs ${debtTypeColor} text-white`}
+                >
                   {debtTypeLabel}
                 </Badge>
               </div>
@@ -173,7 +185,8 @@ function DebtCard({ debt, onAddPayment, onEditDebt, onDeleteDebt }: DebtCardProp
 
             {totalPaid > 0 && (
               <div className="text-sm text-neutral-400">
-                £{totalPaid.toLocaleString()} of £{originalBalance.toLocaleString()} paid
+                £{totalPaid.toLocaleString()} of £
+                {originalBalance.toLocaleString()} paid
               </div>
             )}
           </div>
@@ -182,7 +195,9 @@ function DebtCard({ debt, onAddPayment, onEditDebt, onDeleteDebt }: DebtCardProp
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-neutral-400">Min Payment</span>
-              <div className="font-medium text-white">£{Number(debt.minPayment).toLocaleString()}</div>
+              <div className="font-medium text-white">
+                £{Number(debt.minPayment).toLocaleString()}
+              </div>
             </div>
             {debt.apr && (
               <div>
@@ -200,7 +215,8 @@ function DebtCard({ debt, onAddPayment, onEditDebt, onDeleteDebt }: DebtCardProp
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4 text-neutral-400" />
               <span className="text-neutral-400">
-                Next payment due in {daysUntilDue} day{daysUntilDue !== 1 ? 's' : ''}
+                Next payment due in {daysUntilDue} day
+                {daysUntilDue !== 1 ? "s" : ""}
               </span>
             </div>
           )}
