@@ -14,7 +14,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { ColumnMappingField } from "@/components/forms/ColumnMappingField";
 import { SummaryCard } from "@/components/common/SummaryCard";
-import { TransactionItem } from "@/components/common/TransactionItem";
+import TransactionsTable from "@/components/tables/TransactionsTable";
 import {
   useCategories,
   useCreateCategory,
@@ -40,18 +40,6 @@ import React from "react";
 import { CategoryKind, TransactionType } from "../../../generated/prisma";
 import { toast } from "sonner";
 
-function recentlyUpdated(
-  timeThresholdInMinutes: number,
-  sourceDate: Date,
-  referenceDate: Date = new Date()
-): boolean {
-  const sourceTime = new Date(sourceDate).getTime();
-  const referenceTime = referenceDate.getTime();
-
-  const thresholdMs = timeThresholdInMinutes * 60 * 1000;
-
-  return referenceTime - sourceTime <= thresholdMs;
-}
 
 function ExpenseManager() {
   const [showExpenseForm, setShowExpenseForm] = React.useState(false);
@@ -797,16 +785,12 @@ function ExpenseManager() {
               </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-3 p-3 border max-h-96 overflow-auto">
-              {transactions.map((transaction) => (
-                <TransactionItem
-                  key={transaction.id}
-                  transaction={transaction}
-                  onDelete={(id) => deleteTransactionMutation.mutate({ id })}
-                  recentlyUpdated={recentlyUpdated}
-                />
-              ))}
-            </div>
+            <TransactionsTable
+              transactions={transactions}
+              type={TransactionType.EXPENSE}
+              onDelete={(id) => deleteTransactionMutation.mutate({ id })}
+              isDeleting={deleteTransactionMutation.isPending}
+            />
           )}
         </CardContent>
       </Card>
