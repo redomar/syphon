@@ -8,7 +8,14 @@ export interface RouteConfig {
 }
 
 // Currently accessible routes
-export const enabledRoutes = ["/", "/settings", "/income", "/expenses"];
+export const enabledRoutes = [
+  "/",
+  "/settings",
+  "/income",
+  "/expense",
+  "/goals",
+  "/debt",
+];
 
 export const routes: RouteConfig[] = [
   // Budget Control Items
@@ -29,12 +36,12 @@ export const routes: RouteConfig[] = [
     enabled: enabledRoutes.includes("/income"),
   },
   {
-    path: "/expenses",
+    path: "/expense",
     title: "EXPENSE TRACKER",
     category: "BUDGET CONTROL",
     icon: "DollarSign",
     isBudgetRelated: true,
-    enabled: enabledRoutes.includes("/expenses"),
+    enabled: enabledRoutes.includes("/expense"),
   },
   {
     path: "/goals",

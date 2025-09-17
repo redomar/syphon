@@ -1,5 +1,5 @@
 # =============================================================================
-# SYPHON PRODUCTION DOCKER COMPOSE - DOKPLOY OPTIMIZED v0.2.0
+# SYPHON PRODUCTION DOCKER COMPOSE - DOKPLOY OPTIMIZED v0.3.0
 # =============================================================================
 
 services:
@@ -52,6 +52,51 @@ services:
         max-file: "${LOG_MAX_FILES:-3}"
 
   # =============================================================================
+  # METRICS SERVICE - PROMETHEUS
+  # =============================================================================
+  prometheus:
+    image: prom/prometheus:${PROMETHEUS_VERSION:-latest}
+    container_name: syphon-prometheus
+    restart: unless-stopped
+    hostname: prometheus
+    networks:
+      - syphon-network
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./deployment/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-200h}'
+      - '--web.enable-lifecycle'
+    depends_on:
+      jaeger:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: ${PROMETHEUS_HEALTHCHECK_INTERVAL:-30s}
+      timeout: ${PROMETHEUS_HEALTHCHECK_TIMEOUT:-10s}
+      retries: ${PROMETHEUS_HEALTHCHECK_RETRIES:-3}
+      start_period: ${PROMETHEUS_HEALTHCHECK_START_PERIOD:-40s}
+    deploy:
+      resources:
+        limits:
+          memory: ${PROMETHEUS_MEMORY_LIMIT:-1G}
+          cpus: ${PROMETHEUS_CPU_LIMIT:-1.0}
+        reservations:
+          memory: ${PROMETHEUS_MEMORY_RESERVATION:-512M}
+          cpus: ${PROMETHEUS_CPU_RESERVATION:-0.25}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "${LOG_MAX_SIZE:-10m}"
+        max-file: "${LOG_MAX_FILES:-3}"
+
+  # =============================================================================
   # MAIN APPLICATION SERVICE - SYPHON APP
   # =============================================================================
   app:
@@ -60,7 +105,7 @@ services:
       dockerfile: Dockerfile
       args:
         - NODE_ENV=${NODE_ENV:-production}
-        - VERSION=${VERSION:-0.2.0}
+        - VERSION=${VERSION:-0.3.0}
     container_name: syphon-app
     restart: unless-stopped
     hostname: app
@@ -71,7 +116,7 @@ services:
       # CORE APPLICATION ENVIRONMENT - PRIORITIZE ENV VARIABLES
       # =======================================================================
       - NODE_ENV=${NODE_ENV:-production}
-      - VERSION=${VERSION:-0.2.0}
+      - VERSION=${VERSION:-0.3.0}
       - BRANCH=${BRANCH:-main}
       - PORT=${PORT:-3001}
       - HOSTNAME=${HOSTNAME:-0.0.0.0}
@@ -95,14 +140,14 @@ services:
       # =======================================================================
       - OTEL_SDK_DISABLED=${OTEL_SDK_DISABLED:-false}
       - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-syphon-app}
-      - OTEL_SERVICE_VERSION=${OTEL_SERVICE_VERSION:-${VERSION:-0.2.0}}
+      - OTEL_SERVICE_VERSION=${OTEL_SERVICE_VERSION:-${VERSION:-0.3.0}}
       
       # Docker network endpoints (defaults to internal service names)
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://syphon-jaeger:4318}
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://syphon-jaeger:4318/v1/traces}
       
       # Resource attributes for service identification
-      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES:-service.name=syphon-app,service.version=${VERSION:-0.2.0},deployment.environment=${NODE_ENV:-production}}
+      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES:-service.name=syphon-app,service.version=${VERSION:-0.3.0},deployment.environment=${NODE_ENV:-production}}
       
       # =======================================================================
       # OPENTELEMETRY PERFORMANCE SETTINGS
@@ -152,3 +197,6 @@ volumes:
   jaeger_data:
     driver: local
     name: syphon-jaeger-data
+  prometheus_data:
+    driver: local
+    name: syphon-prometheus-data
