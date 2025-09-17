@@ -48,7 +48,8 @@ ENV VERSION=${VERSION}
 
 # Generate Prisma client and build application in one RUN command to reduce layers
 RUN npx prisma generate && \
-    npm run build && \
+    rm -rf .next && \
+    NODE_ENV=production npm run build && \
     npm cache clean --force && \
     rm -rf ~/.npm
 
