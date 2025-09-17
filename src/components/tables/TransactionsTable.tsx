@@ -6,9 +6,11 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
   type ColumnDef,
   type SortingState,
   type ColumnFiltersState,
+  type PaginationState,
   flexRender,
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
@@ -30,7 +32,11 @@ import {
   Trash,
   Info,
   Filter,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { TransactionType } from "../../../generated/prisma";
@@ -79,8 +85,14 @@ export default function TransactionsTable({
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: "occurredAt", desc: true }, // Sort by date descending by default
   ]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
   const [globalFilter, setGlobalFilter] = React.useState("");
+  const [pagination, setPagination] = React.useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 15,
+  });
 
   const columns = React.useMemo<ColumnDef<Transaction>[]>(
     () => [
@@ -131,7 +143,9 @@ export default function TransactionsTable({
         ),
         cell: ({ getValue }) => (
           <div className="max-w-md truncate">
-            {getValue() as string || <span className="text-neutral-500 italic">No description</span>}
+            {(getValue() as string) || (
+              <span className="text-neutral-500 italic">No description</span>
+            )}
           </div>
         ),
         size: 300,
@@ -289,13 +303,16 @@ export default function TransactionsTable({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
+    onPaginationChange: setPagination,
     state: {
       sorting,
       columnFilters,
       globalFilter,
+      pagination,
     },
     globalFilterFn: "includesString",
   });
@@ -312,7 +329,7 @@ export default function TransactionsTable({
   const totalCount = transactions.length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-0">
       {/* Search and Filter Controls */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 flex-1">
@@ -346,7 +363,10 @@ export default function TransactionsTable({
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="border-b border-orange-900 bg-accent">
+              <TableRow
+                key={headerGroup.id}
+                className="border-b border-orange-900 bg-accent"
+              >
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
@@ -366,36 +386,21 @@ export default function TransactionsTable({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              <>
-                {table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    className="h-10 hover:bg-neutral-800/50 border-b border-neutral-800"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="px-4 py-2">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-                {/* Totals Row */}
-                <TableRow className="bg-neutral-900 font-medium border-t-2 border-neutral-600">
-                  <TableCell className="px-4 py-3 font-mono text-lg">
-                    {formatCurrency(total.toString())}
-                  </TableCell>
-                  <TableCell className="px-4 py-3 text-neutral-400">
-                    Total ({filteredCount} transaction{filteredCount !== 1 ? 's' : ''})
-                  </TableCell>
-                  <TableCell className="px-4 py-3"></TableCell>
-                  <TableCell className="px-4 py-3"></TableCell>
-                  <TableCell className="px-4 py-3"></TableCell>
-                  <TableCell className="px-4 py-3"></TableCell>
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  className="h-10 hover:bg-neutral-800/50 border-b border-neutral-800"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className="px-4 py-2">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              </>
+              ))
             ) : (
               <TableRow>
                 <TableCell
@@ -408,6 +413,71 @@ export default function TransactionsTable({
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Totals Row (Penultimate) */}
+      {table.getFilteredRowModel().rows.length > 0 && (
+        <div className="border border-t-0 bg-neutral-900 px-4 py-3 flex items-center justify-between font-medium">
+          <div className="flex items-center gap-4">
+            <span className="font-mono text-lg">
+              {formatCurrency(total.toString())}
+            </span>
+            <span className="text-neutral-400">
+              Total ({filteredCount} transaction{filteredCount !== 1 ? "s" : ""}
+              )
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Pagination Controls (Footer) */}
+      <div className="flex items-center justify-between px-4 py-3 border border-t-0 bg-neutral-950">
+        <div className="flex items-center gap-2">
+          <p className="text-sm text-neutral-400">
+            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            {table.getPageCount()} ({table.getFilteredRowModel().rows.length}{" "}
+            total)
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.setPageIndex(0)}
+            disabled={!table.getCanPreviousPage()}
+            className="h-8 w-8 p-0"
+          >
+            <ChevronsLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="h-8 w-8 p-0"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="h-8 w-8 p-0"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            disabled={!table.getCanNextPage()}
+            className="h-8 w-8 p-0"
+          >
+            <ChevronsRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -294,7 +294,7 @@ export function useTransactions(
           "hook.name": "useTransactions",
           operation: "fetch",
           "filters.type": filters?.type || "all",
-          "filters.limit": filters?.limit || 50,
+          "filters.limit": filters?.limit || 5000,
         });
 
         try {
@@ -611,11 +611,11 @@ export function useExpenseCategories() {
 }
 
 export function useIncomeTransactions() {
-  return useTransactions({ type: TransactionType.INCOME, limit: 10 });
+  return useTransactions({ type: TransactionType.INCOME });
 }
 
 export function useExpenseTransactions() {
-  return useTransactions({ type: TransactionType.EXPENSE, limit: 10 });
+  return useTransactions({ type: TransactionType.EXPENSE });
 }
 
 // CSV Import Hook
@@ -639,6 +639,7 @@ export function useImportExpenses(
       merchantColumn?: string;
       descriptionColumn?: string;
       accountColumn?: string;
+      overrideDateRange?: boolean;
     }
   >
 ) {

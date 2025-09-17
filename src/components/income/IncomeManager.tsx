@@ -25,18 +25,11 @@ import {
   useSetupDefaults,
 } from "@/hooks/useFinancialData";
 import { tracer } from "@/lib/telemetry";
-import {
-  CalendarDays,
-  DollarSign,
-  Edit,
-  Plus,
-  Tag,
-} from "lucide-react";
+import { CalendarDays, DollarSign, Edit, Plus, Tag } from "lucide-react";
 import React from "react";
 import { CategoryKind, TransactionType } from "../../../generated/prisma";
 import { toast } from "sonner";
 // removed unused imports
-
 
 function IncomeManager() {
   const [showIncomeForm, setShowIncomeForm] = React.useState(false);

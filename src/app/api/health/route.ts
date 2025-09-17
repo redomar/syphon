@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { generateTestTrace } from "@/lib/test-telemetry";
 
 // Health check endpoint for deployment monitoring
 export async function GET() {
@@ -16,13 +15,6 @@ export async function GET() {
       telemetry: "unknown",
     },
   };
-
-  // Generate a test trace to verify telemetry is working
-  try {
-    generateTestTrace();
-  } catch (error) {
-    console.error("Failed to generate test trace:", error);
-  }
 
   try {
     // Check database connectivity
