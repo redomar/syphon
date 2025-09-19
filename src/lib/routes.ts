@@ -16,13 +16,14 @@ export const enabledRoutes = [
   "/expense",
   "/goals",
   "/debt",
+  "/transactions",
 ];
 
 export const routes: RouteConfig[] = [
   // Budget Control Items
   {
     path: "/dashboard",
-    title: "DASHBOARD",
+    title: "FINANCIAL OVERVIEW",
     category: "BUDGET CONTROL",
     icon: "PieChart",
     isBudgetRelated: true,
