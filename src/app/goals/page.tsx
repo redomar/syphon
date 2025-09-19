@@ -1,11 +1,14 @@
 import GoalsManager from "@/components/goals/GoalsManager";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import React from "react";
 
 function Goals() {
   return (
-    <div className="space-y-6">
-      <GoalsManager />
-    </div>
+    <ProtectedRoute>
+      <div className="space-y-6">
+        <GoalsManager />
+      </div>
+    </ProtectedRoute>
   );
 }
 

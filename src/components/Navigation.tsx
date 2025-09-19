@@ -14,6 +14,7 @@ import {
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import { routes, RouteConfig } from "@/lib/routes";
 
 // Icon mapping
@@ -31,6 +32,12 @@ const iconMap = {
 
 export default function Navigation() {
   const pathname = usePathname();
+  const { isSignedIn, isLoaded } = useUser();
+
+  // Don't render navigation if user is not authenticated
+  if (!isLoaded || !isSignedIn) {
+    return null;
+  }
 
   const budgetRoutes = routes.filter((route) => route.isBudgetRelated);
   const nonBudgetRoutes = routes.filter((route) => !route.isBudgetRelated);

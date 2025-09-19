@@ -1,12 +1,15 @@
 import IncomeManager from "@/components/income/IncomeManager";
 import IncomeTotal from "@/components/income/IncomeTotal";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 function Income() {
   return (
-    <div className="space-y-6">
-      <IncomeTotal />
-      <IncomeManager />
-    </div>
+    <ProtectedRoute>
+      <div className="space-y-6">
+        <IncomeTotal />
+        <IncomeManager />
+      </div>
+    </ProtectedRoute>
   );
 }
 

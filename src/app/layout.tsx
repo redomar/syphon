@@ -58,25 +58,27 @@ export default function RootLayout({
           >
             <QueryProvider>
               <div className="flex h-screen text-white">
-                <div
-                  className={`w-70 bg-neutral-900 border-r border-neutral-700 transition-all duration-300 fixed md:relative z-50 md:z-auto h-full `}
-                >
-                  <div className="flex flex-col gap-8 p-4 h-full">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h1 className="text-orange-500 font-bold text-lg tracking-wider">
-                          PROJECT SYPHON
-                        </h1>
-                        <p className="text-neutral-500 text-xs">
-                          Track your spending, manage your finances, and gain
-                          insights
-                        </p>
+                <SignedIn>
+                  <div
+                    className={`w-70 bg-neutral-900 border-r border-neutral-700 transition-all duration-300 fixed md:relative z-50 md:z-auto h-full `}
+                  >
+                    <div className="flex flex-col gap-8 p-4 h-full">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h1 className="text-orange-500 font-bold text-lg tracking-wider">
+                            PROJECT SYPHON
+                          </h1>
+                          <p className="text-neutral-500 text-xs">
+                            Track your spending, manage your finances, and gain
+                            insights
+                          </p>
+                        </div>
                       </div>
+                      <Navigation />
+                      <SystemStatus />
                     </div>
-                    <Navigation />
-                    <SystemStatus />
                   </div>
-                </div>
+                </SignedIn>
                 <div className="flex-1 flex flex-col">
                   <div className="h-16 bg-neutral-800 border-b border-neutral-700 flex items-center justify-between px-6">
                     <div className="flex items-center gap-4">
