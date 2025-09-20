@@ -38,7 +38,7 @@ export function MobileSidebar() {
           />
 
           {/* Sidebar */}
-          <div className="fixed left-0 top-0 h-full w-80 bg-neutral-900 border-r border-neutral-700">
+          <div className="fixed left-0 top-0 h-full w-70 bg-neutral-900 border-r border-neutral-700">
             <div className="flex flex-col gap-6 p-4 h-full overflow-hidden">
               {/* Header with close button */}
               <div className="flex items-center justify-between flex-shrink-0">

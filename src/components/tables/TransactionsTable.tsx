@@ -102,8 +102,9 @@ export default function TransactionsTable({
         header: ({ column }) => (
           <Button
             variant="ghost"
+            size="custom"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="h-auto p-0 font-medium hover:bg-transparent"
+            className="h-auto px-1 font-medium hover:bg-transparent"
           >
             Amount
             {column.getIsSorted() === "asc" ? (
@@ -116,8 +117,9 @@ export default function TransactionsTable({
           </Button>
         ),
         cell: ({ getValue }) => (
-          <div className="font-mono font-medium">
-            {formatCurrency(getValue() as string)}
+          <div className="bg-neutral-800/40 px-2 py-1 text-right font-mono font-medium group-hover:animate-pulse group-hover:bg-accent">
+            {formatCurrency(getValue() as string)}{" "}
+            <span className="text-neutral-500"></span>
           </div>
         ),
         size: 120,
@@ -128,8 +130,9 @@ export default function TransactionsTable({
         header: ({ column }) => (
           <Button
             variant="ghost"
+            size="custom"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="h-auto p-0 font-medium hover:bg-transparent"
+            className="h-auto px-1 -ml-1 font-medium hover:bg-transparent"
           >
             Description
             {column.getIsSorted() === "asc" ? (
@@ -156,8 +159,9 @@ export default function TransactionsTable({
         header: ({ column }) => (
           <Button
             variant="ghost"
+            size="custom"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="h-auto p-0 font-medium hover:bg-transparent"
+            className="h-auto px-1 -ml-1 font-medium hover:bg-transparent"
           >
             Category
             {column.getIsSorted() === "asc" ? (
@@ -194,8 +198,9 @@ export default function TransactionsTable({
         header: ({ column }) => (
           <Button
             variant="ghost"
+            size="custom"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="h-auto p-0 font-medium hover:bg-transparent"
+            className="h-auto px-1 -ml-1 font-medium hover:bg-transparent"
           >
             {type === TransactionType.INCOME ? "Source" : "Account"}
             {column.getIsSorted() === "asc" ? (
@@ -225,8 +230,9 @@ export default function TransactionsTable({
         header: ({ column }) => (
           <Button
             variant="ghost"
+            size="custom"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="h-auto p-0 font-medium hover:bg-transparent"
+            className="h-auto px-1 -ml-1 font-medium hover:bg-transparent"
           >
             Date
             {column.getIsSorted() === "asc" ? (
@@ -331,7 +337,7 @@ export default function TransactionsTable({
   return (
     <div className="space-y-0">
       {/* Search and Filter Controls */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 my-2">
         <div className="flex items-center gap-2 flex-1">
           <Filter className="h-4 w-4 text-neutral-500" />
           <Input
@@ -359,7 +365,7 @@ export default function TransactionsTable({
       </div>
 
       {/* Table */}
-      <div className="border ">
+      <div className="border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -370,7 +376,7 @@ export default function TransactionsTable({
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="h-10 px-4 py-2"
+                    className="h-10 py-2 first:text-right"
                     style={{ width: header.getSize() }}
                   >
                     {header.isPlaceholder
@@ -389,10 +395,10 @@ export default function TransactionsTable({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="h-10 hover:bg-neutral-800/50 border-b border-neutral-800"
+                  className="h-10 hover:bg-neutral-800/50 border-b border-neutral-800 group"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="px-4 py-2">
+                    <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -417,7 +423,7 @@ export default function TransactionsTable({
 
       {/* Totals Row (Penultimate) */}
       {table.getFilteredRowModel().rows.length > 0 && (
-        <div className="border border-t-0 bg-neutral-900 px-4 py-3 flex items-center justify-between font-medium">
+        <div className="border border-t-0 bg-neutral-900 px-4 py-[0.625rem] flex items-center justify-between font-medium">
           <div className="flex items-center gap-4">
             <span className="font-mono text-lg">
               {formatCurrency(total.toString())}
@@ -431,7 +437,7 @@ export default function TransactionsTable({
       )}
 
       {/* Pagination Controls (Footer) */}
-      <div className="flex items-center justify-between px-4 py-3 border border-t-0 bg-neutral-950">
+      <div className="flex items-center justify-between px-4 py-3 border border-t-0 bg-neutral-900">
         <div className="flex items-center gap-2">
           <p className="text-sm text-neutral-400">
             Page {table.getState().pagination.pageIndex + 1} of{" "}

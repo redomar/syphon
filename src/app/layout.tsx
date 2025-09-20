@@ -61,7 +61,7 @@ export default function RootLayout({
               <div className="flex h-screen text-white">
                 <SignedIn>
                   {/* Desktop Sidebar */}
-                  <div className="hidden md:flex w-80 min-w-80 bg-neutral-900 border-r border-neutral-700 h-full flex-shrink-0">
+                  <div className="hidden md:flex w-70 min-w-70 bg-neutral-900 border-r border-neutral-700 h-full flex-shrink-0">
                     <div className="flex flex-col gap-6 p-4 h-full overflow-hidden w-full">
                       <div className="flex-shrink-0">
                         <div>

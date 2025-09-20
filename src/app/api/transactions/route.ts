@@ -114,8 +114,11 @@ export async function POST(request: NextRequest) {
       // Validate required fields
       if (!type || !amount || !occurredAt) {
         span.setAttributes({
+          error: true,
           "http.status_code": 400,
           "error.type": "validation",
+          "validation.message": "Missing required fields",
+          "user.id": user.id,
         });
         span.end();
         return NextResponse.json(
@@ -127,9 +130,13 @@ export async function POST(request: NextRequest) {
       // Validate transaction type
       if (!Object.values(TransactionType).includes(type)) {
         span.setAttributes({
+          error: true,
           "http.status_code": 400,
           "error.type": "validation",
           "validation.field": "type",
+          "validation.value": type,
+          "validation.message": "Invalid transaction type",
+          "user.id": user.id,
         });
         span.end();
         return NextResponse.json(
@@ -141,9 +148,13 @@ export async function POST(request: NextRequest) {
       // Validate amount
       if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
         span.setAttributes({
+          error: true,
           "http.status_code": 400,
           "error.type": "validation",
           "validation.field": "amount",
+          "validation.message": "Amount must be a positive number",
+          "validation.value": amount,
+          "user.id": user.id,
         });
         span.end();
         return NextResponse.json(
@@ -156,9 +167,13 @@ export async function POST(request: NextRequest) {
       const transactionDate = new Date(occurredAt);
       if (isNaN(transactionDate.getTime())) {
         span.setAttributes({
+          error: true,
           "http.status_code": 400,
           "error.type": "validation",
           "validation.field": "occurredAt",
+          "validation.value": occurredAt,
+          "validation.message": "Invalid date format",
+          "user.id": user.id,
         });
         span.end();
         return NextResponse.json(
@@ -177,9 +192,13 @@ export async function POST(request: NextRequest) {
         });
         if (!category) {
           span.setAttributes({
+            error: true,
             "http.status_code": 400,
             "error.type": "validation",
             "validation.field": "categoryId",
+            "validation.value": categoryId,
+            "validation.message": "Invalid category",
+            "user.id": user.id,
           });
           span.end();
           return NextResponse.json(
@@ -198,9 +217,13 @@ export async function POST(request: NextRequest) {
         });
         if (!incomeSource) {
           span.setAttributes({
+            error: true,
             "http.status_code": 400,
             "error.type": "validation",
             "validation.field": "incomeSourceId",
+            "validation.value": incomeSourceId,
+            "validation.message": "Invalid income source",
+            "user.id": user.id,
           });
           span.end();
           return NextResponse.json(
@@ -220,9 +243,13 @@ export async function POST(request: NextRequest) {
         });
         if (!account) {
           span.setAttributes({
+            error: true,
             "http.status_code": 400,
             "error.type": "validation",
             "validation.field": "accountId",
+            "validation.value": accountId,
+            "validation.message": "Invalid account",
+            "user.id": user.id,
           });
           span.end();
           return NextResponse.json(
@@ -264,8 +291,10 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       span.recordException(error as Error);
       span.setAttributes({
+        error: true,
         "http.status_code": 500,
         "error.message": (error as Error).message,
+        "user.id": (await getCurrentUser())?.id || "unknown",
       });
       span.end();
       return NextResponse.json(
@@ -299,9 +328,12 @@ export async function DELETE(request: NextRequest) {
 
       if (!transactionId) {
         span.setAttributes({
+          error: true,
           "http.status_code": 400,
           "error.type": "validation",
           "validation.field": "id",
+          "validation.message": "Transaction ID is required",
+          "user.id": user.id,
         });
         span.end();
         return NextResponse.json(
@@ -319,6 +351,7 @@ export async function DELETE(request: NextRequest) {
 
       if (!transaction) {
         span.setAttributes({
+          error: true,
           "http.status_code": 404,
           "error.type": "not_found",
           "validation.field": "id",
@@ -347,8 +380,11 @@ export async function DELETE(request: NextRequest) {
     } catch (error) {
       span.recordException(error as Error);
       span.setAttributes({
+        error: true,
         "http.status_code": 500,
         "error.message": (error as Error).message,
+        deletion: "failed",
+        "user.id": (await getCurrentUser())?.id || "unknown",
       });
       span.end();
       return NextResponse.json(
