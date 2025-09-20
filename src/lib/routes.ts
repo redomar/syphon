@@ -10,22 +10,24 @@ export interface RouteConfig {
 // Currently accessible routes
 export const enabledRoutes = [
   "/",
+  "/dashboard",
   "/settings",
   "/income",
   "/expense",
   "/goals",
   "/debt",
+  "/transactions",
 ];
 
 export const routes: RouteConfig[] = [
   // Budget Control Items
   {
-    path: "/",
+    path: "/dashboard",
     title: "FINANCIAL OVERVIEW",
     category: "BUDGET CONTROL",
     icon: "PieChart",
     isBudgetRelated: true,
-    enabled: enabledRoutes.includes("/"),
+    enabled: enabledRoutes.includes("/dashboard"),
   },
   {
     path: "/income",

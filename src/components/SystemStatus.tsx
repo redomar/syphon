@@ -47,8 +47,8 @@ export function SystemStatus() {
 
     fetchHealth();
 
-    // Refresh health status every 30 seconds
-    const interval = setInterval(fetchHealth, 30000);
+    // Refresh health status every 5 minutes
+    const interval = setInterval(fetchHealth, 300000);
 
     return () => clearInterval(interval);
   }, []);

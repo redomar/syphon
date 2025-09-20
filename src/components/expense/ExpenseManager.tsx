@@ -14,7 +14,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { ColumnMappingField } from "@/components/forms/ColumnMappingField";
 import { SummaryCard } from "@/components/common/SummaryCard";
-import { TransactionItem } from "@/components/common/TransactionItem";
+import TransactionsTable from "@/components/tables/TransactionsTable";
 import {
   useCategories,
   useCreateCategory,
@@ -37,26 +37,15 @@ import {
   Upload,
 } from "lucide-react";
 import React from "react";
-import { CategoryKind, TransactionType } from "../../../generated/prisma";
+import { CategoryKind, TransactionType } from "@/../generated/prisma";
 import { toast } from "sonner";
-
-function recentlyUpdated(
-  timeThresholdInMinutes: number,
-  sourceDate: Date,
-  referenceDate: Date = new Date()
-): boolean {
-  const sourceTime = new Date(sourceDate).getTime();
-  const referenceTime = referenceDate.getTime();
-
-  const thresholdMs = timeThresholdInMinutes * 60 * 1000;
-
-  return referenceTime - sourceTime <= thresholdMs;
-}
+import { Switch } from "@/components/ui/switch";
 
 function ExpenseManager() {
   const [showExpenseForm, setShowExpenseForm] = React.useState(false);
   const [showCategoryForm, setShowCategoryForm] = React.useState(false);
   const [showImportForm, setShowImportForm] = React.useState(false);
+  const [overrideDateRange, setOverrideDateRange] = React.useState(false);
 
   const fileRef = React.useRef<HTMLInputElement | null>(null);
 
@@ -242,15 +231,8 @@ function ExpenseManager() {
         span.end();
       });
       setShowImportForm(false);
-      setImportForm({
-        dateColumn: "Date",
-        amountColumn: "Amount",
-        categoryColumn: "Category",
-        merchantColumn: "",
-        descriptionColumn: "",
-        accountColumn: "",
-      });
-      if (fileRef.current) fileRef.current.value = "";
+      setOverrideDateRange(false);
+      resetImportForm();
       toast.success(result.message);
     },
     onError: (error) => {
@@ -378,6 +360,7 @@ function ExpenseManager() {
         merchantColumn: importForm.merchantColumn || undefined,
         descriptionColumn: importForm.descriptionColumn || undefined,
         accountColumn: importForm.accountColumn || undefined,
+        overrideDateRange,
       });
     };
 
@@ -386,6 +369,18 @@ function ExpenseManager() {
 
   const handleSetupDefaults = () => {
     setupMutation.mutate();
+  };
+
+  const resetImportForm = () => {
+    setImportForm({
+      dateColumn: "Date",
+      amountColumn: "Amount",
+      categoryColumn: "Category",
+      merchantColumn: "Merchant Name",
+      descriptionColumn: "Description",
+      accountColumn: "Account Provider",
+    });
+    if (fileRef.current) fileRef.current.value = "";
   };
 
   const isLoading =
@@ -750,16 +745,35 @@ function ExpenseManager() {
                 ))}
               </div>
 
-              <div className="bg-neutral-900 p-3 rounded-md border">
-                <p className="text-sm text-neutral-400 mb-2">
-                  <strong>Note:</strong> Only transactions from the last 90 days
-                  will be imported.
-                </p>
-                <p className="text-xs text-neutral-500">
-                  Your CSV should have headers matching the column names you
-                  specify above. Amounts will be treated as expenses (positive
-                  values).
-                </p>
+              <div className="bg-neutral-900 p-4 rounded-md border space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-neutral-400 font-medium">
+                      Import Range
+                    </p>
+                    <p className="text-xs text-neutral-500">
+                      Only transactions from the last{" "}
+                      {overrideDateRange ? 365 : 90} days will be imported
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-neutral-500">90 days</span>
+                    <Switch
+                      checked={overrideDateRange}
+                      onCheckedChange={setOverrideDateRange}
+                    />
+                    <span className="text-xs text-neutral-400 font-medium">
+                      1 year
+                    </span>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-neutral-800">
+                  <p className="text-xs text-neutral-500">
+                    Your CSV should have headers matching the column names
+                    above. Amounts will be treated as expenses (positive
+                    values).
+                  </p>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
@@ -769,7 +783,10 @@ function ExpenseManager() {
                 <Button
                   type="button"
                   variant="secondary"
-                  onClick={() => setShowImportForm(false)}
+                  onClick={() => {
+                    setShowImportForm(false);
+                    setOverrideDateRange(false);
+                  }}
                 >
                   Cancel
                 </Button>
@@ -797,16 +814,12 @@ function ExpenseManager() {
               </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-3 p-3 border max-h-96 overflow-auto">
-              {transactions.map((transaction) => (
-                <TransactionItem
-                  key={transaction.id}
-                  transaction={transaction}
-                  onDelete={(id) => deleteTransactionMutation.mutate({ id })}
-                  recentlyUpdated={recentlyUpdated}
-                />
-              ))}
-            </div>
+            <TransactionsTable
+              transactions={transactions}
+              type={TransactionType.EXPENSE}
+              onDelete={(id) => deleteTransactionMutation.mutate({ id })}
+              isDeleting={deleteTransactionMutation.isPending}
+            />
           )}
         </CardContent>
       </Card>

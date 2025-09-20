@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { generateTestTrace } from "@/lib/test-telemetry";
 
 // Health check endpoint for deployment monitoring
 export async function GET() {
@@ -8,7 +7,7 @@ export async function GET() {
     timestamp: new Date().toISOString(),
     status: "healthy",
     environment: process.env.NODE_ENV || "development",
-    version: process.env.VERSION || process.env.npm_package_version || "0.3.0",
+    version: process.env.VERSION || process.env.npm_package_version || "0.4.0",
     branch: process.env.BRANCH || "dev",
     service: "syphon-app",
     checks: {
@@ -16,13 +15,6 @@ export async function GET() {
       telemetry: "unknown",
     },
   };
-
-  // Generate a test trace to verify telemetry is working
-  try {
-    generateTestTrace();
-  } catch (error) {
-    console.error("Failed to generate test trace:", error);
-  }
 
   try {
     // Check database connectivity

@@ -20,8 +20,8 @@ WORKDIR /app
 # Copy package files with better caching
 COPY package.json package-lock.json* ./
 
-# Install dependencies with npm ci for reproducible builds
-RUN npm ci --omit=dev --frozen-lockfile && npm cache clean --force
+# Install dependencies with npm ci for reproducible builds with optimizations
+RUN npm ci --omit=dev --frozen-lockfile --prefer-offline --no-audit --no-fund --progress=false && npm cache clean --force
 
 # =============================================================================
 # BUILDER STAGE - Build application with dev dependencies
@@ -32,8 +32,8 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json* ./
 
-# Install all dependencies (including dev) for build in one step
-RUN npm ci --frozen-lockfile && npm cache clean --force
+# Install all dependencies (including dev) for build with optimizations
+RUN npm ci --frozen-lockfile --prefer-offline --no-audit --no-fund --progress=false && npm cache clean --force
 
 # Copy source code
 COPY . .
@@ -42,7 +42,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PRISMA_CLI_BINARY_TARGETS="linux-musl-openssl-3.0.x"
 ARG NODE_ENV=production
-ARG VERSION=0.3.0
+ARG VERSION=0.4.0
 ENV NODE_ENV=${NODE_ENV}
 ENV VERSION=${VERSION}
 
@@ -51,7 +51,9 @@ RUN npx prisma generate && \
     rm -rf .next && \
     NODE_ENV=production npm run build && \
     npm cache clean --force && \
-    rm -rf ~/.npm
+    rm -rf ~/.npm && \
+    rm -rf .git && \
+    find . -name "*.map" -delete
 
 # =============================================================================
 # PRODUCTION RUNTIME STAGE
@@ -62,8 +64,6 @@ WORKDIR /app
 # Set production environment variables
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3001
-ENV HOSTNAME="0.0.0.0"
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs && \
@@ -94,8 +94,8 @@ USER nextjs
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3001/api/health || exit 1
 
-# Expose application port
-EXPOSE 3001
+# Expose application port (configurable via PORT env var)
+EXPOSE ${PORT:-3001}
 
 # Use dumb-init for proper signal handling in containers
 ENTRYPOINT ["dumb-init", "--"]

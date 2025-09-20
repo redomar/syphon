@@ -17,6 +17,7 @@ interface CSVImportRequest {
   merchantColumn?: string;
   descriptionColumn?: string;
   accountColumn?: string;
+  overrideDateRange?: boolean;
 }
 
 export async function POST(request: NextRequest) {
@@ -45,6 +46,7 @@ export async function POST(request: NextRequest) {
         merchantColumn,
         descriptionColumn,
         accountColumn,
+        overrideDateRange = false,
       }: CSVImportRequest = await request.json();
 
       // Parse CSV data
@@ -94,9 +96,10 @@ export async function POST(request: NextRequest) {
       const accountsMap = new Map<string, string>();
       const skippedRows: string[] = [];
 
-      // Get current date for filtering (last 90 days)
-      const ninetyDaysAgo = new Date();
-      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+      // Get current date for filtering (90 days or 1 year based on override)
+      const cutoffDate = new Date();
+      const daysToSubtract = overrideDateRange ? 365 : 90;
+      cutoffDate.setDate(cutoffDate.getDate() - daysToSubtract);
 
       span.setAttributes({
         "csv.total_rows": dataLines.length,
@@ -122,8 +125,8 @@ export async function POST(request: NextRequest) {
             continue;
           }
 
-          // Only import transactions from the last 90 days
-          if (transactionDate < ninetyDaysAgo) {
+          // Only import transactions from the specified date range
+          if (transactionDate < cutoffDate) {
             continue;
           }
 
@@ -255,7 +258,7 @@ export async function POST(request: NextRequest) {
         skippedReasons: skippedRows,
         categoriesCreated: categoriesMap.size,
         accountsCreated: accountsMap.size,
-        message: `Successfully imported ${importedCount} expense transactions from the last 90 days`,
+        message: `Successfully imported ${importedCount} expense transactions from the last ${daysToSubtract} days`,
       });
     } catch (error) {
       span.recordException(error as Error);
