@@ -19,11 +19,15 @@ export async function register() {
 
     // Configure exporter with production-ready settings
     let traceExporter;
-    if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
-      const baseUrl = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
-      const tracesUrl = baseUrl.endsWith("/v1/traces")
-        ? baseUrl
-        : `${baseUrl}/v1/traces`;
+
+    // Check for specific traces endpoint first, then fallback to general endpoint
+    const tracesEndpoint = process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT ||
+                          process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
+
+    if (tracesEndpoint) {
+      const tracesUrl = tracesEndpoint.endsWith("/v1/traces")
+        ? tracesEndpoint
+        : `${tracesEndpoint}/v1/traces`;
 
       const exporterConfig: { url: string; headers?: Record<string, string> } =
         {
@@ -85,12 +89,12 @@ export async function register() {
 
     sdk.start();
 
-    if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
+    if (tracesEndpoint) {
       console.log(
         `📊 OpenTelemetry started - Service: ${serviceName}@${serviceVersion} (${environment})`
       );
       console.log(
-        `   Sending traces to: ${process.env.OTEL_EXPORTER_OTLP_ENDPOINT}`
+        `   Sending traces to: ${tracesEndpoint}`
       );
     } else {
       console.log(

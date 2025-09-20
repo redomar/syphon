@@ -64,8 +64,8 @@ WORKDIR /app
 # Set production environment variables
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3001
-ENV HOSTNAME="0.0.0.0"
+ENV PORT=${PORT:-3001}
+ENV HOSTNAME=${HOSTNAME:-0.0.0.0}
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs && \
@@ -96,8 +96,8 @@ USER nextjs
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3001/api/health || exit 1
 
-# Expose application port
-EXPOSE 3001
+# Expose application port (configurable via PORT env var)
+EXPOSE ${PORT:-3001}
 
 # Use dumb-init for proper signal handling in containers
 ENTRYPOINT ["dumb-init", "--"]

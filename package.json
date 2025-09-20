@@ -3,10 +3,10 @@
   "version": "0.3.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p ${PORT:-3000}",
     "dev:telemetry": "docker-compose up jaeger prometheus -d && npm run dev",
     "build": "npx prisma generate && next build",
-    "start": "next start",
+    "start": "next start -p ${PORT:-3000}",
     "lint": "next lint"
   },
   "dependencies": {
