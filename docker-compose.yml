@@ -8,7 +8,7 @@ services:
   # =============================================================================
   jaeger:
     image: jaegertracing/all-in-one:${JAEGER_VERSION:-latest}
-    container_name: syphon-jaeger
+    container_name: syphon-${BRANCH:-main}-jaeger
     restart: unless-stopped
     hostname: jaeger
     networks:
@@ -56,7 +56,7 @@ services:
   # =============================================================================
   prometheus:
     image: prom/prometheus:${PROMETHEUS_VERSION:-latest}
-    container_name: syphon-prometheus
+    container_name: syphon-${BRANCH:-main}-prometheus
     restart: unless-stopped
     hostname: prometheus
     networks:
@@ -106,7 +106,7 @@ services:
       args:
         - NODE_ENV=${NODE_ENV:-production}
         - VERSION=${VERSION:-0.4.0}
-    container_name: syphon-app
+    container_name: syphon-${BRANCH:-main}-app
     restart: unless-stopped
     hostname: app
     networks:
@@ -143,8 +143,8 @@ services:
       - OTEL_SERVICE_VERSION=${OTEL_SERVICE_VERSION:-${VERSION:-0.4.0}}
       
       # Docker network endpoints (defaults to internal service names)
-      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://syphon-jaeger:4318}
-      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://syphon-jaeger:4318/v1/traces}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://syphon-${BRANCH:-main}-jaeger:4318}
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://syphon-${BRANCH:-main}-jaeger:4318/v1/traces}
       
       # Resource attributes for service identification
       - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES:-service.name=syphon-app,service.version=${VERSION:-0.4.0},deployment.environment=${NODE_ENV:-production}}
@@ -188,7 +188,7 @@ services:
 networks:
   syphon-network:
     driver: bridge
-    name: syphon-network
+    name: syphon-${BRANCH:-main}-network
 
 # =============================================================================
 # PERSISTENT VOLUMES
@@ -196,7 +196,7 @@ networks:
 volumes:
   jaeger_data:
     driver: local
-    name: syphon-jaeger-data
+    name: syphon-${BRANCH:-main}-jaeger-data
   prometheus_data:
     driver: local
-    name: syphon-prometheus-data
+    name: syphon-${BRANCH:-main}-prometheus-data
