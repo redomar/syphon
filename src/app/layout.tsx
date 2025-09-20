@@ -5,6 +5,7 @@ import "./globals.css";
 import Navigation from "@/components/Navigation";
 import { DynamicBreadcrumb } from "@/components/DynamicBreadcrumb";
 import { SystemStatus } from "@/components/SystemStatus";
+import { MobileSidebar } from "@/components/MobileSidebar";
 import { Bell, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -59,29 +60,34 @@ export default function RootLayout({
             <QueryProvider>
               <div className="flex h-screen text-white">
                 <SignedIn>
-                  <div
-                    className={`w-70 bg-neutral-900 border-r border-neutral-700 transition-all duration-300 fixed md:relative z-50 md:z-auto h-full `}
-                  >
-                    <div className="flex flex-col gap-8 p-4 h-full">
-                      <div className="flex items-center justify-between">
+                  {/* Desktop Sidebar */}
+                  <div className="hidden md:flex w-80 min-w-80 bg-neutral-900 border-r border-neutral-700 h-full flex-shrink-0">
+                    <div className="flex flex-col gap-6 p-4 h-full overflow-hidden w-full">
+                      <div className="flex-shrink-0">
                         <div>
                           <h1 className="text-orange-500 font-bold text-lg tracking-wider">
                             PROJECT SYPHON
                           </h1>
-                          <p className="text-neutral-500 text-xs">
+                          <p className="text-neutral-500 text-xs leading-relaxed">
                             Track your spending, manage your finances, and gain
                             insights
                           </p>
                         </div>
                       </div>
-                      <Navigation />
-                      <SystemStatus />
+                      <div className="flex-1 overflow-y-auto">
+                        <Navigation />
+                      </div>
+                      <div className="flex-shrink-0">
+                        <SystemStatus />
+                      </div>
                     </div>
                   </div>
                 </SignedIn>
-                <div className="flex-1 flex flex-col">
-                  <div className="h-16 bg-neutral-800 border-b border-neutral-700 flex items-center justify-between px-6">
-                    <div className="flex items-center gap-4">
+
+                <div className="flex-1 flex flex-col min-w-0">
+                  <div className="h-16 bg-neutral-800 border-b border-neutral-700 flex items-center justify-between px-4 md:px-6">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <MobileSidebar />
                       <DynamicBreadcrumb />
                     </div>
                     <div className="flex items-center gap-2 sm:gap-4">

@@ -30,7 +30,11 @@ const iconMap = {
   User,
 };
 
-export default function Navigation() {
+interface NavigationProps {
+  onItemClick?: () => void;
+}
+
+export default function Navigation({ onItemClick }: NavigationProps = {}) {
   const pathname = usePathname();
   const { isSignedIn, isLoaded } = useUser();
 
@@ -85,8 +89,10 @@ export default function Navigation() {
             />
           </div>
         )}
-        {Icon && <Icon className="size-4" />}
-        <span className={!isEnabled ? "line-through" : ""}>{route.title}</span>
+        {Icon && <Icon className="size-4 flex-shrink-0" />}
+        <span className={`truncate ${!isEnabled ? "line-through" : ""}`}>
+          {route.title}
+        </span>
         {!isEnabled && (
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-neutral-700 to-transparent h-px top-1/2 transform -translate-y-1/2 opacity-30" />
         )}
@@ -102,20 +108,27 @@ export default function Navigation() {
     }
 
     return (
-      <Link key={route.path} href={route.path} className={getClasses()}>
+      <Link
+        key={route.path}
+        href={route.path}
+        className={getClasses()}
+        onClick={onItemClick}
+      >
         {content}
       </Link>
     );
   };
 
   return (
-    <nav className="space-y-2">
+    <nav className="space-y-1">
       {/* Budget Control Items */}
-      {budgetRoutes.map((route) => renderNavItem(route))}
+      <div className="space-y-1">
+        {budgetRoutes.map((route) => renderNavItem(route))}
+      </div>
 
       {/* Separator */}
       {nonBudgetRoutes.length > 0 && (
-        <div className="my-4">
+        <div className="my-6">
           <div className="h-px bg-neutral-700 mx-3" />
           <div className="text-xs text-neutral-600 px-3 py-2 font-medium tracking-wider">
             SYSTEM
@@ -124,7 +137,9 @@ export default function Navigation() {
       )}
 
       {/* Non-Budget Items */}
-      {nonBudgetRoutes.map((route) => renderNavItem(route, true))}
+      <div className="space-y-1">
+        {nonBudgetRoutes.map((route) => renderNavItem(route, true))}
+      </div>
     </nav>
   );
 }

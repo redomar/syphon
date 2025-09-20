@@ -34,11 +34,15 @@ export default async function Home() {
               Take Control of Your Money
             </h1>
             <p className="max-w-xl mx-auto text-base text-neutral-400 leading-relaxed">
-              Centralized cash flow, spending velocity, and debt management in a single operational interface.
+              Centralized cash flow, spending velocity, and debt management in a
+              single operational interface.
             </p>
             <div className="pt-2">
               <SignUpButton mode="modal">
-                <Button size="lg" className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-medium px-8">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-medium px-8"
+                >
                   Start Free
                 </Button>
               </SignUpButton>
@@ -59,12 +63,17 @@ export default async function Home() {
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-lg font-semibold text-white">Free</CardTitle>
+                    <CardTitle className="text-lg font-semibold text-white">
+                      Free
+                    </CardTitle>
                     <CardDescription className="text-xs text-neutral-400">
                       Core financial tracking
                     </CardDescription>
                   </div>
-                  <Badge variant="secondary" className="bg-neutral-800 text-neutral-300 text-xs">
+                  <Badge
+                    variant="secondary"
+                    className="bg-neutral-800 text-neutral-300 text-xs"
+                  >
                     Active
                   </Badge>
                 </div>
@@ -77,23 +86,33 @@ export default async function Home() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Check className="w-3 h-3 text-green-500" />
-                    <span className="text-xs text-neutral-300">Income & expense tracking</span>
+                    <span className="text-xs text-neutral-300">
+                      Income & expense tracking
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-3 h-3 text-green-500" />
-                    <span className="text-xs text-neutral-300">Basic debt management</span>
+                    <span className="text-xs text-neutral-300">
+                      Basic debt management
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-3 h-3 text-green-500" />
-                    <span className="text-xs text-neutral-300">Savings goals</span>
+                    <span className="text-xs text-neutral-300">
+                      Savings goals
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-3 h-3 text-green-500" />
-                    <span className="text-xs text-neutral-300">Financial dashboard</span>
+                    <span className="text-xs text-neutral-300">
+                      Financial dashboard
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-3 h-3 text-green-500" />
-                    <span className="text-xs text-neutral-300">Data import</span>
+                    <span className="text-xs text-neutral-300">
+                      Data import
+                    </span>
                   </div>
                 </div>
                 <SignUpButton mode="modal">
@@ -109,7 +128,9 @@ export default async function Home() {
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-lg font-semibold text-white">Pro</CardTitle>
+                    <CardTitle className="text-lg font-semibold text-white">
+                      Pro
+                    </CardTitle>
                     <CardDescription className="text-xs text-neutral-400">
                       Advanced analytics & automation
                     </CardDescription>
@@ -127,33 +148,45 @@ export default async function Home() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Check className="w-3 h-3 text-green-500" />
-                    <span className="text-xs text-neutral-300">Advanced analytics & reports</span>
+                    <span className="text-xs text-neutral-300">
+                      Advanced analytics & reports
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-3 h-3 text-green-500" />
-                    <span className="text-xs text-neutral-300">Budget forecasting</span>
+                    <span className="text-xs text-neutral-300">
+                      Budget forecasting
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-3 h-3 text-green-500" />
-                    <span className="text-xs text-neutral-300">Custom categories & tags</span>
+                    <span className="text-xs text-neutral-300">
+                      Custom categories & tags
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-3 h-3 text-green-500" />
-                    <span className="text-xs text-neutral-300">Email notifications</span>
+                    <span className="text-xs text-neutral-300">
+                      Email notifications
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-3 h-3 text-green-500" />
-                    <span className="text-xs text-neutral-300">Priority support</span>
+                    <span className="text-xs text-neutral-300">
+                      Priority support
+                    </span>
                   </div>
                 </div>
-                <Button disabled className="w-full bg-neutral-700 text-neutral-400 cursor-not-allowed text-sm">
+                <Button
+                  disabled
+                  className="w-full bg-neutral-700 text-neutral-400 cursor-not-allowed text-sm"
+                >
                   Coming Soon
                 </Button>
               </CardContent>
             </Card>
           </div>
         </div>
-
       </SignedOut>
 
       <SignedIn>

@@ -2,7 +2,10 @@
 
 import React from "react";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import { useTransactions, useDeleteTransaction } from "@/hooks/useFinancialData";
+import {
+  useTransactions,
+  useDeleteTransaction,
+} from "@/hooks/useFinancialData";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,7 +27,7 @@ import {
   Trash,
   Info,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency, formatDate } from "@/lib/types";
@@ -67,7 +70,7 @@ export default function TransactionsPage() {
   ]);
   const [globalFilter, setGlobalFilter] = React.useState("");
 
-  const columns = React.useMemo<ColumnDef<typeof transactions[0]>[]>(
+  const columns = React.useMemo<ColumnDef<(typeof transactions)[0]>[]>(
     () => [
       {
         id: "type",
@@ -92,7 +95,9 @@ export default function TransactionsPage() {
           const type = getValue() as TransactionType;
           return (
             <Badge
-              variant={type === TransactionType.INCOME ? "default" : "secondary"}
+              variant={
+                type === TransactionType.INCOME ? "default" : "secondary"
+              }
               className={`text-xs ${
                 type === TransactionType.INCOME
                   ? "bg-green-600 text-white"
@@ -135,10 +140,13 @@ export default function TransactionsPage() {
           return (
             <div
               className={`font-mono font-medium text-sm ${
-                type === TransactionType.INCOME ? "text-green-400" : "text-red-400"
+                type === TransactionType.INCOME
+                  ? "text-green-400"
+                  : "text-red-400"
               }`}
             >
-              {type === TransactionType.INCOME ? "+" : "-"}{formatCurrency(amount)}
+              {type === TransactionType.INCOME ? "+" : "-"}
+              {formatCurrency(amount)}
             </div>
           );
         },
@@ -347,13 +355,13 @@ export default function TransactionsPage() {
   const filteredRows = table.getFilteredRowModel().rows;
   const incomeTotal = React.useMemo(() => {
     return filteredRows
-      .filter(row => row.original.type === TransactionType.INCOME)
+      .filter((row) => row.original.type === TransactionType.INCOME)
       .reduce((sum, row) => sum + parseFloat(row.original.amount), 0);
   }, [filteredRows]);
 
   const expenseTotal = React.useMemo(() => {
     return filteredRows
-      .filter(row => row.original.type === TransactionType.EXPENSE)
+      .filter((row) => row.original.type === TransactionType.EXPENSE)
       .reduce((sum, row) => sum + parseFloat(row.original.amount), 0);
   }, [filteredRows]);
 
@@ -385,7 +393,8 @@ export default function TransactionsPage() {
           </CardHeader>
           <CardContent className="pt-0">
             <p className="text-xs text-neutral-400">
-              Complete transaction history with filtering, sorting, and search capabilities.
+              Complete transaction history with filtering, sorting, and search
+              capabilities.
             </p>
           </CardContent>
         </Card>
@@ -396,7 +405,9 @@ export default function TransactionsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-neutral-400 tracking-wider">TOTAL INCOME</p>
+                  <p className="text-xs text-neutral-400 tracking-wider">
+                    TOTAL INCOME
+                  </p>
                   <p className="text-lg font-bold text-green-400 font-mono">
                     {formatCurrency(incomeTotal.toString())}
                   </p>
@@ -410,7 +421,9 @@ export default function TransactionsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-neutral-400 tracking-wider">TOTAL EXPENSES</p>
+                  <p className="text-xs text-neutral-400 tracking-wider">
+                    TOTAL EXPENSES
+                  </p>
                   <p className="text-lg font-bold text-red-400 font-mono">
                     {formatCurrency(expenseTotal.toString())}
                   </p>
@@ -424,20 +437,31 @@ export default function TransactionsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-neutral-400 tracking-wider">NET FLOW</p>
-                  <p className={`text-lg font-bold font-mono ${
-                    (incomeTotal - expenseTotal) >= 0 ? "text-green-400" : "text-red-400"
-                  }`}>
+                  <p className="text-xs text-neutral-400 tracking-wider">
+                    NET FLOW
+                  </p>
+                  <p
+                    className={`text-lg font-bold font-mono ${
+                      incomeTotal - expenseTotal >= 0
+                        ? "text-green-400"
+                        : "text-red-400"
+                    }`}
+                  >
                     {formatCurrency((incomeTotal - expenseTotal).toString())}
                   </p>
                 </div>
-                <div className={`h-6 w-6 ${
-                  (incomeTotal - expenseTotal) >= 0 ? "text-green-400" : "text-red-400"
-                }`}>
-                  {(incomeTotal - expenseTotal) >= 0 ?
-                    <TrendingUp className="h-6 w-6" /> :
+                <div
+                  className={`h-6 w-6 ${
+                    incomeTotal - expenseTotal >= 0
+                      ? "text-green-400"
+                      : "text-red-400"
+                  }`}
+                >
+                  {incomeTotal - expenseTotal >= 0 ? (
+                    <TrendingUp className="h-6 w-6" />
+                  ) : (
                     <TrendingDown className="h-6 w-6" />
-                  }
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -450,7 +474,9 @@ export default function TransactionsPage() {
             {isLoading ? (
               <div className="flex items-center justify-center py-16">
                 <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
-                <span className="ml-2 text-neutral-400">Loading transactions...</span>
+                <span className="ml-2 text-neutral-400">
+                  Loading transactions...
+                </span>
               </div>
             ) : (
               <div className="p-6 space-y-4">
@@ -464,12 +490,13 @@ export default function TransactionsPage() {
                     className="max-w-sm"
                   />
                   <div className="text-sm text-neutral-500 ml-auto">
-                    {table.getFilteredRowModel().rows.length} of {transactions.length} transactions
+                    {table.getFilteredRowModel().rows.length} of{" "}
+                    {transactions.length} transactions
                   </div>
                 </div>
 
                 {/* Table */}
-                <div className="border rounded-lg">
+                <div className="border ">
                   <Table>
                     <TableHeader>
                       {table.getHeaderGroups().map((headerGroup) => (
