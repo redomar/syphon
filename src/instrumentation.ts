@@ -57,7 +57,7 @@ export async function register() {
     const environment = process.env.NODE_ENV || "development";
     const serviceName = process.env.OTEL_SERVICE_NAME || "syphon-app";
     const serviceVersion =
-      process.env.OTEL_SERVICE_VERSION || process.env.VERSION || "0.3.0";
+      process.env.OTEL_SERVICE_VERSION || process.env.VERSION || "0.4.0";
 
     // Configure service resource with proper attributes
     const resource = resourceFromAttributes({

@@ -42,7 +42,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PRISMA_CLI_BINARY_TARGETS="linux-musl-openssl-3.0.x"
 ARG NODE_ENV=production
-ARG VERSION=0.3.0
+ARG VERSION=0.4.0
 ENV NODE_ENV=${NODE_ENV}
 ENV VERSION=${VERSION}
 
@@ -64,8 +64,6 @@ WORKDIR /app
 # Set production environment variables
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=${PORT:-3001}
-ENV HOSTNAME=${HOSTNAME:-0.0.0.0}
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs && \
