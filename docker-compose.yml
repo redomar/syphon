@@ -1,202 +1,58 @@
-# =============================================================================
-# SYPHON PRODUCTION DOCKER COMPOSE - DOKPLOY OPTIMIZED v0.4.0
-# =============================================================================
-
 services:
-  # =============================================================================
-  # TELEMETRY SERVICE - JAEGER ALL-IN-ONE
-  # =============================================================================
-  jaeger:
-    image: jaegertracing/all-in-one:${JAEGER_VERSION:-latest}
-    container_name: syphon-${BRANCH:-main}-jaeger
-    restart: unless-stopped
-    hostname: jaeger
-    networks:
-      - syphon-network
-    environment:
-      # Core Jaeger configuration - prioritize environment variables
-      - COLLECTOR_OTLP_ENABLED=true
-      - JAEGER_DISABLED=false
-      - MEMORY_MAX_TRACES=${JAEGER_MAX_TRACES:-50000}
-      - METRICS_BACKEND=prometheus
-      - QUERY_BASE_PATH=/
-      # Performance configuration
-      - COLLECTOR_QUEUE_SIZE=${JAEGER_COLLECTOR_QUEUE_SIZE:-2000}
-      - COLLECTOR_NUM_WORKERS=${JAEGER_COLLECTOR_WORKERS:-50}
-      - SPAN_STORAGE_TYPE=memory
-    ports:
-      - "${JAEGER_UI_PORT:-16686}:16686"     # Jaeger UI
-      - "${JAEGER_THRIFT_PORT:-14268}:14268" # HTTP Thrift receiver
-      - "${JAEGER_OTLP_GRPC_PORT:-4317}:4317" # OTLP gRPC receiver
-      - "${JAEGER_OTLP_HTTP_PORT:-4318}:4318" # OTLP HTTP receiver
-    volumes:
-      - jaeger_data:/tmp
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:16686/api/services"]
-      interval: ${HEALTHCHECK_INTERVAL:-20s}
-      timeout: ${HEALTHCHECK_TIMEOUT:-5s}
-      retries: ${HEALTHCHECK_RETRIES:-5}
-      start_period: ${HEALTHCHECK_START_PERIOD:-30s}
-    deploy:
-      resources:
-        limits:
-          memory: ${JAEGER_MEMORY_LIMIT:-512M}
-          cpus: ${JAEGER_CPU_LIMIT:-1.0}
-        reservations:
-          memory: ${JAEGER_MEMORY_RESERVATION:-256M}
-          cpus: ${JAEGER_CPU_RESERVATION:-0.25}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "${LOG_MAX_SIZE:-10m}"
-        max-file: "${LOG_MAX_FILES:-3}"
-
-  # =============================================================================
-  # METRICS SERVICE - PROMETHEUS
-  # =============================================================================
-  prometheus:
-    image: prom/prometheus:${PROMETHEUS_VERSION:-latest}
-    container_name: syphon-${BRANCH:-main}-prometheus
-    restart: unless-stopped
-    hostname: prometheus
-    networks:
-      - syphon-network
-    ports:
-      - "${PROMETHEUS_PORT:-9090}:9090"
-    volumes:
-      - ./deployment/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-      - '--storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-200h}'
-      - '--web.enable-lifecycle'
-    depends_on:
-      jaeger:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
-      interval: ${PROMETHEUS_HEALTHCHECK_INTERVAL:-30s}
-      timeout: ${PROMETHEUS_HEALTHCHECK_TIMEOUT:-10s}
-      retries: ${PROMETHEUS_HEALTHCHECK_RETRIES:-3}
-      start_period: ${PROMETHEUS_HEALTHCHECK_START_PERIOD:-40s}
-    deploy:
-      resources:
-        limits:
-          memory: ${PROMETHEUS_MEMORY_LIMIT:-1G}
-          cpus: ${PROMETHEUS_CPU_LIMIT:-1.0}
-        reservations:
-          memory: ${PROMETHEUS_MEMORY_RESERVATION:-512M}
-          cpus: ${PROMETHEUS_CPU_RESERVATION:-0.25}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "${LOG_MAX_SIZE:-10m}"
-        max-file: "${LOG_MAX_FILES:-3}"
-
-  # =============================================================================
-  # MAIN APPLICATION SERVICE - SYPHON APP
-  # =============================================================================
   app:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - NODE_ENV=${NODE_ENV:-production}
-        - VERSION=${VERSION:-0.4.0}
-    container_name: syphon-${BRANCH:-main}-app
+    container_name: syphon-app
     restart: unless-stopped
-    hostname: app
-    networks:
-      - syphon-network
+    ports:
+      - "${PORT:-3000}:3000"
     environment:
-      # =======================================================================
-      # CORE APPLICATION ENVIRONMENT - PRIORITIZE ENV VARIABLES
-      # =======================================================================
       - NODE_ENV=${NODE_ENV:-production}
       - VERSION=${VERSION:-0.4.0}
-      - BRANCH=${BRANCH:-main}
-      - PORT=${PORT:-3001}
-      - HOSTNAME=${HOSTNAME:-0.0.0.0}
+      - BRANCH=${BRANCH:-develop}
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
       - NEXT_TELEMETRY_DISABLED=${NEXT_TELEMETRY_DISABLED:-1}
-      
-      # =======================================================================
-      # DATABASE CONFIGURATION - EXTERNAL NEON DATABASE
-      # =======================================================================
+
+      # Database
       - DATABASE_URL=${DATABASE_URL}
-      
-      # =======================================================================
-      # AUTHENTICATION - CLERK CONFIGURATION
-      # =======================================================================
+
+      # Clerk Authentication
       - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
       - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
-      - NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=${NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL:-/}
-      - NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=${NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL:-/}
-      
-      # =======================================================================
-      # OPENTELEMETRY - LOCAL JAEGER CONTAINER (DOCKER NETWORK)
-      # =======================================================================
+      - NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=${NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL:-/dashboard}
+      - NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=${NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL:-/dashboard}
+
+      # OpenTelemetry
       - OTEL_SDK_DISABLED=${OTEL_SDK_DISABLED:-false}
       - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-syphon-app}
-      - OTEL_SERVICE_VERSION=${OTEL_SERVICE_VERSION:-${VERSION:-0.4.0}}
-      
-      # Docker network endpoints (defaults to internal service names)
-      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://syphon-${BRANCH:-main}-jaeger:4318}
-      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://syphon-${BRANCH:-main}-jaeger:4318/v1/traces}
-      
-      # Resource attributes for service identification
-      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES:-service.name=syphon-app,service.version=${VERSION:-0.4.0},deployment.environment=${NODE_ENV:-production}}
-      
-      # =======================================================================
-      # OPENTELEMETRY PERFORMANCE SETTINGS
-      # =======================================================================
-      - OTEL_EXPORTER_OTLP_TIMEOUT=${OTEL_EXPORTER_OTLP_TIMEOUT:-10000}
-      - OTEL_EXPORTER_OTLP_COMPRESSION=${OTEL_EXPORTER_OTLP_COMPRESSION:-gzip}
-      - OTEL_BSP_MAX_EXPORT_BATCH_SIZE=${OTEL_BSP_MAX_EXPORT_BATCH_SIZE:-512}
-      - OTEL_BSP_EXPORT_TIMEOUT=${OTEL_BSP_EXPORT_TIMEOUT:-30000}
-      - OTEL_BSP_SCHEDULE_DELAY=${OTEL_BSP_SCHEDULE_DELAY:-5000}
-    ports:
-      - "${APP_PORT:-3001}:${PORT:-3001}"
-    depends_on:
-      jaeger:
-        condition: service_healthy
+      - OTEL_SERVICE_VERSION=${OTEL_SERVICE_VERSION:-0.4.0}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://localhost:4318/v1/traces}
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${PORT:-3001}/api/health"]
-      interval: ${APP_HEALTHCHECK_INTERVAL:-30s}
-      timeout: ${APP_HEALTHCHECK_TIMEOUT:-10s}
-      retries: ${APP_HEALTHCHECK_RETRIES:-5}
-      start_period: ${APP_HEALTHCHECK_START_PERIOD:-60s}
-    deploy:
-      resources:
-        limits:
-          memory: ${APP_MEMORY_LIMIT:-1G}
-          cpus: ${APP_CPU_LIMIT:-2.0}
-        reservations:
-          memory: ${APP_MEMORY_RESERVATION:-512M}
-          cpus: ${APP_CPU_RESERVATION:-0.5}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "${LOG_MAX_SIZE:-10m}"
-        max-file: "${LOG_MAX_FILES:-3}"
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-# =============================================================================
-# DOCKER NETWORKS - BRIDGE NETWORK FOR CONTAINER COMMUNICATION
-# =============================================================================
-networks:
-  syphon-network:
-    driver: bridge
-    name: syphon-${BRANCH:-main}-network
-
-# =============================================================================
-# PERSISTENT VOLUMES
-# =============================================================================
-volumes:
-  jaeger_data:
-    driver: local
-    name: syphon-${BRANCH:-main}-jaeger-data
-  prometheus_data:
-    driver: local
-    name: syphon-${BRANCH:-main}-prometheus-data
+  # Optional: Add Jaeger for telemetry (can be started separately)
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: syphon-jaeger
+    restart: unless-stopped
+    ports:
+      - "${JAEGER_UI_PORT:-16686}:16686"
+      - "${JAEGER_OTLP_HTTP_PORT:-4318}:4318"
+      - "${JAEGER_OTLP_GRPC_PORT:-4317}:4317"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    profiles:
+      - telemetry
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:16686/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
