@@ -52,10 +52,15 @@ import {
 import { toast } from "sonner";
 import { formatCurrency, formatDate } from "@/lib/types";
 import { TransactionType } from "../../../generated/prisma";
+import { useTransactions } from "@/hooks/useFinancialData";
 import {
-  useTransactions,
-} from "@/hooks/useFinancialData";
-import { startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, format } from "date-fns";
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+  subMonths,
+  format,
+} from "date-fns";
 
 interface DateRange {
   from: Date;
@@ -151,7 +156,8 @@ export default function ReportsPage() {
 
     const netFlow = income - expenses;
     const totalTransactions = filteredTransactions.length;
-    const avgTransactionSize = totalTransactions > 0 ? (income + expenses) / totalTransactions : 0;
+    const avgTransactionSize =
+      totalTransactions > 0 ? (income + expenses) / totalTransactions : 0;
 
     return {
       income,
@@ -164,7 +170,10 @@ export default function ReportsPage() {
 
   // Category breakdown data
   const categoryBreakdown = React.useMemo(() => {
-    const breakdown = new Map<string, { name: string; amount: number; count: number; color?: string }>();
+    const breakdown = new Map<
+      string,
+      { name: string; amount: number; count: number; color?: string }
+    >();
 
     filteredTransactions.forEach((tx) => {
       const categoryName = tx.category?.name || "Uncategorized";
@@ -195,7 +204,10 @@ export default function ReportsPage() {
 
   // Monthly trend data
   const monthlyTrend = React.useMemo(() => {
-    const monthlyData = new Map<string, { month: string; income: number; expenses: number }>();
+    const monthlyData = new Map<
+      string,
+      { month: string; income: number; expenses: number }
+    >();
 
     filteredTransactions.forEach((tx) => {
       const monthKey = format(new Date(tx.occurredAt), "yyyy-MM");
@@ -203,7 +215,11 @@ export default function ReportsPage() {
       const amount = parseFloat(tx.amount);
 
       if (!monthlyData.has(monthKey)) {
-        monthlyData.set(monthKey, { month: monthLabel, income: 0, expenses: 0 });
+        monthlyData.set(monthKey, {
+          month: monthLabel,
+          income: 0,
+          expenses: 0,
+        });
       }
 
       const data = monthlyData.get(monthKey)!;
@@ -214,11 +230,20 @@ export default function ReportsPage() {
       }
     });
 
-    return Array.from(monthlyData.values()).sort((a, b) => a.month.localeCompare(b.month));
+    return Array.from(monthlyData.values()).sort((a, b) =>
+      a.month.localeCompare(b.month)
+    );
   }, [filteredTransactions]);
 
   const handleExportCSV = () => {
-    const headers = ["Date", "Type", "Amount", "Description", "Category", "Account/Source"];
+    const headers = [
+      "Date",
+      "Type",
+      "Amount",
+      "Description",
+      "Category",
+      "Account/Source",
+    ];
     const rows = filteredTransactions.map((tx) => [
       formatDate(tx.occurredAt),
       tx.type,
@@ -228,7 +253,9 @@ export default function ReportsPage() {
       tx.account?.name || tx.incomeSource?.name || "",
     ]);
 
-    const csvContent = [headers, ...rows].map((row) => row.join(",")).join("\n");
+    const csvContent = [headers, ...rows]
+      .map((row) => row.join(","))
+      .join("\n");
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -290,7 +317,8 @@ export default function ReportsPage() {
           </CardHeader>
           <CardContent className="pt-0">
             <p className="text-xs text-neutral-400">
-              Comprehensive analysis of your financial data with advanced filtering and visualizations.
+              Comprehensive analysis of your financial data with advanced
+              filtering and visualizations.
             </p>
           </CardContent>
         </Card>
@@ -349,7 +377,10 @@ export default function ReportsPage() {
                   onChange={(e) =>
                     setFilters((prev) => ({
                       ...prev,
-                      dateRange: { ...prev.dateRange, from: new Date(e.target.value) },
+                      dateRange: {
+                        ...prev.dateRange,
+                        from: new Date(e.target.value),
+                      },
                     }))
                   }
                 />
@@ -362,7 +393,10 @@ export default function ReportsPage() {
                   onChange={(e) =>
                     setFilters((prev) => ({
                       ...prev,
-                      dateRange: { ...prev.dateRange, to: new Date(e.target.value) },
+                      dateRange: {
+                        ...prev.dateRange,
+                        to: new Date(e.target.value),
+                      },
                     }))
                   }
                 />
@@ -377,7 +411,8 @@ export default function ReportsPage() {
                 onValueChange={(value) =>
                   setFilters((prev) => ({
                     ...prev,
-                    transactionType: value === "all" ? undefined : (value as TransactionType),
+                    transactionType:
+                      value === "all" ? undefined : (value as TransactionType),
                   }))
                 }
               >
@@ -386,15 +421,22 @@ export default function ReportsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value={TransactionType.INCOME}>Income Only</SelectItem>
-                  <SelectItem value={TransactionType.EXPENSE}>Expenses Only</SelectItem>
+                  <SelectItem value={TransactionType.INCOME}>
+                    Income Only
+                  </SelectItem>
+                  <SelectItem value={TransactionType.EXPENSE}>
+                    Expenses Only
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Export Controls */}
             <div className="flex justify-end">
-              <Button onClick={handleExportCSV} className="flex items-center gap-2">
+              <Button
+                onClick={handleExportCSV}
+                className="flex items-center gap-2"
+              >
                 <Download className="h-4 w-4" />
                 Export CSV
               </Button>
@@ -408,7 +450,9 @@ export default function ReportsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-neutral-400 tracking-wider">TOTAL INCOME</p>
+                  <p className="text-xs text-neutral-400 tracking-wider">
+                    TOTAL INCOME
+                  </p>
                   <p className="text-lg font-bold text-green-400 font-mono">
                     {formatCurrency(summaryMetrics.income.toString())}
                   </p>
@@ -422,7 +466,9 @@ export default function ReportsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-neutral-400 tracking-wider">TOTAL EXPENSES</p>
+                  <p className="text-xs text-neutral-400 tracking-wider">
+                    TOTAL EXPENSES
+                  </p>
                   <p className="text-lg font-bold text-red-400 font-mono">
                     {formatCurrency(summaryMetrics.expenses.toString())}
                   </p>
@@ -436,10 +482,14 @@ export default function ReportsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-neutral-400 tracking-wider">NET FLOW</p>
+                  <p className="text-xs text-neutral-400 tracking-wider">
+                    NET FLOW
+                  </p>
                   <p
                     className={`text-lg font-bold font-mono ${
-                      summaryMetrics.netFlow >= 0 ? "text-green-400" : "text-red-400"
+                      summaryMetrics.netFlow >= 0
+                        ? "text-green-400"
+                        : "text-red-400"
                     }`}
                   >
                     {formatCurrency(summaryMetrics.netFlow.toString())}
@@ -458,7 +508,9 @@ export default function ReportsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-neutral-400 tracking-wider">TRANSACTIONS</p>
+                  <p className="text-xs text-neutral-400 tracking-wider">
+                    TRANSACTIONS
+                  </p>
                   <p className="text-lg font-bold text-blue-400 font-mono">
                     {summaryMetrics.totalTransactions}
                   </p>
@@ -472,9 +524,13 @@ export default function ReportsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-neutral-400 tracking-wider">AVG SIZE</p>
+                  <p className="text-xs text-neutral-400 tracking-wider">
+                    AVG SIZE
+                  </p>
                   <p className="text-lg font-bold text-purple-400 font-mono">
-                    {formatCurrency(summaryMetrics.avgTransactionSize.toString())}
+                    {formatCurrency(
+                      summaryMetrics.avgTransactionSize.toString()
+                    )}
                   </p>
                 </div>
                 <DollarSign className="h-6 w-6 text-purple-400" />
@@ -511,7 +567,9 @@ export default function ReportsPage() {
                         cy="50%"
                         labelLine={false}
                         label={({ name, percent }) =>
-                          percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : ''
+                          percent > 0.05
+                            ? `${name} ${(percent * 100).toFixed(0)}%`
+                            : ""
                         }
                         outerRadius={80}
                         fill="#8884d8"
@@ -528,7 +586,7 @@ export default function ReportsPage() {
                           border: "1px solid #374151",
                           borderRadius: "1px",
                           color: "#f9fafb",
-                          padding: "0px 8px"
+                          padding: "0px 8px",
                         }}
                         labelStyle={{ color: "#f9fafb" }}
                       />
@@ -547,19 +605,25 @@ export default function ReportsPage() {
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={monthlyTrend}  >
+                    <BarChart data={monthlyTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                       <XAxis dataKey="month" stroke="#9ca3af" />
-                      <YAxis stroke="#9ca3af" tickFormatter={(value) => formatCurrency(value)} />
+                      <YAxis
+                        stroke="#9ca3af"
+                        tickFormatter={(value) => formatCurrency(value)}
+                      />
                       <Tooltip
-                        cursor={{ fill: '#1f293755' }}
-                        formatter={(value, name) => [formatCurrency(value as number), name]}
+                        cursor={{ fill: "#1f293755" }}
+                        formatter={(value, name) => [
+                          formatCurrency(value as number),
+                          name,
+                        ]}
                         labelStyle={{ color: "#f9fafb" }}
                         contentStyle={{
                           backgroundColor: "#1f2937",
                           border: "1px solid #374151",
                           borderRadius: "6px",
-                          color: "#f9fafb"
+                          color: "#f9fafb",
                         }}
                       />
                       <Legend />
@@ -584,14 +648,18 @@ export default function ReportsPage() {
                       <TableHead>Category</TableHead>
                       <TableHead className="text-right">Amount</TableHead>
                       <TableHead className="text-right">Transactions</TableHead>
-                      <TableHead className="text-right">Avg per Transaction</TableHead>
+                      <TableHead className="text-right">
+                        Avg per Transaction
+                      </TableHead>
                       <TableHead className="text-right">% of Total</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {categoryBreakdown.map((category) => {
-                      const percentage = (category.amount / summaryMetrics.expenses) * 100;
-                      const avgPerTransaction = category.amount / category.count;
+                      const percentage =
+                        (category.amount / summaryMetrics.expenses) * 100;
+                      const avgPerTransaction =
+                        category.amount / category.count;
                       return (
                         <TableRow key={category.name}>
                           <TableCell>
@@ -606,11 +674,15 @@ export default function ReportsPage() {
                           <TableCell className="text-right font-mono">
                             {formatCurrency(category.amount)}
                           </TableCell>
-                          <TableCell className="text-right">{category.count}</TableCell>
+                          <TableCell className="text-right">
+                            {category.count}
+                          </TableCell>
                           <TableCell className="text-right font-mono">
                             {formatCurrency(avgPerTransaction)}
                           </TableCell>
-                          <TableCell className="text-right">{percentage.toFixed(1)}%</TableCell>
+                          <TableCell className="text-right">
+                            {percentage.toFixed(1)}%
+                          </TableCell>
                         </TableRow>
                       );
                     })}
@@ -630,15 +702,21 @@ export default function ReportsPage() {
                   <LineChart data={monthlyTrend}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis dataKey="month" stroke="#9ca3af" />
-                    <YAxis stroke="#9ca3af" tickFormatter={(value) => formatCurrency(value)} />
+                    <YAxis
+                      stroke="#9ca3af"
+                      tickFormatter={(value) => formatCurrency(value)}
+                    />
                     <Tooltip
-                      formatter={(value, name) => [formatCurrency(value as number), name]}
+                      formatter={(value, name) => [
+                        formatCurrency(value as number),
+                        name,
+                      ]}
                       labelStyle={{ color: "#f9fafb" }}
                       contentStyle={{
                         backgroundColor: "#1f2937",
                         border: "1px solid #374151",
                         borderRadius: "6px",
-                        color: "#f9fafb"
+                        color: "#f9fafb",
                       }}
                     />
                     <Legend />
@@ -689,7 +767,11 @@ export default function ReportsPage() {
                         </TableCell>
                         <TableCell>
                           <Badge
-                            variant={tx.type === TransactionType.INCOME ? "default" : "secondary"}
+                            variant={
+                              tx.type === TransactionType.INCOME
+                                ? "default"
+                                : "secondary"
+                            }
                             className={`text-xs ${
                               tx.type === TransactionType.INCOME
                                 ? "bg-green-600 text-white"
@@ -701,7 +783,9 @@ export default function ReportsPage() {
                         </TableCell>
                         <TableCell className="max-w-md truncate">
                           {tx.description || (
-                            <span className="text-neutral-500 italic">No description</span>
+                            <span className="text-neutral-500 italic">
+                              No description
+                            </span>
                           )}
                         </TableCell>
                         <TableCell>
@@ -717,13 +801,17 @@ export default function ReportsPage() {
                               {tx.category.name}
                             </Badge>
                           ) : (
-                            <span className="text-neutral-500 italic text-xs">No category</span>
+                            <span className="text-neutral-500 italic text-xs">
+                              No category
+                            </span>
                           )}
                         </TableCell>
                         <TableCell className="text-right font-mono">
                           <span
                             className={
-                              tx.type === TransactionType.INCOME ? "text-green-400" : "text-red-400"
+                              tx.type === TransactionType.INCOME
+                                ? "text-green-400"
+                                : "text-red-400"
                             }
                           >
                             {tx.type === TransactionType.INCOME ? "+" : "-"}
@@ -736,7 +824,8 @@ export default function ReportsPage() {
                 </Table>
                 {filteredTransactions.length > 50 && (
                   <p className="text-sm text-neutral-400 mt-4">
-                    Showing first 50 transactions. Export to CSV for complete data.
+                    Showing first 50 transactions. Export to CSV for complete
+                    data.
                   </p>
                 )}
               </CardContent>
