@@ -17,6 +17,7 @@ export const enabledRoutes = [
   "/goals",
   "/debt",
   "/transactions",
+  "/reports",
 ];
 
 export const routes: RouteConfig[] = [
