@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -541,7 +542,24 @@ function IncomeManager() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {transactions.length === 0 ? (
+          {transactionsLoading ? (
+            <div className="space-y-3 border border-neutral-800 p-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <Skeleton className="h-4 w-full mx-3" />
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-8 w-8 rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : transactions.length === 0 ? (
             <div className="text-center py-8 text-neutral-500">
               <CalendarDays className="h-12 w-12 mx-auto mb-3 opacity-50" />
               <p>No income transactions yet.</p>

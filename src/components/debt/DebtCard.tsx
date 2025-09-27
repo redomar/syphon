@@ -125,9 +125,9 @@ function DebtCard({
   const daysUntilDue = getDaysUntilDue();
 
   return (
-    <Card className="bg-neutral-900 border-neutral-700 hover:border-neutral-600 transition-colors">
-      <CardContent className="p-6">
-        <div className="space-y-4">
+    <Card className="bg-neutral-900 border-neutral-700 hover:border-neutral-600 transition-colors h-full flex flex-col">
+      <CardContent className="px-6 flex-1">
+        <div className="flex flex-col h-full space-y-4">
           {/* Header */}
           <div className="flex items-start justify-between">
             <div className="space-y-1">
@@ -235,6 +235,9 @@ function DebtCard({
               </div>
             </div>
           )}
+
+          {/* Spacer to push actions to bottom */}
+          <div className="flex-1"></div>
 
           {/* Actions */}
           <div className="flex gap-2 pt-2">

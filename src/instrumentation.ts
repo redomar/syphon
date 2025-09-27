@@ -21,8 +21,9 @@ export async function register() {
     let traceExporter;
 
     // Check for specific traces endpoint first, then fallback to general endpoint
-    const tracesEndpoint = process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT ||
-                          process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
+    const tracesEndpoint =
+      process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT ||
+      process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
 
     if (tracesEndpoint) {
       const tracesUrl = tracesEndpoint.endsWith("/v1/traces")
@@ -93,9 +94,7 @@ export async function register() {
       console.log(
         `📊 OpenTelemetry started - Service: ${serviceName}@${serviceVersion} (${environment})`
       );
-      console.log(
-        `   Sending traces to: ${tracesEndpoint}`
-      );
+      console.log(`   Sending traces to: ${tracesEndpoint}`);
     } else {
       console.log(
         `🔍 OpenTelemetry started - Service: ${serviceName}@${serviceVersion} (${environment})`

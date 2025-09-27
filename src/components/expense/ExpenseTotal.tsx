@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useExpenseTransactions } from "@/hooks/useFinancialData";
 import { formatCurrency } from "@/lib/types";
 
@@ -15,7 +16,7 @@ function ExpenseTotal() {
           <CardTitle>Total Expenses</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold text-red-400">Loading...</p>
+          <Skeleton className="h-8 w-32" />
         </CardContent>
       </Card>
     );

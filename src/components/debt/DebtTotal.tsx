@@ -100,7 +100,7 @@ function DebtTotal() {
     <div className="grid gap-6">
       {/* Main Total Card */}
       <Card className="bg-neutral-900 border-neutral-700">
-        <CardContent className="p-6">
+        <CardContent className="px-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Total Balance */}
             <div className="space-y-2">
@@ -153,11 +153,11 @@ function DebtTotal() {
       </Card>
 
       {/* Additional Info Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="flex gap-4">
         {/* Highest APR Alert */}
         {highestAPRDebt && highestAPRDebt.apr && highestAPRDebt.apr > 15 && (
-          <Card className="bg-neutral-900 border-red-800">
-            <CardContent className="p-4">
+          <Card className="w-full border-red-800 bg-neutral-900">
+            <CardContent className="px-6">
               <div className="flex items-center gap-3">
                 <AlertTriangle className="h-5 w-5 text-red-500" />
                 <div className="flex-1">
@@ -185,8 +185,8 @@ function DebtTotal() {
 
         {/* Upcoming Payments */}
         {upcomingPayments.length > 0 && (
-          <Card className="bg-neutral-900 border-orange-800">
-            <CardContent className="p-4">
+          <Card className="w-full border-orange-800 bg-neutral-900 justify-center">
+            <CardContent className="px-6">
               <div className="flex items-center gap-3">
                 <Clock className="h-5 w-5 text-orange-500" />
                 <div className="flex-1">

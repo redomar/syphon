@@ -21,6 +21,7 @@ import {
 import DebtCard from "./DebtCard";
 import DebtForm from "./DebtForm";
 import PaymentForm from "./PaymentForm";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
 interface DebtPayment {
@@ -254,6 +255,71 @@ function DebtManager() {
     0
   );
 
+  // Loading state
+  if (debtsLoading) {
+    return (
+      <div className="grid gap-6">
+        {/* Header Loading */}
+        <Card className="bg-neutral-900 border-neutral-700">
+          <CardContent className="grid grid-cols-[1fr_auto] items-end w-full">
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-96" />
+            </div>
+            <Skeleton className="h-10 w-28" />
+          </CardContent>
+        </Card>
+
+        {/* Summary Stats Loading */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="bg-neutral-900 border-neutral-700">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-5 w-5 rounded" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Debt Cards Loading */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="bg-neutral-900 border-neutral-700">
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <Skeleton className="h-5 w-5 rounded" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-3 w-16" />
+                  <Skeleton className="h-8 w-24" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-2 w-full rounded-full" />
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="h-8 flex-1" />
+                  <Skeleton className="h-8 w-8" />
+                  <Skeleton className="h-8 w-8" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="grid gap-6">
       {/* Header */}
@@ -282,7 +348,7 @@ function DebtManager() {
       {debts.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="bg-neutral-900 border-neutral-700">
-            <CardContent className="p-4">
+            <CardContent className="px-4">
               <div className="flex items-center gap-2">
                 <CreditCard className="h-5 w-5 text-red-500" />
                 <div>
@@ -294,7 +360,7 @@ function DebtManager() {
           </Card>
 
           <Card className="bg-neutral-900 border-neutral-700">
-            <CardContent className="p-4">
+            <CardContent className="px-4">
               <div className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-orange-500" />
                 <div>
@@ -308,7 +374,7 @@ function DebtManager() {
           </Card>
 
           <Card className="bg-neutral-900 border-neutral-700">
-            <CardContent className="p-4">
+            <CardContent className="px-4">
               <div className="flex items-center gap-2">
                 <TrendingDown className="h-5 w-5 text-blue-500" />
                 <div>
@@ -322,7 +388,7 @@ function DebtManager() {
           </Card>
 
           <Card className="bg-neutral-900 border-neutral-700">
-            <CardContent className="p-4">
+            <CardContent className="px-4">
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-5 w-5 text-purple-500" />
                 <div>
@@ -381,7 +447,7 @@ function DebtManager() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
           {debts.map((debt) => (
             <DebtCard
               key={debt.id}
