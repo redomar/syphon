@@ -108,6 +108,8 @@ model Category {
 
   @@unique([userId, name, kind])
   @@index([userId])
+  @@index([userId, kind])
+  @@index([userId, isArchived])
 }
 
 // ---------- Accounts ----------
@@ -172,6 +174,8 @@ model Transaction {
   @@index([userId, type, occurredAt])
   @@index([userId, categoryId])
   @@index([userId, accountId])
+  @@index([userId, incomeSourceId])
+  @@index([userId, amount])
 }
 
 // ---------- Savings ----------
@@ -192,6 +196,7 @@ model SavingsGoal {
 
   @@unique([userId, name])
   @@index([userId])
+  @@index([userId, isArchived])
 }
 
 model SavingsGoalContribution {
@@ -229,6 +234,7 @@ model Debt {
 
   @@unique([userId, name])
   @@index([userId])
+  @@index([userId, isClosed])
 }
 
 model DebtPayment {
@@ -275,6 +281,7 @@ model BudgetCategory {
   category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([budgetId, categoryId])
+  @@index([budgetId, categoryId])
 }
 
 // ---------- Pay schedule ----------

@@ -129,7 +129,7 @@ export default function RootLayout({
                   <div className="flex-1 p-6 overflow-auto">{children}</div>
                 </div>
               </div>
-              <Toaster />
+              <Toaster position="bottom-left" />
             </QueryProvider>
           </ThemeProvider>
         </body>

@@ -28,6 +28,8 @@ import {
   AlertTriangle,
   RefreshCw,
   CheckCircle,
+  ShieldAlert,
+  Zap,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
@@ -62,19 +64,33 @@ interface DeletionProgress {
   total: number;
 }
 
+interface GlassBreak {
+  isBroken: boolean;
+  isBreaking: boolean;
+}
+
 export default function ProfilePage() {
   const { user } = useUser();
-  const [deletionProgress, setDeletionProgress] = React.useState<DeletionProgress>({
-    isDeleting: false,
-    step: "",
-    completed: [],
-    total: 0,
+  const [deletionProgress, setDeletionProgress] =
+    React.useState<DeletionProgress>({
+      isDeleting: false,
+      step: "",
+      completed: [],
+      total: 0,
+    });
+
+  const [glassBreak, setGlassBreak] = React.useState<GlassBreak>({
+    isBroken: false,
+    isBreaking: false,
   });
 
-  const { data: transactions = [], isLoading: transactionsLoading } = useTransactions();
-  const { data: categories = [], isLoading: categoriesLoading } = useCategories();
+  const { data: transactions = [], isLoading: transactionsLoading } =
+    useTransactions();
+  const { data: categories = [], isLoading: categoriesLoading } =
+    useCategories();
   const { data: accounts = [], isLoading: accountsLoading } = useAccounts();
-  const { data: incomeSources = [], isLoading: incomeSourcesLoading } = useIncomeSources();
+  const { data: incomeSources = [], isLoading: incomeSourcesLoading } =
+    useIncomeSources();
   const { data: goals = [], isLoading: goalsLoading } = useGoals();
   const { data: debts = [], isLoading: debtsLoading } = useDebts();
 
@@ -98,7 +114,10 @@ export default function ProfilePage() {
 
     const sortedTransactions = transactions
       .slice()
-      .sort((a, b) => new Date(a.occurredAt).getTime() - new Date(b.occurredAt).getTime());
+      .sort(
+        (a, b) =>
+          new Date(a.occurredAt).getTime() - new Date(b.occurredAt).getTime()
+      );
 
     return {
       transactions: transactions.length,
@@ -109,12 +128,27 @@ export default function ProfilePage() {
       debts: debts.length,
       totalIncome: income,
       totalExpenses: expenses,
-      oldestTransaction: sortedTransactions[0] ? new Date(sortedTransactions[0].occurredAt) : undefined,
+      oldestTransaction: sortedTransactions[0]
+        ? new Date(sortedTransactions[0].occurredAt)
+        : undefined,
       newestTransaction: sortedTransactions[sortedTransactions.length - 1]
         ? new Date(sortedTransactions[sortedTransactions.length - 1].occurredAt)
         : undefined,
     };
   }, [transactions, categories, accounts, incomeSources, goals, debts]);
+
+  const handleBreakGlass = () => {
+    setGlassBreak({ isBroken: false, isBreaking: true });
+
+    // Simulate glass breaking animation
+    setTimeout(() => {
+      setGlassBreak({ isBroken: true, isBreaking: false });
+      toast.warning("Emergency protocols activated", {
+        description: "Glass barrier removed. Proceed with extreme caution.",
+        icon: <ShieldAlert className="h-4 w-4" />,
+      });
+    }, 1000);
+  };
 
   const handleDeleteAllData = async () => {
     setDeletionProgress({
@@ -247,7 +281,8 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent className="pt-0">
             <p className="text-xs text-neutral-400">
-              Manage your account, view data statistics, and control your financial data.
+              Manage your account, view data statistics, and control your
+              financial data.
             </p>
           </CardContent>
         </Card>
@@ -264,7 +299,9 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-neutral-400">Email</p>
-                <p className="font-medium">{user?.emailAddresses[0]?.emailAddress || "Not available"}</p>
+                <p className="font-medium">
+                  {user?.emailAddresses[0]?.emailAddress || "Not available"}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-neutral-400">Name</p>
@@ -277,7 +314,9 @@ export default function ProfilePage() {
               <div>
                 <p className="text-sm text-neutral-400">Account Created</p>
                 <p className="font-medium">
-                  {user?.createdAt ? formatDate(user.createdAt.toISOString()) : "Unknown"}
+                  {user?.createdAt
+                    ? formatDate(user.createdAt.toISOString())
+                    : "Unknown"}
                 </p>
               </div>
               <div>
@@ -308,10 +347,18 @@ export default function ProfilePage() {
                   <Badge variant="secondary">{dataStats.transactions}</Badge>
                 </div>
                 <div className="space-y-1 text-sm text-neutral-400">
-                  <p>Income: {formatCurrency(dataStats.totalIncome.toString())}</p>
-                  <p>Expenses: {formatCurrency(dataStats.totalExpenses.toString())}</p>
+                  <p>
+                    Income: {formatCurrency(dataStats.totalIncome.toString())}
+                  </p>
+                  <p>
+                    Expenses:{" "}
+                    {formatCurrency(dataStats.totalExpenses.toString())}
+                  </p>
                   {dataStats.oldestTransaction && (
-                    <p>Oldest: {formatDate(dataStats.oldestTransaction.toISOString())}</p>
+                    <p>
+                      Oldest:{" "}
+                      {formatDate(dataStats.oldestTransaction.toISOString())}
+                    </p>
                   )}
                 </div>
               </div>
@@ -404,7 +451,8 @@ export default function ProfilePage() {
                 <div className="flex-1">
                   <h3 className="font-medium text-red-400 mb-2">Danger Zone</h3>
                   <p className="text-sm text-neutral-300 mb-4">
-                    These actions cannot be undone. Please be certain before proceeding.
+                    These actions cannot be undone. Please be certain before
+                    proceeding.
                   </p>
 
                   {deletionProgress.isDeleting ? (
@@ -417,13 +465,20 @@ export default function ProfilePage() {
                         <div
                           className="bg-orange-500 h-2 transition-all duration-300"
                           style={{
-                            width: `${(deletionProgress.completed.length / deletionProgress.total) * 100}%`,
+                            width: `${
+                              (deletionProgress.completed.length /
+                                deletionProgress.total) *
+                              100
+                            }%`,
                           }}
                         />
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {deletionProgress.completed.map((item) => (
-                          <div key={item} className="flex items-center gap-1 text-xs text-green-400">
+                          <div
+                            key={item}
+                            className="flex items-center gap-1 text-xs text-green-400"
+                          >
                             <CheckCircle className="h-3 w-3" />
                             {item}
                           </div>
@@ -436,16 +491,23 @@ export default function ProfilePage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="sm" className="text-red-400 border-red-400 hover:bg-red-400/10">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-400 border-red-400 hover:bg-red-400/10"
+                            >
                               Delete All Transactions
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete All Transactions?</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                Delete All Transactions?
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
-                                This will permanently delete all {dataStats.transactions} transactions.
-                                This action cannot be undone.
+                                This will permanently delete all{" "}
+                                {dataStats.transactions} transactions. This
+                                action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -462,16 +524,23 @@ export default function ProfilePage() {
 
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="sm" className="text-red-400 border-red-400 hover:bg-red-400/10">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-400 border-red-400 hover:bg-red-400/10"
+                            >
                               Delete All Categories
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete All Categories?</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                Delete All Categories?
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
-                                This will permanently delete all {dataStats.categories} categories.
-                                This action cannot be undone.
+                                This will permanently delete all{" "}
+                                {dataStats.categories} categories. This action
+                                cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -487,43 +556,133 @@ export default function ProfilePage() {
                         </AlertDialog>
                       </div>
 
-                      {/* Complete deletion */}
+                      {/* Complete deletion with glass cover */}
                       <div className="pt-4 border-t border-red-800">
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button className="bg-red-600 hover:bg-red-700 w-full">
-                              Delete All Profile Data
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete All Profile Data?</AlertDialogTitle>
-                              <AlertDialogDescription className="space-y-2">
-                                <p>This will permanently delete ALL of your financial data including:</p>
-                                <ul className="list-disc list-inside space-y-1 text-sm">
-                                  <li>{dataStats.transactions} transactions</li>
-                                  <li>{dataStats.categories} categories</li>
-                                  <li>{dataStats.accounts} accounts</li>
-                                  <li>{dataStats.incomeSources} income sources</li>
-                                  <li>{dataStats.goals} savings goals</li>
-                                  <li>{dataStats.debts} debt records</li>
-                                </ul>
-                                <p className="font-medium text-red-400">
-                                  This action cannot be undone and you will lose all your financial history.
+                        <div className="relative">
+                          {/* Glass Cover */}
+                          {!glassBreak.isBroken && (
+                            <div className="absolute inset-0 z-10 flex items-center justify-center">
+                              <div
+                                className={`absolute inset-0  transition-all duration-1000 ${
+                                  glassBreak.isBreaking
+                                    ? "bg-gradient-to-br from-cyan-400/30 via-blue-400/20 to-cyan-300/30 animate-pulse"
+                                    : "bg-gradient-to-br from-cyan-400/20 via-blue-400/10 to-cyan-300/20"
+                                } backdrop-blur-sm border border-cyan-400/50 shadow-lg`}
+                                style={{
+                                  backgroundImage: glassBreak.isBreaking
+                                    ? "radial-gradient(circle at 50% 50%, transparent 0%, transparent 30%, rgba(255,255,255,0.1) 40%, transparent 70%)"
+                                    : "linear-gradient(45deg, transparent 25%, rgba(255,255,255,0.1) 50%, transparent 75%)",
+                                }}
+                              />
+                              <div className="relative z-20 text-center">
+                                <ShieldAlert className="h-8 w-8 text-cyan-300 mx-auto mb-2" />
+                                <p className="text-sm font-medium text-cyan-200 mb-3">
+                                  Emergency Glass Cover
                                 </p>
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={handleDeleteAllData}
-                                className="bg-red-600 hover:bg-red-700"
-                              >
-                                Delete Everything
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                                <Button
+                                  onClick={handleBreakGlass}
+                                  disabled={glassBreak.isBreaking}
+                                  className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold"
+                                >
+                                  {glassBreak.isBreaking ? (
+                                    <>
+                                      <Zap className="h-4 w-4 mr-2 animate-spin" />
+                                      Breaking Glass...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Zap className="h-4 w-4 mr-2" />
+                                      Break Glass
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Emergency Button (behind glass initially) */}
+                          <div
+                            className={`transition-all duration-500 ${
+                              !glassBreak.isBroken ? "blur-sm opacity-60" : ""
+                            }`}
+                          >
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  className="bg-red-600 hover:bg-red-700 w-full text-lg py-6 font-bold relative overflow-hidden"
+                                  disabled={!glassBreak.isBroken}
+                                >
+                                  <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-red-500 to-red-600 animate-pulse" />
+                                  <div className="relative z-10 flex items-center justify-center gap-2">
+                                    <AlertTriangle className="h-5 w-5" />
+                                    EMERGENCY: Delete All Profile Data
+                                    <AlertTriangle className="h-5 w-5" />
+                                  </div>
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent className="md:max-w-2xl">
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle className="flex items-center gap-2 text-red-400">
+                                    <AlertTriangle className="h-5 w-5" />
+                                    FINAL WARNING
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription asChild>
+                                    <div className="space-y-3">
+                                      <div className="p-3 bg-red-950/50 border border-red-800 rounded">
+                                        <p className="font-medium text-red-300 mb-2">
+                                          You are about to permanently delete
+                                          ALL financial data:
+                                        </p>
+                                        <ul className="list-disc list-inside space-y-1 text-sm text-red-200">
+                                          <li>
+                                            {dataStats.transactions}{" "}
+                                            transactions
+                                          </li>
+                                          <li>
+                                            {dataStats.categories} categories
+                                          </li>
+                                          <li>{dataStats.accounts} accounts</li>
+                                          <li>
+                                            {dataStats.incomeSources} income
+                                            sources
+                                          </li>
+                                          <li>
+                                            {dataStats.goals} savings goals
+                                          </li>
+                                          <li>
+                                            {dataStats.debts} debt records
+                                          </li>
+                                        </ul>
+                                      </div>
+                                      <div className="p-3 bg-yellow-950/30 border border-yellow-700 rounded">
+                                        <p className="font-bold text-yellow-300 text-center">
+                                          ⚠️ THIS ACTION CANNOT BE UNDONE ⚠️
+                                        </p>
+                                        <p className="text-yellow-200 text-sm text-center mt-1">
+                                          All your financial history will be
+                                          lost forever
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <div className="flex w-full justify-between gap-2">
+                                    <AlertDialogCancel className="bg-green-700 hover:bg-green-600 text-white border-0 w-6/12">
+                                      Cancel - Keep My Data Safe
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={handleDeleteAllData}
+                                      className="bg-red-600 hover:bg-red-700 font-bold "
+                                    >
+                                      I Understand - Delete Everything
+                                    </AlertDialogAction>
+                                  </div>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
