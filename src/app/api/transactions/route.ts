@@ -22,11 +22,16 @@ export async function GET(request: NextRequest) {
         span.end();
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
+      // Ensure user exists in the database/ asking for details they own.
+
+
 
       const { searchParams } = new URL(request.url);
       const type = searchParams.get("type");
       const limit = parseInt(searchParams.get("limit") || "5000");
       const offset = parseInt(searchParams.get("offset") || "0");
+
+      // Does the app acc/
 
       const whereClause: {
         userId: string;
