@@ -1,0 +1,375 @@
+"Title","Description","Project","Status","Estimate","Priority","Labels"
+"[E4.S1.T1] Add Goals to Schema","Add savings_goals table to Convex schema.
+
+**Files Modified:** convex/schema.ts
+
+**Table Fields:**
+- userId, name, targetAmount, currentAmount
+- targetDate, color, icon, isArchived, createdAt
+
+**Indexes:**
+- by_user
+- by_user_active
+
+**Acceptance Criteria:**
+- [ ] Goals table in schema
+- [ ] Indexes defined
+- [ ] Schema compiles","E4: Savings Goals","Backlog",1,"Urgent","Setup, Blocker"
+"[E4.S1.T2] Create Goal Form Component","Create form to create savings goals.
+
+**Files Created:** src/components/goals/GoalForm.tsx
+
+**Form Fields:**
+- Name (text)
+- Target amount (number)
+- Target date (date picker, optional)
+- Color (picker)
+- Icon (selector)
+
+**Acceptance Criteria:**
+- [ ] Form renders
+- [ ] All fields present
+- [ ] Validation works
+- [ ] Can select color and icon","E4: Savings Goals","Backlog",2,"High","Feature"
+"[E4.S1.T3] Create Goal Mutations","Create Convex mutations for goals CRUD.
+
+**Files Created:** convex/goals.ts
+
+**Mutations:**
+- createGoal
+- updateGoal
+- deleteGoal (soft delete)
+
+**Acceptance Criteria:**
+- [ ] All mutations created
+- [ ] Validation works
+- [ ] No TypeScript errors","E4: Savings Goals","Backlog",1,"High","Feature"
+"[E4.S1.T4] Create Goals Query","Create Convex query to fetch goals.
+
+**Files Created/Modified:** convex/goals.ts
+
+**Query:** getGoals(userId, includeArchived?)
+
+**Returns:** All goals with progress percentage
+
+**Acceptance Criteria:**
+- [ ] Query created
+- [ ] Filter works
+- [ ] Returns goals sorted","E4: Savings Goals","Backlog",1,"High","Feature"
+"[E4.S1.T5] Wire Goal Form to Mutations","Connect goal form to Convex.
+
+**Files Modified:** src/components/goals/GoalForm.tsx
+
+**Connect:**
+- useMutation for create/update
+- Success toast
+- Navigate to goals list
+
+**Acceptance Criteria:**
+- [ ] Form submits
+- [ ] Goal created
+- [ ] Toast shows
+- [ ] Navigation works","E4: Savings Goals","Backlog",1,"High","Feature"
+"[E4.S2.T1] Add Goal Contributions to Schema","Add goal_contributions table to schema.
+
+**Files Modified:** convex/schema.ts
+
+**Table Fields:**
+- goalId, amount, date, note, createdAt
+
+**Indexes:**
+- by_goal
+- by_goal_and_date
+
+**Acceptance Criteria:**
+- [ ] Contributions table in schema
+- [ ] Indexes defined
+- [ ] Schema compiles","E4: Savings Goals","Backlog",1,"High","Setup"
+"[E4.S2.T2] Create Contribution Form Component","Create form to add contributions to goals.
+
+**Files Created:** src/components/goals/ContributionForm.tsx
+
+**Form Fields:**
+- Amount (number)
+- Date (date picker, defaults today)
+- Note (text, optional)
+
+**Acceptance Criteria:**
+- [ ] Form renders
+- [ ] All fields present
+- [ ] Validation works","E4: Savings Goals","Backlog",1,"High","Feature"
+"[E4.S2.T3] Create Contribution Mutations","Create mutations for goal contributions.
+
+**Files Created/Modified:** convex/goals.ts
+
+**Mutations:**
+- addContribution
+- updateGoalAmount (updates currentAmount)
+
+**Logic:**
+- Add contribution record
+- Update goal.currentAmount
+
+**Acceptance Criteria:**
+- [ ] Mutations created
+- [ ] Goal amount updates
+- [ ] Contribution recorded","E4: Savings Goals","Backlog",1,"High","Feature"
+"[E4.S2.T4] Wire Contribution Form to Mutations","Connect contribution form to Convex.
+
+**Files Modified:** src/components/goals/ContributionForm.tsx
+
+**Connect:**
+- useMutation(addContribution)
+- Update goal progress
+- Success toast
+
+**Acceptance Criteria:**
+- [ ] Form submits
+- [ ] Contribution added
+- [ ] Progress updates
+- [ ] Toast shows","E4: Savings Goals","Backlog",1,"High","Feature"
+"[E4.S3.T1] Create Goal Progress Component","Create visual progress component for goals.
+
+**Files Created:** src/components/goals/GoalProgress.tsx
+
+**Features:**
+- Progress bar (current / target)
+- Percentage complete
+- Amount remaining
+- Days until target
+
+**Acceptance Criteria:**
+- [ ] Component renders
+- [ ] Progress accurate
+- [ ] Visual appealing
+- [ ] Responsive","E4: Savings Goals","Backlog",2,"High","Feature"
+"[E4.S3.T2] Create Goals List Component","Create list view for all goals.
+
+**Files Created:** src/components/goals/GoalsList.tsx
+
+**Features:**
+- Grid layout
+- Progress bars
+- Quick add contribution
+- Edit/delete actions
+
+**Acceptance Criteria:**
+- [ ] List renders
+- [ ] Shows all goals
+- [ ] Real-time updates
+- [ ] Actions work","E4: Savings Goals","Backlog",2,"High","Feature"
+"[E4.S3.T3] Add Goals to Dashboard","Add goals widget to dashboard.
+
+**Files Modified:** src/routes/dashboard.tsx
+
+**Add:**
+- Goals summary card
+- Top 3 goals in progress
+- Quick contribution button
+
+**Acceptance Criteria:**
+- [ ] Widget renders on dashboard
+- [ ] Shows top goals
+- [ ] Quick actions work","E4: Savings Goals","Backlog",1,"High","Feature"
+"[E5.S1.T1] Add Debts to Schema","Add debts table to Convex schema.
+
+**Files Modified:** convex/schema.ts
+
+**Table Fields:**
+- userId, name, type, originalAmount
+- currentBalance, interestRate, minimumPayment
+- dueDay, isArchived, createdAt
+
+**Indexes:**
+- by_user
+- by_user_active
+
+**Acceptance Criteria:**
+- [ ] Debts table in schema
+- [ ] Indexes defined
+- [ ] Schema compiles","E5: Debt Tracking","Backlog",1,"Urgent","Setup, Blocker"
+"[E5.S1.T2] Create Debt Form Component","Create form to add debts.
+
+**Files Created:** src/components/debts/DebtForm.tsx
+
+**Form Fields:**
+- Name (text)
+- Type (credit card, loan, mortgage, etc)
+- Original amount (number)
+- Current balance (number)
+- Interest rate (percentage)
+- Minimum payment (number)
+- Due day (1-31)
+
+**Acceptance Criteria:**
+- [ ] Form renders
+- [ ] All fields present
+- [ ] Validation works","E5: Debt Tracking","Backlog",2,"High","Feature"
+"[E5.S1.T3] Create Debt Mutations","Create Convex mutations for debts CRUD.
+
+**Files Created:** convex/debts.ts
+
+**Mutations:**
+- createDebt
+- updateDebt
+- deleteDebt (soft delete)
+
+**Acceptance Criteria:**
+- [ ] All mutations created
+- [ ] Validation works
+- [ ] No TypeScript errors","E5: Debt Tracking","Backlog",1,"High","Feature"
+"[E5.S1.T4] Create Debts Query","Create Convex query to fetch debts.
+
+**Files Created/Modified:** convex/debts.ts
+
+**Query:** getDebts(userId, includeArchived?)
+
+**Returns:** All debts with payment history
+
+**Acceptance Criteria:**
+- [ ] Query created
+- [ ] Filter works
+- [ ] Returns debts sorted","E5: Debt Tracking","Backlog",1,"High","Feature"
+"[E5.S1.T5] Wire Debt Form to Mutations","Connect debt form to Convex.
+
+**Files Modified:** src/components/debts/DebtForm.tsx
+
+**Connect:**
+- useMutation for create/update
+- Success toast
+- Navigate to debts list
+
+**Acceptance Criteria:**
+- [ ] Form submits
+- [ ] Debt created
+- [ ] Toast shows
+- [ ] Navigation works","E5: Debt Tracking","Backlog",1,"High","Feature"
+"[E5.S2.T1] Add Debt Payments to Schema","Add debt_payments table to schema.
+
+**Files Modified:** convex/schema.ts
+
+**Table Fields:**
+- debtId, amount, date, note, createdAt
+
+**Indexes:**
+- by_debt
+- by_debt_and_date
+
+**Acceptance Criteria:**
+- [ ] Payments table in schema
+- [ ] Indexes defined
+- [ ] Schema compiles","E5: Debt Tracking","Backlog",1,"High","Setup"
+"[E5.S2.T2] Create Payment Form Component","Create form to record debt payments.
+
+**Files Created:** src/components/debts/PaymentForm.tsx
+
+**Form Fields:**
+- Amount (number)
+- Date (date picker, defaults today)
+- Note (text, optional)
+
+**Acceptance Criteria:**
+- [ ] Form renders
+- [ ] All fields present
+- [ ] Validation works","E5: Debt Tracking","Backlog",1,"High","Feature"
+"[E5.S2.T3] Create Payment Mutations","Create mutations for debt payments.
+
+**Files Created/Modified:** convex/debts.ts
+
+**Mutations:**
+- addPayment
+- updateDebtBalance (reduces currentBalance)
+
+**Logic:**
+- Add payment record
+- Update debt.currentBalance
+
+**Acceptance Criteria:**
+- [ ] Mutations created
+- [ ] Balance updates
+- [ ] Payment recorded","E5: Debt Tracking","Backlog",1,"High","Feature"
+"[E5.S2.T4] Wire Payment Form to Mutations","Connect payment form to Convex.
+
+**Files Modified:** src/components/debts/PaymentForm.tsx
+
+**Connect:**
+- useMutation(addPayment)
+- Update debt balance
+- Success toast
+
+**Acceptance Criteria:**
+- [ ] Form submits
+- [ ] Payment added
+- [ ] Balance updates
+- [ ] Toast shows","E5: Debt Tracking","Backlog",1,"High","Feature"
+"[E5.S3.T1] Create Debt Progress Component","Create visual progress component for debts.
+
+**Files Created:** src/components/debts/DebtProgress.tsx
+
+**Features:**
+- Progress bar (paid / original)
+- Percentage paid off
+- Amount remaining
+- Estimated payoff date
+
+**Acceptance Criteria:**
+- [ ] Component renders
+- [ ] Progress accurate
+- [ ] Visual clear
+- [ ] Responsive","E5: Debt Tracking","Backlog",2,"High","Feature"
+"[E5.S3.T2] Create Debts List Component","Create list view for all debts.
+
+**Files Created:** src/components/debts/DebtsList.tsx
+
+**Features:**
+- List layout
+- Progress bars
+- Quick add payment
+- Edit/delete actions
+
+**Acceptance Criteria:**
+- [ ] List renders
+- [ ] Shows all debts
+- [ ] Real-time updates
+- [ ] Actions work","E5: Debt Tracking","Backlog",2,"High","Feature"
+"[E5.S3.T3] Add Debt Payoff Calculator","Calculate payoff timeline based on payments.
+
+**Files Created:** src/lib/debtCalculator.ts
+
+**Calculates:**
+- Payoff date (with minimum payments)
+- Payoff date (with custom payment)
+- Total interest paid
+
+**Acceptance Criteria:**
+- [ ] Calculator accurate
+- [ ] Accounts for interest
+- [ ] Shows timeline","E5: Debt Tracking","Backlog",2,"High","Feature"
+"[E5.S3.T4] Create Debt Dashboard Component","Create overview of all debts.
+
+**Files Created:** src/components/debts/DebtDashboard.tsx
+
+**Features:**
+- Total debt amount
+- Total paid this month
+- Upcoming payments
+- Payoff projections
+
+**Acceptance Criteria:**
+- [ ] Dashboard renders
+- [ ] Shows all debts
+- [ ] Summaries accurate
+- [ ] Projections clear","E5: Debt Tracking","Backlog",2,"High","Feature"
+"[E5.S3.T5] Add Debts to Dashboard","Add debts widget to main dashboard.
+
+**Files Modified:** src/routes/dashboard.tsx
+
+**Add:**
+- Debt summary card
+- Total debt remaining
+- Upcoming payments
+
+**Acceptance Criteria:**
+- [ ] Widget renders
+- [ ] Shows debt summary
+- [ ] Quick actions work","E5: Debt Tracking","Backlog",1,"High","Feature"

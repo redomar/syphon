@@ -1,0 +1,536 @@
+"Title","Description","Project","Status","Estimate","Priority","Labels"
+"[E8.S1.T1] Add CSV Import to Schema","Add csv_imports table to schema.
+
+**Files Modified:** convex/schema.ts
+
+**Table Fields:**
+- userId, filename, rowCount
+- storageId, createdAt, expiresAt
+
+**Indexes:**
+- by_user
+- by_user_and_date
+
+**Acceptance Criteria:**
+- [ ] Imports table in schema
+- [ ] Indexes defined
+- [ ] Schema compiles","E8: Polish & Launch","Backlog",1,"High","Setup"
+"[E8.S1.T2] Create CSV Upload Component","Create drag-drop CSV upload component.
+
+**Files Created:** src/components/import/CSVUpload.tsx
+
+**Features:**
+- Drag and drop area
+- File picker fallback
+- File size limit: 10MB
+- Accepts .csv only
+- Upload to Convex storage
+
+**Acceptance Criteria:**
+- [ ] Component renders
+- [ ] Drag-drop works
+- [ ] File picker works
+- [ ] Uploads to storage
+- [ ] Size limit enforced","E8: Polish & Launch","Backlog",2,"High","Feature"
+"[E8.S1.T3] Create CSV Parser","Create CSV parsing logic.
+
+**Files Created:** src/lib/csvParser.ts
+
+**Features:**
+- Parse CSV to array
+- Detect columns
+- Handle quoted fields
+- Handle commas in values
+- Error handling
+
+**Acceptance Criteria:**
+- [ ] Parser works
+- [ ] Handles edge cases
+- [ ] Error messages clear
+- [ ] Performance good","E8: Polish & Launch","Backlog",2,"High","Feature"
+"[E8.S1.T4] Create Column Mapping UI","Create UI to map CSV columns to fields.
+
+**Files Created:** src/components/import/ColumnMapper.tsx
+
+**Features:**
+- Shows CSV columns
+- Dropdown to map to fields
+- Preview first 5 rows
+- Auto-detect common patterns
+
+**Acceptance Criteria:**
+- [ ] Component renders
+- [ ] Mapping works
+- [ ] Preview accurate
+- [ ] Auto-detect works","E8: Polish & Launch","Backlog",2,"High","Feature"
+"[E8.S1.T5] Create Date Format Detector","Auto-detect date formats in CSV.
+
+**Files Created:** src/lib/dateFormatDetector.ts
+
+**Detects:**
+- MM/DD/YYYY
+- DD/MM/YYYY
+- YYYY-MM-DD
+- DD-MM-YYYY
+- Others
+
+**Acceptance Criteria:**
+- [ ] Detects formats correctly
+- [ ] Parses dates accurately
+- [ ] Handles edge cases","E8: Polish & Launch","Backlog",1,"High","Feature"
+"[E8.S1.T6] Create Amount Parser","Parse amounts from CSV (handles currency symbols).
+
+**Files Created:** src/lib/amountParser.ts
+
+**Handles:**
+- Currency symbols (£, $, €)
+- Commas in numbers
+- Decimal points
+- Negative amounts
+
+**Acceptance Criteria:**
+- [ ] Parses amounts correctly
+- [ ] Handles all formats
+- [ ] Returns cents","E8: Polish & Launch","Backlog",1,"High","Feature"
+"[E8.S1.T7] Create Duplicate Detection","Detect duplicate transactions in CSV.
+
+**Files Created:** src/lib/duplicateDetector.ts
+
+**Logic:**
+- Match on date + amount + description
+- Show duplicate count
+- Allow user to choose: skip or import
+
+**Acceptance Criteria:**
+- [ ] Detects duplicates
+- [ ] Count accurate
+- [ ] User can choose action","E8: Polish & Launch","Backlog",2,"High","Feature"
+"[E8.S1.T8] Create Import Mutation","Create Convex mutation to import transactions.
+
+**Files Created/Modified:** convex/imports.ts
+
+**Mutation:** importTransactions
+
+**Logic:**
+- Create transactions in batch
+- Link to import record
+- Return count
+
+**Acceptance Criteria:**
+- [ ] Mutation created
+- [ ] Batch insert works
+- [ ] Returns count","E8: Polish & Launch","Backlog",1,"High","Feature"
+"[E8.S1.T9] Create Import Progress Component","Show progress during CSV import.
+
+**Files Created:** src/components/import/ImportProgress.tsx
+
+**Features:**
+- Progress bar
+- Rows imported / total
+- Cancel button
+- Success message
+
+**Acceptance Criteria:**
+- [ ] Component renders
+- [ ] Progress updates
+- [ ] Cancel works
+- [ ] Success shows","E8: Polish & Launch","Backlog",1,"High","Feature"
+"[E8.S1.T10] Create Undo Import Feature","Allow undoing most recent import.
+
+**Files Created:** src/components/import/UndoImport.tsx
+
+**Features:**
+- Shows import details
+- ""Undo Import"" button
+- Confirmation dialog
+- Deletes transactions from import
+
+**Acceptance Criteria:**
+- [ ] Component renders
+- [ ] Shows import details
+- [ ] Undo works
+- [ ] Transactions deleted","E8: Polish & Launch","Backlog",2,"High","Feature"
+"[E8.S1.T11] Add GDPR Cleanup for CSV Files","Auto-delete CSV files after 30 days.
+
+**Files Created:** convex/crons.ts
+
+**Cron:**
+- Runs daily
+- Deletes expired imports
+- Removes from storage
+
+**Acceptance Criteria:**
+- [ ] Cron scheduled
+- [ ] Deletes expired files
+- [ ] Storage cleaned up","E8: Polish & Launch","Backlog",1,"High","Feature"
+"[E8.S2.T1] Add Receipts to Schema","Add receipts table to schema.
+
+**Files Modified:** convex/schema.ts
+
+**Table Fields:**
+- transactionId, storageId, filename
+- fileType, fileSize, createdAt
+
+**Indexes:**
+- by_transaction
+
+**Acceptance Criteria:**
+- [ ] Receipts table in schema
+- [ ] Index defined
+- [ ] Schema compiles","E8: Polish & Launch","Backlog",1,"High","Setup"
+"[E8.S2.T2] Create Receipt Upload Component","Create component to upload receipts.
+
+**Files Created:** src/components/receipts/ReceiptUpload.tsx
+
+**Features:**
+- File picker
+- Supports: JPG, PNG, PDF
+- Size limit: 5MB
+- Upload to Convex storage
+- Link to transaction
+
+**Acceptance Criteria:**
+- [ ] Component renders
+- [ ] Upload works
+- [ ] File types validated
+- [ ] Size limit enforced","E8: Polish & Launch","Backlog",2,"High","Feature"
+"[E8.S2.T3] Create Receipt Mutation","Create Convex mutation to add receipt.
+
+**Files Created:** convex/receipts.ts
+
+**Mutation:** addReceipt
+
+**Logic:**
+- Store file in Convex storage
+- Create receipt record
+- Link to transaction
+
+**Acceptance Criteria:**
+- [ ] Mutation created
+- [ ] File stored
+- [ ] Record created","E8: Polish & Launch","Backlog",1,"High","Feature"
+"[E8.S2.T4] Create Receipt Viewer Component","Create component to view receipts.
+
+**Files Created:** src/components/receipts/ReceiptViewer.tsx
+
+**Features:**
+- Thumbnail on transaction
+- Click to view full size
+- Modal or new tab
+- Download option
+- Delete option
+
+**Acceptance Criteria:**
+- [ ] Viewer renders
+- [ ] Thumbnail shows
+- [ ] Full view works
+- [ ] Download works
+- [ ] Delete works","E8: Polish & Launch","Backlog",2,"High","Feature"
+"[E8.S2.T5] Create Receipts Gallery Page","Create page showing all receipts.
+
+**Files Created:** src/routes/receipts.tsx
+
+**Features:**
+- Grid view
+- Filter by date/category
+- Search by filename
+- Click to view transaction
+
+**Acceptance Criteria:**
+- [ ] Page renders
+- [ ] Grid layout works
+- [ ] Filters work
+- [ ] Links to transactions","E8: Polish & Launch","Backlog",1,"Medium","Feature"
+"[E8.S2.T6] Add GDPR Deletion for Receipts","Delete receipts when transaction deleted.
+
+**Files Modified:** convex/transactions.ts
+
+**Logic:**
+- When transaction deleted
+- Delete associated receipts
+- Remove from storage
+
+**Acceptance Criteria:**
+- [ ] Receipts deleted with transaction
+- [ ] Storage cleaned up
+- [ ] GDPR compliant","E8: Polish & Launch","Backlog",1,"High","Feature"
+"[E8.S3.T1] Create Onboarding Flow Schema","Add onboarding fields to users table.
+
+**Files Modified:** convex/schema.ts
+
+**Fields:**
+- onboardingComplete (boolean)
+- isDemoMode (boolean)
+
+**Acceptance Criteria:**
+- [ ] Fields added
+- [ ] Schema compiles
+- [ ] Migration notes added","E8: Polish & Launch","Backlog",1,"High","Setup"
+"[E8.S3.T2] Create Welcome Screen Component","Create initial welcome screen.
+
+**Files Created:** src/components/onboarding/WelcomeScreen.tsx
+
+**Features:**
+- App introduction
+- Two options: Demo Mode / Setup Wizard
+- Hero image
+- Clear CTAs
+
+**Acceptance Criteria:**
+- [ ] Component renders
+- [ ] Two options clear
+- [ ] Visual appealing
+- [ ] CTAs work","E8: Polish & Launch","Backlog",2,"High","Feature"
+"[E8.S3.T3] Create Demo Data Generator","Generate sample data for demo mode.
+
+**Files Created:** src/lib/demoDataGenerator.ts
+
+**Generates:**
+- 50 transactions (last 3 months)
+- 1 budget (current month)
+- 2 savings goals
+- 1 debt
+- All tagged isDemoData: true
+
+**Acceptance Criteria:**
+- [ ] Generator works
+- [ ] Realistic data
+- [ ] All tagged correctly","E8: Polish & Launch","Backlog",2,"High","Feature"
+"[E8.S3.T4] Create Setup Wizard Component","Create multi-step onboarding wizard.
+
+**Files Created:** src/components/onboarding/SetupWizard.tsx
+
+**Steps:**
+- Step 1: Currency + timezone
+- Step 2: Categories (defaults + custom)
+- Step 3: First account (optional)
+- Step 4: First budget (optional)
+- Step 5: First transaction or import
+
+**Acceptance Criteria:**
+- [ ] Wizard renders
+- [ ] All steps work
+- [ ] Can navigate back
+- [ ] Validation works
+- [ ] Can skip optional steps","E8: Polish & Launch","Backlog",2,"High","Feature"
+"[E8.S3.T5] Create Clear Demo Data Feature","Create button to clear demo data.
+
+**Files Created:** src/components/settings/ClearDemoData.tsx
+
+**Features:**
+- Shows warning
+- Confirmation dialog
+- Deletes all isDemoData records
+- Success message
+
+**Acceptance Criteria:**
+- [ ] Button shows when demo active
+- [ ] Confirmation required
+- [ ] All demo data deleted
+- [ ] Success message shows","E8: Polish & Launch","Backlog",1,"High","Feature"
+"[E8.S3.T6] Wire Onboarding to App","Integrate onboarding into app flow.
+
+**Files Modified:** src/App.tsx
+
+**Logic:**
+- Check onboardingComplete
+- Show onboarding if false
+- Never show again after complete
+
+**Acceptance Criteria:**
+- [ ] Onboarding shows on first login
+- [ ] Never shows again
+- [ ] Can skip
+- [ ] Demo mode works","E8: Polish & Launch","Backlog",1,"High","Feature"
+"[E8.S3.T7] Create Progress Indicator","Show progress through wizard steps.
+
+**Files Created:** src/components/onboarding/ProgressIndicator.tsx
+
+**Features:**
+- Shows current step
+- Shows total steps
+- Visual progress bar
+
+**Acceptance Criteria:**
+- [ ] Indicator renders
+- [ ] Updates on step change
+- [ ] Visual clear","E8: Polish & Launch","Backlog",1,"High","Feature"
+"[E8.S3.T8] Test Onboarding Flow End-to-End","Comprehensive testing of onboarding.
+
+**Test Scenarios:**
+- Demo mode setup
+- Full wizard completion
+- Skip optional steps
+- Clear demo data
+- Complete setup
+
+**Acceptance Criteria:**
+- [ ] All flows work
+- [ ] No bugs found
+- [ ] Data created correctly","E8: Polish & Launch","Backlog",2,"High","Feature"
+"[E8.S4.T1] Create Bill Reminders Query","Create query for upcoming bills.
+
+**Files Created/Modified:** convex/recurring.ts
+
+**Query:** getUpcomingBills(userId, daysAhead)
+
+**Returns:**
+- Projected recurring expenses
+- Due in next N days
+- Sorted by date
+
+**Acceptance Criteria:**
+- [ ] Query created
+- [ ] Filters expenses only
+- [ ] Date range correct","E8: Polish & Launch","Backlog",1,"High","Feature"
+"[E8.S4.T2] Create Bill Reminders Component","Create component to show upcoming bills.
+
+**Files Created:** src/components/dashboard/BillReminders.tsx
+
+**Features:**
+- List of upcoming bills
+- Shows: description, amount, due date, days until due
+- Mark as paid button
+- Alert banner if due soon
+
+**Acceptance Criteria:**
+- [ ] Component renders
+- [ ] Shows upcoming bills
+- [ ] Alert shows
+- [ ] Mark as paid works","E8: Polish & Launch","Backlog",2,"High","Feature"
+"[E8.S4.T3] Add Bill Reminder Settings","Add setting for reminder days.
+
+**Files Modified:** src/routes/settings.tsx
+
+**Setting:**
+- Reminder days (7/14/30/custom)
+- Save to user preferences
+
+**Acceptance Criteria:**
+- [ ] Setting renders
+- [ ] Can change value
+- [ ] Saves to database
+- [ ] Applied to reminders","E8: Polish & Launch","Backlog",1,"High","Feature"
+"[E8.S4.T4] Add Bill Reminders to Dashboard","Add bill reminders widget to dashboard.
+
+**Files Modified:** src/routes/dashboard.tsx
+
+**Add:**
+- Bill reminders card
+- Alert banner at top
+- Quick mark as paid
+
+**Acceptance Criteria:**
+- [ ] Widget renders
+- [ ] Shows upcoming bills
+- [ ] Alert functional
+- [ ] Quick action works","E8: Polish & Launch","Backlog",1,"High","Feature"
+"[E8.S5.T1] Create Pay Schedule Feature","Allow users to set payday schedule.
+
+**Files Modified:** convex/schema.ts, src/routes/settings.tsx
+
+**Fields:**
+- Pay frequency (weekly/bi-weekly/monthly)
+- Pay day (day of week or date)
+- Next pay date
+
+**Acceptance Criteria:**
+- [ ] Schema updated
+- [ ] Settings page shows option
+- [ ] Can set schedule
+- [ ] Calculates next payday","E8: Polish & Launch","Backlog",2,"Medium","Feature"
+"[E8.S5.T2] Add Loading States Everywhere","Ensure all components have loading states.
+
+**Files Modified:** All component files
+
+**Add:**
+- Skeleton loaders
+- Spinner components
+- Loading text
+
+**Acceptance Criteria:**
+- [ ] All lists have skeletons
+- [ ] All forms have loading
+- [ ] No blank screens
+- [ ] Consistent style","E8: Polish & Launch","Backlog",2,"High","Feature"
+"[E8.S5.T3] Add Error Boundaries","Add error boundaries to catch React errors.
+
+**Files Created:** src/components/ErrorBoundary.tsx
+
+**Features:**
+- Catches React errors
+- Shows friendly message
+- Log to console
+- Reload button
+
+**Acceptance Criteria:**
+- [ ] Error boundary works
+- [ ] Shows friendly message
+- [ ] Doesn't crash app
+- [ ] Logs errors","E8: Polish & Launch","Backlog",1,"High","Feature"
+"[E8.S5.T4] Add Empty States Everywhere","Ensure all lists have empty states.
+
+**Files Modified:** All list components
+
+**Add:**
+- Empty state message
+- Illustration or icon
+- CTA to add first item
+
+**Acceptance Criteria:**
+- [ ] All lists have empty state
+- [ ] Messages clear
+- [ ] CTAs work
+- [ ] Consistent style","E8: Polish & Launch","Backlog",2,"High","Feature"
+"[E8.S5.T5] Accessibility Audit","Review app for accessibility issues.
+
+**Tasks:**
+- Keyboard navigation
+- Screen reader support
+- Color contrast
+- ARIA labels
+- Focus indicators
+
+**Acceptance Criteria:**
+- [ ] Can navigate with keyboard
+- [ ] Screen reader works
+- [ ] Contrast meets WCAG AA
+- [ ] All interactive elements labeled","E8: Polish & Launch","Backlog",2,"High","Feature"
+"[E8.S5.T6] Performance Optimization","Optimize app performance.
+
+**Tasks:**
+- Code splitting
+- Lazy loading routes
+- Memoize expensive calculations
+- Optimize re-renders
+
+**Acceptance Criteria:**
+- [ ] Lighthouse score >90
+- [ ] No unnecessary re-renders
+- [ ] Fast page loads","E8: Polish & Launch","Backlog",2,"High","Feature"
+"[E8.S5.T7] Final Polish & Bug Fixes","Fix all remaining bugs and polish UI.
+
+**Tasks:**
+- Fix any remaining bugs
+- Polish animations
+- Consistent spacing
+- Mobile responsive check
+
+**Acceptance Criteria:**
+- [ ] No known bugs
+- [ ] UI polished
+- [ ] Mobile works
+- [ ] Animations smooth","E8: Polish & Launch","Backlog",2,"Urgent","Feature, Blocker"
+"[E8.S5.T8] Production Deployment & Testing","Deploy v1.0.0 to production.
+
+**Tasks:**
+- Deploy Convex to production
+- Deploy frontend to Netlify
+- Test all features in production
+- Monitor for errors
+
+**Acceptance Criteria:**
+- [ ] Production deployed
+- [ ] All features work
+- [ ] No errors
+- [ ] Performance good","E8: Polish & Launch","Backlog",2,"Urgent","Blocker, Quick Win"

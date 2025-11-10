@@ -1,0 +1,327 @@
+"Title","Description","Project","Status","Estimate","Priority","Labels"
+"[E7.S1.T1] Install Recharts","Install Recharts library for data visualization.
+
+**Commands:**
+```bash
+npm install recharts
+```
+
+**Acceptance Criteria:**
+- [ ] Recharts installed
+- [ ] No peer dependency errors
+- [ ] Can import components","E7: Analytics & Reports","Backlog",1,"High","Setup"
+"[E7.S1.T2] Create Income vs Expense Query","Create Convex query for income vs expense data.
+
+**Files Created:** convex/reports.ts
+
+**Query:** getIncomeVsExpense(userId, startDate, endDate)
+
+**Returns:**
+- Array of {month, income, expense}
+
+**Acceptance Criteria:**
+- [ ] Query created
+- [ ] Aggregates by month
+- [ ] Filters by date range
+- [ ] Returns formatted data","E7: Analytics & Reports","Backlog",2,"High","Feature"
+"[E7.S1.T3] Create Line Chart Component","Create reusable line chart component.
+
+**Files Created:** src/components/charts/LineChart.tsx
+
+**Features:**
+- Uses Recharts
+- Responsive
+- Customizable colors
+- Tooltip on hover
+
+**Acceptance Criteria:**
+- [ ] Component renders
+- [ ] Responsive design
+- [ ] Tooltip works
+- [ ] Reusable","E7: Analytics & Reports","Backlog",2,"High","Feature"
+"[E7.S1.T4] Create Income vs Expense Chart","Create income vs expense chart component.
+
+**Files Created:** src/components/reports/IncomeVsExpenseChart.tsx
+
+**Features:**
+- Line chart
+- Two lines (income green, expense red)
+- X-axis: Months
+- Y-axis: Amount (currency formatted)
+- Hover shows exact amounts
+
+**Acceptance Criteria:**
+- [ ] Chart renders
+- [ ] Data accurate
+- [ ] Colors correct
+- [ ] Responsive","E7: Analytics & Reports","Backlog",2,"High","Feature"
+"[E7.S1.T5] Add Date Range Filter to Reports","Add date range filter component for reports.
+
+**Files Created:** src/components/reports/ReportFilters.tsx
+
+**Options:**
+- Last 3 months
+- Last 6 months
+- Last 12 months
+- All time
+- Custom (date pickers)
+
+**Acceptance Criteria:**
+- [ ] Filter renders
+- [ ] All options work
+- [ ] Custom date picker works
+- [ ] State persists","E7: Analytics & Reports","Backlog",2,"High","Feature"
+"[E7.S1.T6] Wire Income vs Expense Chart","Connect income vs expense chart to Convex.
+
+**Files Modified:** src/components/reports/IncomeVsExpenseChart.tsx
+
+**Connect:**
+- useQuery(getIncomeVsExpense)
+- Apply date range filter
+- Loading state
+- Empty state
+
+**Acceptance Criteria:**
+- [ ] Chart shows data
+- [ ] Real-time updates
+- [ ] Filters work
+- [ ] Loading state shows","E7: Analytics & Reports","Backlog",1,"High","Feature"
+"[E7.S2.T1] Create Spending by Category Query","Create Convex query for category breakdown.
+
+**Files Created/Modified:** convex/reports.ts
+
+**Query:** getSpendingByCategory(userId, startDate, endDate)
+
+**Returns:**
+- Array of {category, amount, percentage, color}
+
+**Acceptance Criteria:**
+- [ ] Query created
+- [ ] Aggregates by category
+- [ ] Calculates percentages
+- [ ] Returns category colors","E7: Analytics & Reports","Backlog",2,"High","Feature"
+"[E7.S2.T2] Create Pie Chart Component","Create reusable pie chart component.
+
+**Files Created:** src/components/charts/PieChart.tsx
+
+**Features:**
+- Uses Recharts
+- Responsive
+- Custom colors per slice
+- Labels with percentages
+
+**Acceptance Criteria:**
+- [ ] Component renders
+- [ ] Colors work
+- [ ] Labels clear
+- [ ] Responsive","E7: Analytics & Reports","Backlog",2,"High","Feature"
+"[E7.S2.T3] Create Bar Chart Component","Create reusable bar chart component.
+
+**Files Created:** src/components/charts/BarChart.tsx
+
+**Features:**
+- Uses Recharts
+- Horizontal or vertical
+- Custom colors
+- Tooltip
+
+**Acceptance Criteria:**
+- [ ] Component renders
+- [ ] Both orientations work
+- [ ] Colors work
+- [ ] Tooltip works","E7: Analytics & Reports","Backlog",1,"High","Feature"
+"[E7.S2.T4] Create Category Spending Chart","Create spending by category chart.
+
+**Files Created:** src/components/reports/CategorySpendingChart.tsx
+
+**Features:**
+- Toggle: Pie chart / Bar chart
+- Colors match category colors
+- Shows amount + percentage
+- Click to filter transactions
+
+**Acceptance Criteria:**
+- [ ] Chart renders
+- [ ] Toggle works
+- [ ] Colors accurate
+- [ ] Click filters work","E7: Analytics & Reports","Backlog",2,"High","Feature"
+"[E7.S2.T5] Wire Category Chart to Query","Connect category chart to Convex.
+
+**Files Modified:** src/components/reports/CategorySpendingChart.tsx
+
+**Connect:**
+- useQuery(getSpendingByCategory)
+- Apply filters
+- Loading state
+- Empty state
+
+**Acceptance Criteria:**
+- [ ] Chart shows data
+- [ ] Filters work
+- [ ] Real-time updates
+- [ ] Loading state shows","E7: Analytics & Reports","Backlog",1,"High","Feature"
+"[E7.S3.T1] Create Net Worth Query","Create Convex query for net worth calculation.
+
+**Files Created/Modified:** convex/reports.ts
+
+**Query:** getNetWorthTrend(userId, startDate, endDate)
+
+**Calculates:**
+- Total income (cumulative)
+- Total savings (goals)
+- Total debts
+- Net worth = income + savings - debts
+
+**Returns:**
+- Array of {month, netWorth, income, savings, debts}
+
+**Acceptance Criteria:**
+- [ ] Query created
+- [ ] Calculation accurate
+- [ ] Returns breakdown
+- [ ] Aggregates by month","E7: Analytics & Reports","Backlog",2,"High","Feature"
+"[E7.S3.T2] Create Net Worth Chart Component","Create net worth trend chart.
+
+**Files Created:** src/components/reports/NetWorthChart.tsx
+
+**Features:**
+- Line chart
+- Green if positive, red if negative
+- X-axis: Months
+- Y-axis: Net worth
+- Tooltip shows breakdown
+
+**Acceptance Criteria:**
+- [ ] Chart renders
+- [ ] Color coding works
+- [ ] Breakdown on hover
+- [ ] Responsive","E7: Analytics & Reports","Backlog",2,"High","Feature"
+"[E7.S3.T3] Wire Net Worth Chart to Query","Connect net worth chart to Convex.
+
+**Files Modified:** src/components/reports/NetWorthChart.tsx
+
+**Connect:**
+- useQuery(getNetWorthTrend)
+- Apply filters
+- Loading state
+- Empty state
+
+**Acceptance Criteria:**
+- [ ] Chart shows data
+- [ ] Filters work
+- [ ] Real-time updates
+- [ ] Loading state shows","E7: Analytics & Reports","Backlog",1,"High","Feature"
+"[E7.S3.T4] Add Net Worth Breakdown Component","Create component to show net worth breakdown.
+
+**Files Created:** src/components/reports/NetWorthBreakdown.tsx
+
+**Features:**
+- Current net worth (large display)
+- Breakdown: Income + Savings - Debts
+- Month-over-month change
+- Visual cards for each component
+
+**Acceptance Criteria:**
+- [ ] Component renders
+- [ ] Shows breakdown
+- [ ] Change calculated
+- [ ] Visual clear","E7: Analytics & Reports","Backlog",2,"High","Feature"
+"[E7.S3.T5] Add Historical Comparison","Show comparison with previous periods.
+
+**Files Modified:** src/components/reports/NetWorthBreakdown.tsx
+
+**Features:**
+- Compare to last month
+- Compare to last year
+- Show percentage change
+- Positive/negative indicators
+
+**Acceptance Criteria:**
+- [ ] Comparison shows
+- [ ] Calculations accurate
+- [ ] Visual indicators clear","E7: Analytics & Reports","Backlog",1,"High","Feature"
+"[E7.S3.T6] Add Net Worth to Dashboard","Add net worth widget to dashboard.
+
+**Files Modified:** src/routes/dashboard.tsx
+
+**Add:**
+- Current net worth card
+- Month-over-month change
+- Quick link to reports
+
+**Acceptance Criteria:**
+- [ ] Widget renders
+- [ ] Shows net worth
+- [ ] Link works","E7: Analytics & Reports","Backlog",1,"High","Feature"
+"[E7.S4.T1] Create Report Filters Panel","Create unified filter panel for all reports.
+
+**Files Created:** src/components/reports/FiltersPanel.tsx
+
+**Filters:**
+- Date range (presets + custom)
+- Categories (multi-select)
+- Accounts (multi-select)
+- Transaction type (income/expense/all)
+
+**Acceptance Criteria:**
+- [ ] Panel renders
+- [ ] All filters work
+- [ ] Apply to all charts
+- [ ] Reset button works","E7: Analytics & Reports","Backlog",2,"High","Feature"
+"[E7.S4.T2] Wire Filters to All Charts","Connect filter panel to all report charts.
+
+**Files Modified:**
+- src/components/reports/IncomeVsExpenseChart.tsx
+- src/components/reports/CategorySpendingChart.tsx
+- src/components/reports/NetWorthChart.tsx
+
+**Connect:**
+- Share filter state
+- All charts update together
+
+**Acceptance Criteria:**
+- [ ] Filters apply to all charts
+- [ ] State shared correctly
+- [ ] Real-time updates","E7: Analytics & Reports","Backlog",1,"High","Feature"
+"[E7.S4.T3] Add Filter State Persistence","Save filter state in URL or local storage.
+
+**Files Created:** src/hooks/useReportFilters.ts
+
+**Features:**
+- Persist filters
+- Restore on page load
+- URL params for sharing
+
+**Acceptance Criteria:**
+- [ ] Filters persist
+- [ ] Restore works
+- [ ] URL params work","E7: Analytics & Reports","Backlog",1,"High","Feature"
+"[E7.S4.T4] Create Reports Page Layout","Create main reports page with all charts.
+
+**Files Modified:** src/routes/reports.tsx
+
+**Layout:**
+- Filter panel at top
+- Three charts in grid
+- Responsive layout
+- Export options
+
+**Acceptance Criteria:**
+- [ ] Page renders
+- [ ] All charts shown
+- [ ] Responsive design
+- [ ] Filters work","E7: Analytics & Reports","Backlog",2,"High","Feature"
+"[E7.S4.T5] Test Reports System End-to-End","Comprehensive testing of reports system.
+
+**Test Scenarios:**
+- View all charts
+- Apply filters
+- Date range changes
+- Category/account filters
+- Export functionality
+
+**Acceptance Criteria:**
+- [ ] All flows work
+- [ ] No bugs found
+- [ ] Performance good
+- [ ] Charts accurate","E7: Analytics & Reports","Backlog",2,"Urgent","Blocker, Quick Win"

@@ -1,0 +1,438 @@
+Title,Description,Project,Status,Priority,Labels,Estimate
+"[E2.S1.T1] Add Categories to Schema","Add categories table to Convex schema.
+
+**Files Modified:** convex/schema.ts
+
+**Table Fields:**
+- userId, name, type, color, icon
+- isArchived, isDefault, createdAt
+
+**Indexes:**
+- by_user
+- by_user_and_type
+- by_user_active
+
+**Acceptance Criteria:**
+- [ ] Categories table in schema
+- [ ] Indexes defined
+- [ ] Schema compiles without errors","E2: Transaction Management","Backlog","Urgent","🔵 Setup,🔴 Blocker",1
+"[E2.S1.T2] Create Category Form Component","Create UI form for creating/editing categories.
+
+**Files Created:** src/components/categories/CategoryForm.tsx
+
+**Form Fields:**
+- Name (text input)
+- Type (income/expense toggle)
+- Color (color picker)
+- Icon (icon selector)
+
+**Uses:** React Hook Form + Zod validation
+
+**Acceptance Criteria:**
+- [ ] Form renders
+- [ ] All fields present
+- [ ] Validation works
+- [ ] Can select color and icon","E2: Transaction Management","Backlog","High","🟣 Feature,🟡 Parallel",2
+"[E2.S1.T3] Create Category Mutations","Create Convex mutations for category CRUD.
+
+**Files Created:** convex/categories.ts
+
+**Mutations:**
+- createCategory
+- updateCategory
+- deleteCategory (soft delete)
+
+**Validation:**
+- Unique name per user per type
+- Required fields
+
+**Acceptance Criteria:**
+- [ ] All mutations created
+- [ ] Validation works
+- [ ] No TypeScript errors","E2: Transaction Management","Backlog","High","🟣 Feature",1
+"[E2.S1.T4] Create Category Query","Create Convex query to fetch categories.
+
+**Files Created/Modified:** convex/categories.ts
+
+**Query:** getCategories(userId, type?, includeArchived?)
+
+**Filters:**
+- By type (income/expense)
+- Include/exclude archived
+
+**Acceptance Criteria:**
+- [ ] Query created
+- [ ] Filters work
+- [ ] Returns sorted by name","E2: Transaction Management","Backlog","High","🟣 Feature",1
+"[E2.S1.T5] Wire Category Form to Mutations","Connect category form to Convex mutations.
+
+**Files Modified:** src/components/categories/CategoryForm.tsx
+
+**Connect:**
+- useMutation for create/update
+- Form submit handler
+- Success toast
+- Optimistic update
+
+**Acceptance Criteria:**
+- [ ] Form submits to Convex
+- [ ] Success toast shows
+- [ ] Category appears instantly
+- [ ] Form resets after submit","E2: Transaction Management","Backlog","High","🟣 Feature",1
+"[E2.S1.T6] Create Category List Component","Create list view for categories.
+
+**Files Created:** src/components/categories/CategoryList.tsx
+
+**Features:**
+- Real-time list (useQuery)
+- Tabs for income/expense
+- Edit/delete actions
+- Empty state
+
+**Acceptance Criteria:**
+- [ ] List shows all categories
+- [ ] Real-time updates work
+- [ ] Can edit category
+- [ ] Can delete category","E2: Transaction Management","Backlog","High","🟣 Feature",2
+"[E2.S1.T7] Create Default Categories on Signup","Auto-create default categories when user signs up.
+
+**Files Modified:** convex/users.ts (syncUser mutation)
+
+**Default Categories:**
+- 5 income (Salary, Freelance, Investment, Gift, Other)
+- 9 expense (Groceries, Rent, Utilities, Transport, etc)
+
+**Acceptance Criteria:**
+- [ ] Default categories created on signup
+- [ ] All 14 categories present
+- [ ] Marked with isDefault: true","E2: Transaction Management","Backlog","High","🟣 Feature",1
+"[E2.S2.T1] Add Accounts to Schema","Add accounts table to Convex schema.
+
+**Files Modified:** convex/schema.ts
+
+**Table Fields:**
+- userId, name, type, provider
+- lastFourDigits, isArchived, createdAt
+
+**Indexes:**
+- by_user
+- by_user_active
+
+**Acceptance Criteria:**
+- [ ] Accounts table in schema
+- [ ] Indexes defined
+- [ ] Schema compiles","E2: Transaction Management","Backlog","High","🔵 Setup",1
+"[E2.S2.T2] Create Account Form & Mutations","Create account form and Convex mutations.
+
+**Files Created:**
+- src/components/accounts/AccountForm.tsx
+- convex/accounts.ts
+
+**Mutations:** create, update, delete (soft)
+**Query:** getAccounts
+
+**Acceptance Criteria:**
+- [ ] Form renders
+- [ ] Mutations work
+- [ ] Query returns accounts
+- [ ] Validation works","E2: Transaction Management","Backlog","High","🟣 Feature",2
+"[E2.S2.T3] Create Account List Component","Create list view for accounts.
+
+**Files Created:** src/components/accounts/AccountList.tsx
+
+**Features:**
+- Real-time list
+- Edit/delete actions
+- Account type icons
+
+**Acceptance Criteria:**
+- [ ] List shows all accounts
+- [ ] Real-time updates
+- [ ] Edit/delete functional","E2: Transaction Management","Backlog","High","🟣 Feature",1
+"[E2.S2.T4] Create Accounts Page","Create page to manage accounts.
+
+**Files Created:** src/routes/accounts.tsx
+
+**Layout:**
+- Account list
+- Add account button
+- Modal for create/edit
+
+**Acceptance Criteria:**
+- [ ] Page renders
+- [ ] Can create account
+- [ ] Can edit/delete
+- [ ] Navigation works","E2: Transaction Management","Backlog","High","🟣 Feature",1
+"[E2.S2.T5] Add Accounts to Settings","Add account management section to settings page.
+
+**Files Modified:** src/routes/settings.tsx
+
+**Section:**
+- Link to accounts page
+- Quick add account
+- Account count
+
+**Acceptance Criteria:**
+- [ ] Settings shows accounts section
+- [ ] Link works
+- [ ] Quick add functional","E2: Transaction Management","Backlog","Medium","🟣 Feature",1
+"[E2.S3.T1] Add Transactions to Schema","Add transactions table to Convex schema.
+
+**Files Modified:** convex/schema.ts
+
+**Table Fields:**
+- userId, type, amount, description, date
+- categoryId, accountId, importId, receiptId
+- isDemoData, createdAt, updatedAt
+
+**Indexes:**
+- by_user_and_date
+- by_user_and_type
+- by_user_and_category
+- by_user_and_account
+
+**Acceptance Criteria:**
+- [ ] Transactions table in schema
+- [ ] All indexes defined
+- [ ] Schema compiles","E2: Transaction Management","Backlog","Urgent","🔵 Setup,🔴 Blocker",1
+"[E2.S3.T2] Create Transaction Form Component","Create form for creating transactions.
+
+**Files Created:** src/components/transactions/TransactionForm.tsx
+
+**Form Fields:**
+- Type (income/expense toggle)
+- Amount (number input, validation)
+- Description (text input)
+- Date (date picker, defaults today)
+- Category (dropdown, filtered by type)
+- Account (dropdown, optional)
+
+**Uses:** React Hook Form + Zod
+
+**Acceptance Criteria:**
+- [ ] Form renders
+- [ ] All fields present
+- [ ] Validation works
+- [ ] Category filters by type","E2: Transaction Management","Backlog","High","🟣 Feature",2
+"[E2.S3.T3] Add Form Validation","Add comprehensive validation to transaction form.
+
+**Validation Rules:**
+- Amount: required, > 0, max 2 decimals
+- Description: required, max 200 chars
+- Date: required, not in future
+- Category: optional
+- Account: optional
+
+**Error Messages:**
+- Clear, actionable
+- Show inline (below field)
+
+**Acceptance Criteria:**
+- [ ] All rules implemented
+- [ ] Error messages show
+- [ ] Form can't submit if invalid
+- [ ] Valid data submits","E2: Transaction Management","Backlog","High","🟣 Feature",1
+"[E2.S3.T4] Create Transaction Mutation","Create Convex mutation to create transaction.
+
+**Files Created:** convex/transactions.ts
+
+**Mutation:** createTransaction
+
+**Logic:**
+- Validate amount (store as cents)
+- Set userId from auth
+- Set timestamps
+- Return transaction ID
+
+**Acceptance Criteria:**
+- [ ] Mutation created
+- [ ] Amount stored as cents
+- [ ] Validation works
+- [ ] Returns new transaction","E2: Transaction Management","Backlog","High","🟣 Feature",1
+"[E2.S3.T5] Wire Form to Mutation","Connect transaction form to Convex.
+
+**Files Modified:** src/components/transactions/TransactionForm.tsx
+
+**Connect:**
+- useMutation(createTransaction)
+- Optimistic update
+- Success toast
+- Form reset
+
+**Acceptance Criteria:**
+- [ ] Form submits to Convex
+- [ ] Transaction appears instantly
+- [ ] Success toast shows
+- [ ] Form resets","E2: Transaction Management","Backlog","High","🟣 Feature",1
+"[E2.S3.T6] Add Transaction to Dashboard","Add quick transaction creation to dashboard.
+
+**Files Modified:** src/routes/dashboard.tsx
+
+**Add:**
+- ""Add Transaction"" button
+- Modal with transaction form
+- Recent transactions list (last 5)
+
+**Acceptance Criteria:**
+- [ ] Button opens modal
+- [ ] Form works
+- [ ] Recent list updates
+- [ ] Can close modal","E2: Transaction Management","Backlog","High","🟣 Feature",1
+"[E2.S4.T1] Create Transaction List Component","Create table component for transactions.
+
+**Files Created:** src/components/transactions/TransactionList.tsx
+
+**Columns:**
+- Date
+- Description
+- Category (with color dot)
+- Account
+- Amount (green for income, red for expense)
+
+**Uses:** TanStack Table (optional) or custom table
+
+**Acceptance Criteria:**
+- [ ] Table renders
+- [ ] All columns show
+- [ ] Income green, expense red
+- [ ] Sortable by date","E2: Transaction Management","Backlog","High","🟣 Feature",2
+"[E2.S4.T2] Create Transactions Query","Create Convex query to fetch transactions.
+
+**Files Created/Modified:** convex/transactions.ts
+
+**Query:** getTransactions(userId, filters)
+
+**Filters:**
+- dateRange (start, end)
+- type (income/expense/all)
+- categoryId
+- accountId
+
+**Sorting:** Date descending (newest first)
+
+**Acceptance Criteria:**
+- [ ] Query created
+- [ ] All filters work
+- [ ] Sorted correctly
+- [ ] Returns related data (category, account)","E2: Transaction Management","Backlog","High","🟣 Feature",2
+"[E2.S4.T3] Wire List to Query","Connect transaction list to Convex query.
+
+**Files Modified:** src/components/transactions/TransactionList.tsx
+
+**Connect:**
+- useQuery(getTransactions)
+- Real-time updates
+- Loading state
+- Empty state
+
+**Acceptance Criteria:**
+- [ ] List shows transactions
+- [ ] Real-time updates work
+- [ ] Loading state shows
+- [ ] Empty state shows if no data","E2: Transaction Management","Backlog","High","🟣 Feature",1
+"[E2.S4.T4] Add Date Range Filter","Add date range filter to transaction list.
+
+**Files Created:** src/components/transactions/DateRangeFilter.tsx
+
+**Presets:**
+- Last 7 days
+- Last 30 days
+- Last 90 days
+- Custom (date pickers)
+
+**Acceptance Criteria:**
+- [ ] Filter component renders
+- [ ] Presets work
+- [ ] Custom range works
+- [ ] List updates on filter change","E2: Transaction Management","Backlog","High","🟣 Feature",2
+"[E2.S4.T5] Add Category Filter","Add category filter to transaction list.
+
+**Files Created:** src/components/transactions/CategoryFilter.tsx
+
+**Features:**
+- Multi-select dropdown
+- Shows all categories
+- ""All Categories"" option
+
+**Acceptance Criteria:**
+- [ ] Filter renders
+- [ ] Can select multiple
+- [ ] List updates
+- [ ] Clear filter works","E2: Transaction Management","Backlog","High","🟣 Feature",1
+"[E2.S4.T6] Add Account Filter","Add account filter to transaction list.
+
+**Files Created:** src/components/transactions/AccountFilter.tsx
+
+**Features:**
+- Multi-select dropdown
+- Shows all accounts
+- ""All Accounts"" option
+
+**Acceptance Criteria:**
+- [ ] Filter renders
+- [ ] Can select multiple
+- [ ] List updates
+- [ ] Clear filter works","E2: Transaction Management","Backlog","High","🟣 Feature",1
+"[E2.S4.T7] Add Type Filter","Add income/expense type filter.
+
+**Files Created:** src/components/transactions/TypeFilter.tsx
+
+**Options:**
+- All
+- Income Only
+- Expense Only
+
+**Uses:** Radio group or toggle
+
+**Acceptance Criteria:**
+- [ ] Filter renders
+- [ ] All 3 options work
+- [ ] List updates
+- [ ] Default: All","E2: Transaction Management","Backlog","Medium","🟣 Feature",1
+"[E2.S4.T8] Add Edit Transaction","Add ability to edit transactions.
+
+**Files Modified:**
+- src/components/transactions/TransactionList.tsx (edit button)
+- src/components/transactions/TransactionForm.tsx (edit mode)
+
+**Mutations:** updateTransaction in convex/transactions.ts
+
+**Acceptance Criteria:**
+- [ ] Edit button shows
+- [ ] Modal opens with pre-filled form
+- [ ] Can update transaction
+- [ ] List updates instantly","E2: Transaction Management","Backlog","High","🟣 Feature",2
+"[E2.S4.T9] Add Delete Transaction","Add ability to delete transactions.
+
+**Files Modified:**
+- src/components/transactions/TransactionList.tsx (delete button)
+
+**Mutation:** deleteTransaction (hard delete)
+
+**Features:**
+- Confirmation dialog
+- Success toast
+
+**Acceptance Criteria:**
+- [ ] Delete button shows
+- [ ] Confirmation dialog appears
+- [ ] Transaction deleted
+- [ ] List updates
+- [ ] Toast shows","E2: Transaction Management","Backlog","High","🟣 Feature",1
+"[E2.S4.T10] Create Transactions Page","Create main transactions page with all features.
+
+**Files Modified:** src/routes/transactions.tsx
+
+**Layout:**
+- Filters at top
+- Add transaction button
+- Transaction list
+- Pagination (if needed)
+
+**Acceptance Criteria:**
+- [ ] Page renders
+- [ ] All filters work
+- [ ] Add transaction works
+- [ ] Edit/delete work
+- [ ] Real-time updates
+- [ ] Performance good with 100+ transactions","E2: Transaction Management","Backlog","Urgent","🟣 Feature,🔴 Blocker",2
