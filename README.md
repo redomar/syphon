@@ -1,71 +1,73 @@
-# Syphon
+# React + TypeScript + Vite
 
-A Next.js application with OpenTelemetry tracing, authentication, and microservice-based deployment architecture.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Quick Start
+Currently, two official plugins are available:
 
-### Development
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-1. **Start services:**
-   ```bash
-   docker-compose -f deployment/docker-compose.dev.yml up -d
-   ```
+## React Compiler
 
-2. **Configure environment:**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your values (see .env.d.ts for examples)
-   ```
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-3. **Run the application:**
-   ```bash
-   npm install
-   npm run dev
-   ```
+## Expanding the ESLint configuration
 
-4. **Access services:**
-   - App: http://localhost:3000
-   - Jaeger UI: http://localhost:16686
-   - Database: localhost:5432
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-### Production
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-```bash
-# Configure production environment
-cp .env .env.production
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-# Deploy all services  
-docker-compose up -d
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
-## Project Structure
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-- **`src/`** - Application source code
-- **`docs/`** - Documentation files
-- **`deployment/`** - Docker and deployment configurations
-- **`.env.d.ts`** - Environment variable definitions and examples
-- **`docker-compose.yml`** - Production microservice deployment
-- **`deployment/docker-compose.dev.yml`** - Development services
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-## Environment Configuration
-
-All environment variable examples and TypeScript definitions are in `.env.d.ts`. Copy values to your `.env` file.
-
-## Deployment
-
-The application uses a microservice architecture with:
-
-- **App Service** - Next.js application (Port 3000)
-- **Database Service** - PostgreSQL (Port 5432)  
-- **Jaeger Service** - Distributed tracing (Port 16686)
-- **Prometheus Service** - Metrics collection (Port 9090, optional)
-
-See `deployment/README.md` for detailed deployment instructions.
-
-## Technologies
-
-- **Framework:** Next.js 15
-- **Database:** PostgreSQL + Prisma  
-- **Authentication:** Clerk
-- **Observability:** OpenTelemetry + Jaeger
-- **Deployment:** Docker Compose
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
