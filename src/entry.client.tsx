@@ -3,8 +3,9 @@
 import { startTransition, StrictMode } from "react";
 import { hydrateRoot } from "react-dom/client";
 import { HydratedRouter } from "react-router/dom";
-import { ConvexProvider, ConvexReactClient } from "convex/react";
-import { ClerkProvider } from "@clerk/clerk-react";
+import { ClerkProvider, useAuth } from "@clerk/clerk-react";
+import { ConvexProviderWithClerk } from "convex/react-clerk";
+import { ConvexReactClient } from "convex/react";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL);
 
@@ -15,9 +16,9 @@ startTransition(() => {
       <ClerkProvider
         publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}
       >
-        <ConvexProvider client={convex}>
+        <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
           <HydratedRouter />
-        </ConvexProvider>
+        </ConvexProviderWithClerk>
       </ClerkProvider>
     </StrictMode>,
     {
