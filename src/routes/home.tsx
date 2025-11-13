@@ -1,21 +1,13 @@
 import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
 import { useEffect, useState } from "react";
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { Navigate } from "react-router";
+import { useConvexAuth } from "convex/react";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "Syphon - Personal Finance Tracker" },
+    { name: "description", content: "Track your finances with Syphon" },
   ];
-}
-
-function UserCount() {
-  const users = useQuery(api.users.list);
-  const userCount = users?.length ?? 0;
-
-  return <p>User Count: {userCount}</p>;
 }
 
 export default function Home() {
@@ -25,13 +17,31 @@ export default function Home() {
     setIsClient(true);
   }, []);
 
-  return (
-    <div>
-      <div style={{ padding: "20px", textAlign: "center" }}>
-        <h2>Convex Connection Test</h2>
-        {isClient ? <UserCount /> : <p>User Count: Loading...</p>}
+  if (!isClient) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
-      <Welcome />
-    </div>
-  );
+    );
+  }
+
+  return <HomeClient />;
+}
+
+function HomeClient() {
+  const { isLoading, isAuthenticated } = useConvexAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <Navigate to="/sign-in" replace />;
 }
