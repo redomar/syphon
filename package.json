@@ -11,6 +11,7 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.54.0",
     "@hookform/resolvers": "^5.2.2",
+    "@netlify/vite-plugin-react-router": "^2.1.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.8",
