@@ -2,7 +2,13 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function Dashboard() {
   const [isClient, setIsClient] = useState(false);
@@ -26,11 +32,11 @@ function DashboardClient() {
     <AppLayout>
       <div className="space-y-6">
         <h2 className="text-3xl font-bold text-foreground">Dashboard</h2>
-
+ 
         {/* User Info Card */}
         <Card>
           <CardHeader>
-            <CardTitle>Welcome back!</CardTitle>
+            <CardTitle>Welcome back! s</CardTitle>
             <CardDescription>Your account information</CardDescription>
           </CardHeader>
           <CardContent>
@@ -41,14 +47,16 @@ function DashboardClient() {
                   {currentUser.firstName} {currentUser.lastName}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  <span className="font-medium">Email:</span> {currentUser.email}
+                  <span className="font-medium">Email:</span>{" "}
+                  {currentUser.email}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   <span className="font-medium">Currency:</span>{" "}
                   {currentUser.currency || "Not set"}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  <span className="font-medium">Timezone:</span> {currentUser.timezone}
+                  <span className="font-medium">Timezone:</span>{" "}
+                  {currentUser.timezone}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   <span className="font-medium">Onboarding:</span>{" "}
@@ -60,7 +68,9 @@ function DashboardClient() {
                 </p>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">Loading user data...</p>
+              <p className="text-sm text-muted-foreground">
+                Loading user data...
+              </p>
             )}
           </CardContent>
         </Card>
@@ -105,16 +115,16 @@ function DashboardLoading() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <div className="h-9 bg-muted rounded w-48 animate-pulse" />
+        <div className="h-9 bg-muted w-48 animate-pulse" />
         <Card>
           <CardHeader>
-            <div className="h-6 bg-muted rounded w-32 animate-pulse" />
-            <div className="h-4 bg-muted rounded w-48 animate-pulse" />
+            <div className="h-6 bg-muted w-32 animate-pulse" />
+            <div className="h-4 bg-muted w-48 animate-pulse" />
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <div className="h-4 bg-muted rounded w-full animate-pulse" />
-              <div className="h-4 bg-muted rounded w-3/4 animate-pulse" />
+              <div className="h-4 bg-muted w-full animate-pulse" />
+              <div className="h-4 bg-muted w-3/4 animate-pulse" />
             </div>
           </CardContent>
         </Card>

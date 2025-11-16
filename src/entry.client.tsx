@@ -20,16 +20,6 @@ startTransition(() => {
           <HydratedRouter />
         </ConvexProviderWithClerk>
       </ClerkProvider>
-    </StrictMode>,
-    {
-      onRecoverableError: (error: unknown) => {
-        // Suppress hydration warnings in development (VS Code browser injects styles)
-        const message = error instanceof Error ? error.message : String(error);
-        if (message.includes("Hydration") || message.includes("hydrated")) {
-          return;
-        }
-        console.error(error);
-      },
-    }
+    </StrictMode>
   );
 });

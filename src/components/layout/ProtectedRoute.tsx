@@ -17,7 +17,7 @@ export default function ProtectedRoute() {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100 mx-auto"></div>
+          <div className="animate-spin h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100 mx-auto"></div>
           <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">Loading...</p>
         </div>
       </div>
@@ -44,7 +44,7 @@ function ProtectedRouteClient() {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100 mx-auto"></div>
+          <div className="animate-spin h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100 mx-auto"></div>
           <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">Loading...</p>
         </div>
       </div>
