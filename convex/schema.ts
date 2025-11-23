@@ -8,13 +8,15 @@ export default defineSchema({
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
-    currency: v.optional(v.union(
-      v.literal("GBP"),
-      v.literal("USD"),
-      v.literal("EUR"),
-      v.literal("CAD"),
-      v.literal("AUD")
-    )),
+    currency: v.optional(
+      v.union(
+        v.literal("GBP"),
+        v.literal("USD"),
+        v.literal("EUR"),
+        v.literal("CAD"),
+        v.literal("AUD")
+      )
+    ),
     timezone: v.string(), // Timezone identifier (e.g., "Europe/London", "America/New_York")
     onboardingComplete: v.boolean(),
     isDemoMode: v.boolean(),
@@ -23,4 +25,18 @@ export default defineSchema({
   })
     .index("by_clerk_id", ["clerkId"])
     .index("by_email", ["email"]),
+  categories: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    type: v.union(v.literal("income"), v.literal("expense")),
+    color: v.string(), // Hex color code (e.g., "#FF5733")
+    icon: v.string(), // Icon name from lucide-react
+    isArchived: v.boolean(),
+    isDefault: v.boolean(),
+    createdAt: v.string(), // ISO8601 UTC string
+    updatedAt: v.string(), // ISO8601 UTC string
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_and_type", ["userId", "type"])
+    .index("by_user_active", ["userId", "isArchived"]),
 });
