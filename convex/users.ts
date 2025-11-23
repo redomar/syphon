@@ -41,6 +41,7 @@ export const syncUser = mutation({
       firstName: identity.givenName,
       lastName: identity.familyName,
       imageUrl: identity.pictureUrl,
+      currency: "GBP",
       timezone: "Europe/London", // Default to London timezone
       onboardingComplete: false,
       isDemoMode: false,
@@ -93,13 +94,15 @@ export const getUserByClerkId = query({
  */
 export const updateProfile = mutation({
   args: {
-    currency: v.optional(v.union(
-      v.literal("GBP"),
-      v.literal("USD"),
-      v.literal("EUR"),
-      v.literal("CAD"),
-      v.literal("AUD")
-    )),
+    currency: v.optional(
+      v.union(
+        v.literal("GBP"),
+        v.literal("USD"),
+        v.literal("EUR"),
+        v.literal("CAD"),
+        v.literal("AUD")
+      )
+    ),
     timezone: v.optional(v.string()),
     onboardingComplete: v.optional(v.boolean()),
     isDemoMode: v.optional(v.boolean()),
@@ -180,6 +183,7 @@ export const syncUserFromWebhook = internalMutation({
       firstName: args.firstName,
       lastName: args.lastName,
       imageUrl: args.imageUrl,
+      currency: "GBP",
       timezone: "Europe/London", // Default to London timezone
       onboardingComplete: false,
       isDemoMode: false,

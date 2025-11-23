@@ -8,14 +8,12 @@ export default defineSchema({
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
-    currency: v.optional(
-      v.union(
-        v.literal("GBP"),
-        v.literal("USD"),
-        v.literal("EUR"),
-        v.literal("CAD"),
-        v.literal("AUD")
-      )
+    currency: v.union(
+      v.literal("GBP"),
+      v.literal("USD"),
+      v.literal("EUR"),
+      v.literal("CAD"),
+      v.literal("AUD")
     ),
     timezone: v.string(), // Timezone identifier (e.g., "Europe/London", "America/New_York")
     onboardingComplete: v.boolean(),
