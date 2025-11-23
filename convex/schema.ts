@@ -18,8 +18,8 @@ export default defineSchema({
     timezone: v.string(), // Timezone identifier (e.g., "Europe/London", "America/New_York")
     onboardingComplete: v.boolean(),
     isDemoMode: v.boolean(),
-    createdAt: v.string(), // ISO8601 UTC string
-    updatedAt: v.string(), // ISO8601 UTC string
+    createdAt: v.number(), // Unix timestamp (ms)
+    updatedAt: v.number(), // Unix timestamp (ms)
   })
     .index("by_clerk_id", ["clerkId"])
     .index("by_email", ["email"]),
@@ -31,8 +31,8 @@ export default defineSchema({
     icon: v.string(), // Icon name from lucide-react
     isArchived: v.boolean(),
     isDefault: v.boolean(),
-    createdAt: v.string(), // ISO8601 UTC string
-    updatedAt: v.string(), // ISO8601 UTC string
+    createdAt: v.number(), // Unix timestamp (ms)
+    updatedAt: v.number(), // Unix timestamp (ms)
   })
     .index("by_user", ["userId"])
     .index("by_user_and_type", ["userId", "type"])

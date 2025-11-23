@@ -20,7 +20,7 @@ export const syncUser = mutation({
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .unique();
 
-    const now = new Date().toISOString();
+    const now = Date.now();
 
     if (existingUser) {
       // Update existing user
@@ -125,7 +125,7 @@ export const updateProfile = mutation({
 
     await ctx.db.patch(user._id, {
       ...args,
-      updatedAt: new Date().toISOString(),
+      updatedAt: Date.now(),
     });
 
     return user._id;
@@ -162,7 +162,7 @@ export const syncUserFromWebhook = internalMutation({
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
       .unique();
 
-    const now = new Date().toISOString();
+    const now = Date.now();
 
     if (existingUser) {
       // Update existing user

@@ -32,7 +32,7 @@ function DashboardClient() {
     <AppLayout>
       <div className="space-y-6">
         <h2 className="text-3xl font-bold text-foreground">Dashboard</h2>
- 
+
         {/* User Info Card */}
         <Card>
           <CardHeader>
@@ -64,7 +64,12 @@ function DashboardClient() {
                 </p>
                 <p className="text-sm text-muted-foreground">
                   <span className="font-medium">Joined:</span>{" "}
-                  {new Date(currentUser.createdAt).toLocaleDateString()}
+                  {new Date(currentUser.createdAt).toLocaleDateString(
+                    undefined,
+                    {
+                      timeZone: currentUser.timezone,
+                    }
+                  )}
                 </p>
               </div>
             ) : (
