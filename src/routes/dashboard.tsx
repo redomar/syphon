@@ -2,13 +2,13 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  PoundSterling,
+  TrendingUp,
+  TrendingDown,
+  Calendar,
+} from "lucide-react";
 
 export default function Dashboard() {
   const [isClient, setIsClient] = useState(false);
@@ -31,85 +31,133 @@ function DashboardClient() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <h2 className="text-3xl font-bold text-foreground">Dashboard</h2>
-
-        {/* User Info Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Welcome back! s</CardTitle>
-            <CardDescription>Your account information</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {currentUser ? (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-medium">Name:</span>{" "}
-                  {currentUser.firstName} {currentUser.lastName}
+        {/* Greeting Card */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-neutral-900 border-neutral-700 md:col-span-2 lg:col-span-4">
+            <CardContent className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="space-y-1">
+                <p className="text-xs text-neutral-400 tracking-wider">
+                  WELCOME
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-medium">Email:</span>{" "}
-                  {currentUser.email}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-medium">Currency:</span>{" "}
-                  {currentUser.currency || "Not set"}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-medium">Timezone:</span>{" "}
-                  {currentUser.timezone}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-medium">Onboarding:</span>{" "}
-                  {currentUser.onboardingComplete ? "Complete" : "Incomplete"}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-medium">Joined:</span>{" "}
-                  {new Date(currentUser.createdAt).toLocaleDateString(
-                    undefined,
-                    {
-                      timeZone: currentUser.timezone,
-                    }
-                  )}
+                <p className="text-2xl font-semibold">
+                  Hi{currentUser?.firstName ? `, ${currentUser.firstName}` : ""}{" "}
+                  — Here is your snapshot.
                 </p>
               </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Loading user data...
-              </p>
-            )}
-          </CardContent>
-        </Card>
+              <div className="text-xs text-neutral-500 max-w-sm md:text-right">
+                {currentUser ? (
+                  <span>
+                    Member since{" "}
+                    {new Date(currentUser.createdAt).toLocaleDateString()}
+                  </span>
+                ) : (
+                  <span>Loading...</span>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardDescription>Total Transactions</CardDescription>
-              <CardTitle className="text-3xl">0</CardTitle>
-            </CardHeader>
+          {/* Stat Cards */}
+          <Card className="bg-neutral-900 border-neutral-700">
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-neutral-400 tracking-wider">
+                    CURRENT BALANCE
+                  </p>
+                  <p className="text-2xl font-bold font-mono text-white">
+                    £0.00
+                  </p>
+                  <p className="text-xs text-neutral-500">Available to spend</p>
+                </div>
+                <PoundSterling className="w-8 h-8 text-white" />
+              </div>
+            </CardContent>
           </Card>
-          <Card>
-            <CardHeader>
-              <CardDescription>This Month</CardDescription>
-              <CardTitle className="text-3xl">£0.00</CardTitle>
-            </CardHeader>
+
+          <Card className="bg-neutral-900 border-neutral-700">
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-neutral-400 tracking-wider">
+                    TOTAL EXPENSES
+                  </p>
+                  <p className="text-2xl font-bold font-mono text-orange-500">
+                    £0.00
+                  </p>
+                  <p className="text-xs text-neutral-500">This month</p>
+                </div>
+                <TrendingDown className="w-8 h-8 text-orange-500" />
+              </div>
+            </CardContent>
           </Card>
-          <Card>
-            <CardHeader>
-              <CardDescription>Balance</CardDescription>
-              <CardTitle className="text-3xl">£0.00</CardTitle>
-            </CardHeader>
+
+          <Card className="bg-neutral-900 border-neutral-700">
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-neutral-400 tracking-wider">
+                    TOTAL INCOME
+                  </p>
+                  <p className="text-2xl font-bold font-mono text-white">
+                    £0.00
+                  </p>
+                  <p className="text-xs text-neutral-500">This month</p>
+                </div>
+                <TrendingUp className="w-8 h-8 text-white" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-neutral-900 border-neutral-700">
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-neutral-400 tracking-wider">
+                    TRANSACTIONS
+                  </p>
+                  <p className="text-2xl font-bold font-mono text-white">0</p>
+                  <p className="text-xs text-neutral-500">Total count</p>
+                </div>
+                <Calendar className="w-8 h-8 text-white" />
+              </div>
+            </CardContent>
           </Card>
         </div>
 
-        {/* Coming Soon */}
-        <Card>
+        {/* Coming Soon Section */}
+        <Card className="bg-neutral-900 border-neutral-700">
           <CardHeader>
-            <CardTitle>Coming Soon</CardTitle>
-            <CardDescription>
-              Dashboard features will be added in upcoming sprints.
-            </CardDescription>
+            <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
+              GETTING STARTED
+            </CardTitle>
           </CardHeader>
+          <CardContent className="space-y-4 text-sm">
+            <p className="text-neutral-400">
+              Welcome to Syphon v0.3.0. Website is currently under active
+              development. Here are some features coming soon:
+            </p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-orange-500"></div>
+                <span className="text-neutral-300">
+                  Transaction management coming in E2
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-neutral-600"></div>
+                <span className="text-neutral-500">
+                  Budget system coming in E3
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-neutral-600"></div>
+                <span className="text-neutral-500">
+                  Savings goals coming in E4
+                </span>
+              </div>
+            </div>
+          </CardContent>
         </Card>
       </div>
     </AppLayout>
@@ -120,19 +168,26 @@ function DashboardLoading() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <div className="h-9 bg-muted w-48 animate-pulse" />
-        <Card>
-          <CardHeader>
-            <div className="h-6 bg-muted w-32 animate-pulse" />
-            <div className="h-4 bg-muted w-48 animate-pulse" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="h-4 bg-muted w-full animate-pulse" />
-              <div className="h-4 bg-muted w-3/4 animate-pulse" />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-neutral-900 border-neutral-700 md:col-span-2 lg:col-span-4">
+            <CardContent>
+              <div className="animate-pulse">
+                <div className="h-4 bg-neutral-700 w-1/4 mb-2"></div>
+                <div className="h-8 bg-neutral-700 w-1/2"></div>
+              </div>
+            </CardContent>
+          </Card>
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="bg-neutral-900 border-neutral-700">
+              <CardContent>
+                <div className="animate-pulse">
+                  <div className="h-3 bg-neutral-700 w-1/2 mb-2"></div>
+                  <div className="h-8 bg-neutral-700 w-3/4"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </AppLayout>
   );
