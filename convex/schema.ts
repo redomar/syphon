@@ -36,5 +36,6 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_user_and_type", ["userId", "type"])
-    .index("by_user_active", ["userId", "isArchived"]),
+    .index("by_user_active", ["userId", "isArchived"])
+    .index("by_user_type_active", ["userId", "type", "isArchived"]),
 });

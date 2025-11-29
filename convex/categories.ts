@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import type { QueryCtx, MutationCtx } from "./_generated/server";
 
 /**
@@ -151,5 +151,58 @@ export const deleteCategory = mutation({
     });
 
     return args.categoryId;
+  },
+});
+
+/**
+ * Gets categories for the authenticated user with optional filtering
+ * All queries are fully indexed for maximum performance
+ */
+export const getCategories = query({
+  args: {
+    type: v.optional(v.union(v.literal("income"), v.literal("expense"))),
+    includeArchived: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+
+    let categories;
+
+    // No type filter, only active categories - use by_user_active index
+    if (!args.type && !args.includeArchived) {
+      categories = await ctx.db
+        .query("categories")
+        .withIndex("by_user_active", (q) =>
+          q.eq("userId", user._id).eq("isArchived", false)
+        )
+        .collect();
+    }
+    // No type filter, include archived - use by_user index
+    else if (!args.type && args.includeArchived) {
+      categories = await ctx.db
+        .query("categories")
+        .withIndex("by_user", (q) => q.eq("userId", user._id))
+        .collect();
+    }
+    // With type filter, only active - use by_user_type_active index (NEW!)
+    else if (args.type && !args.includeArchived) {
+      categories = await ctx.db
+        .query("categories")
+        .withIndex("by_user_type_active", (q) =>
+          q.eq("userId", user._id).eq("type", args.type!).eq("isArchived", false)
+        )
+        .collect();
+    }
+    // With type filter, include archived - use by_user_and_type index
+    else {
+      categories = await ctx.db
+        .query("categories")
+        .withIndex("by_user_and_type", (q) =>
+          q.eq("userId", user._id).eq("type", args.type!)
+        )
+        .collect();
+    }
+
+    return categories.toSorted((a, b) => a.name.localeCompare(b.name));
   },
 });
