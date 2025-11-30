@@ -40,7 +40,7 @@ const formSchema = z.object({
   icon: z.string().min(1, "Please select an icon"),
 });
 
-type CategoryFormValues = z.infer<typeof formSchema>;
+export type CategoryFormValues = z.infer<typeof formSchema>;
 
 interface CategoryFormProps {
   onSubmit: (values: CategoryFormValues) => void;
@@ -225,7 +225,7 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
           <div className="flex items-center gap-3">
             {(() => {
               const selectedIcon = ICONS.find(
-                (icon) => icon.name === form.watch("icon"),
+                (icon) => icon.name === form.watch("icon")
               );
               const IconComponent = selectedIcon?.component || ShoppingCart;
               return (
@@ -247,7 +247,7 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
                     "px-2 py-0.5 text-xs font-medium",
                     form.watch("type") === "income"
                       ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                      : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
+                      : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
                   )}
                 >
                   {form.watch("type")}
