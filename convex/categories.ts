@@ -184,6 +184,77 @@ export const unarchiveCategory = mutation({
 });
 
 /**
+ * Creates default categories for a new user
+ * Called when user chooses to set up default categories
+ */
+export const createDefaultCategories = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
+
+    // Check if user already has categories
+    const existingCategories = await ctx.db
+      .query("categories")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+
+    if (existingCategories.length > 0) {
+      throw new Error("User already has categories");
+    }
+
+    const now = Date.now();
+
+    // Default expense categories
+    const expenseCategories = [
+      { name: "Groceries", color: "#FF5733", icon: "ShoppingCart" },
+      { name: "Transport", color: "#FFC300", icon: "Car" },
+      { name: "Utilities", color: "#DAF7A6", icon: "Home" },
+      { name: "Entertainment", color: "#E91E63", icon: "Coffee" },
+      { name: "Dining Out", color: "#FF9800", icon: "Utensils" },
+    ];
+
+    // Default income categories
+    const incomeCategories = [
+      { name: "Salary", color: "#33FF57", icon: "DollarSign" },
+      { name: "Freelance", color: "#3357FF", icon: "Briefcase" },
+      { name: "Gifts", color: "#8E44AD", icon: "Gift" },
+    ];
+
+    // Create expense categories
+    for (const [index, category] of expenseCategories.entries()) {
+      await ctx.db.insert("categories", {
+        userId: user._id,
+        name: category.name,
+        type: "expense",
+        color: category.color,
+        icon: category.icon,
+        isArchived: false,
+        isDefault: index === 0, // First category is default
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+
+    // Create income categories
+    for (const [index, category] of incomeCategories.entries()) {
+      await ctx.db.insert("categories", {
+        userId: user._id,
+        name: category.name,
+        type: "income",
+        color: category.color,
+        icon: category.icon,
+        isArchived: false,
+        isDefault: index === 0, // First category is default
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+
+    return { created: expenseCategories.length + incomeCategories.length };
+  },
+});
+
+/**
  * Gets categories for the authenticated user with optional filtering
  * All queries are fully indexed for maximum performance
  */

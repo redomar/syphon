@@ -3,7 +3,10 @@ import {
   CategoryForm,
   type CategoryFormValues,
 } from "@/components/categories/CategoryForm";
-import { CategoryList, type Category } from "@/components/categories/CategoryList";
+import {
+  CategoryList,
+  type Category,
+} from "@/components/categories/CategoryList";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,9 +16,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus } from "lucide-react";
-import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Plus, TrendingUp, TrendingDown } from "lucide-react";
+import { useState, useEffect } from "react";
 import { api } from "convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import { toast } from "sonner";
@@ -25,11 +39,15 @@ export default function TransactionsPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
+  const [showDefaultsDialog, setShowDefaultsDialog] = useState(false);
 
   const createCategory = useMutation(api.categories.createCategory);
   const updateCategory = useMutation(api.categories.updateCategory);
   const deleteCategory = useMutation(api.categories.deleteCategory);
   const unarchiveCategory = useMutation(api.categories.unarchiveCategory);
+  const createDefaultCategories = useMutation(
+    api.categories.createDefaultCategories
+  );
 
   const activeCategories = useQuery(api.categories.getCategories, {
     includeArchived: false,
@@ -104,6 +122,27 @@ export default function TransactionsPage() {
     (cat) => cat.isArchived
   );
 
+  // Check if user has 0 categories and show defaults dialog
+  useEffect(() => {
+    if (!isLoadingArchived && archivedCategories) {
+      const totalCategories = archivedCategories.length;
+      if (totalCategories === 0) {
+        setShowDefaultsDialog(true);
+      }
+    }
+  }, [archivedCategories, isLoadingArchived]);
+
+  const handleCreateDefaults = async () => {
+    try {
+      const result = await createDefaultCategories();
+      toast.success(`Created ${result.created} default categories`);
+      setShowDefaultsDialog(false);
+    } catch (error) {
+      toast.error("Failed to create default categories");
+      console.error("Create defaults error:", error);
+    }
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -153,7 +192,10 @@ export default function TransactionsPage() {
         </div>
 
         {/* Category List with Tabs */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "active" | "archived")}>
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => setActiveTab(v as "active" | "archived")}
+        >
           <TabsList className="bg-neutral-800 border-neutral-700">
             <TabsTrigger
               value="active"
@@ -190,6 +232,82 @@ export default function TransactionsPage() {
             />
           </TabsContent>
         </Tabs>
+
+        {/* Default Categories Dialog */}
+        <AlertDialog
+          open={showDefaultsDialog}
+          onOpenChange={setShowDefaultsDialog}
+        >
+          <AlertDialogContent className="bg-neutral-900 border-neutral-800 text-white rounded-md gap-6 max-w-2xl">
+            <AlertDialogHeader className="space-y-4">
+              <AlertDialogTitle className="text-xl font-semibold tracking-tight">
+                Get Started Quickly
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-neutral-400 text-base">
+                Start with a pre-configured set of categories to track your
+                finances immediately. You can always edit them later.
+                <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-4 rounded-md bg-neutral-950/50 p-5 border border-neutral-800/50 hover:border-red-900/30 transition-colors">
+                    <div className="flex items-center gap-2.5 text-sm font-medium text-red-400 uppercase tracking-wider">
+                      <div className="p-1.5 rounded-md bg-red-500/10">
+                        <TrendingDown className="h-4 w-4" />
+                      </div>
+                      <span>Expenses</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        "Groceries",
+                        "Transport",
+                        "Utilities",
+                        "Entertainment",
+                        "Dining Out",
+                      ].map((cat) => (
+                        <Badge
+                          key={cat}
+                          variant="outline"
+                          className="rounded-sm border-neutral-800 bg-neutral-900 text-neutral-300 font-normal hover:border-neutral-700"
+                        >
+                          {cat}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 rounded-md bg-neutral-950/50 p-5 border border-neutral-800/50 hover:border-emerald-900/30 transition-colors">
+                    <div className="flex items-center gap-2.5 text-sm font-medium text-emerald-400 uppercase tracking-wider">
+                      <div className="p-1.5 rounded-md bg-emerald-500/10">
+                        <TrendingUp className="h-4 w-4" />
+                      </div>
+                      <span>Income</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {["Salary", "Freelance", "Gifts"].map((cat) => (
+                        <Badge
+                          key={cat}
+                          variant="outline"
+                          className="rounded-sm border-neutral-800 bg-neutral-900 text-neutral-300 font-normal hover:border-neutral-700"
+                        >
+                          {cat}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="sm:justify-between gap-4 border-t border-neutral-800 pt-6 mt-2">
+              <AlertDialogCancel className="rounded-md bg-transparent border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white mt-0">
+                I'll create my own
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onMouseDown={handleCreateDefaults}
+                className="rounded-md bg-orange-500 hover:bg-orange-600 text-white font-medium px-8"
+              >
+                Create Categories
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AppLayout>
   );

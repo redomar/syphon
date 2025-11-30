@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Form,
   FormControl,
@@ -125,34 +126,32 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
           name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs text-neutral-400 tracking-wider uppercase">
+              <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
                 Type
               </FormLabel>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant={field.value === "expense" ? "default" : "outline"}
-                  className={
-                    field.value === "expense"
-                      ? "flex-1 bg-orange-500 hover:bg-orange-600 text-white"
-                      : "flex-1 bg-neutral-800 border-neutral-700 text-neutral-400 hover:bg-neutral-700 hover:text-white"
-                  }
+              <div className="grid grid-cols-2 gap-3">
+                <div
                   onClick={() => field.onChange("expense")}
+                  className={cn(
+                    "cursor-pointer rounded-md border p-3 text-center transition-all hover:bg-neutral-900",
+                    field.value === "expense"
+                      ? "border-red-500/50 bg-red-500/10 text-red-400"
+                      : "border-neutral-800 bg-neutral-900/50 text-neutral-400 hover:border-neutral-700"
+                  )}
                 >
-                  Expense
-                </Button>
-                <Button
-                  type="button"
-                  variant={field.value === "income" ? "default" : "outline"}
-                  className={
-                    field.value === "income"
-                      ? "flex-1 bg-white hover:bg-neutral-100 text-neutral-900"
-                      : "flex-1 bg-neutral-800 border-neutral-700 text-neutral-400 hover:bg-neutral-700 hover:text-white"
-                  }
+                  <span className="text-sm font-medium">Expense</span>
+                </div>
+                <div
                   onClick={() => field.onChange("income")}
+                  className={cn(
+                    "cursor-pointer rounded-md border p-3 text-center transition-all hover:bg-neutral-900",
+                    field.value === "income"
+                      ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
+                      : "border-neutral-800 bg-neutral-900/50 text-neutral-400 hover:border-neutral-700"
+                  )}
                 >
-                  Income
-                </Button>
+                  <span className="text-sm font-medium">Income</span>
+                </div>
               </div>
               <FormMessage />
             </FormItem>
@@ -164,20 +163,21 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
           name="color"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs text-neutral-400 tracking-wider uppercase">
+              <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
                 Color
               </FormLabel>
-              <div className="grid grid-cols-6 gap-2">
+              <div className="grid grid-cols-6 gap-3">
                 {COLORS.map((color) => (
                   <button
                     key={color}
                     type="button"
                     onClick={() => field.onChange(color)}
-                    className={`w-10 h-10 border-2 transition-all ${
+                    className={cn(
+                      "h-10 w-full rounded-md border-2 transition-all",
                       field.value === color
-                        ? "border-white scale-110"
-                        : "border-neutral-700 hover:border-neutral-500"
-                    }`}
+                        ? "border-white shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+                        : "border-transparent hover:scale-105"
+                    )}
                     style={{ backgroundColor: color }}
                     aria-label={`Select color ${color}`}
                   />
@@ -188,15 +188,12 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
                   type="text"
                   placeholder="#FF5733"
                   {...field}
-                  className="bg-neutral-800 border-neutral-700 text-white font-mono"
+                  className="bg-neutral-900 border-neutral-800 text-white font-mono text-sm h-9"
                   autoComplete="off"
                   data-1p-ignore
                   data-lpignore="true"
                 />
               </FormControl>
-              <FormDescription className="text-xs text-neutral-500">
-                Click a color or enter a custom hex code
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -207,63 +204,85 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
           name="icon"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs text-neutral-400 tracking-wider uppercase">
+              <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
                 Icon
               </FormLabel>
-              <div className="grid grid-cols-6 gap-2">
-                {ICONS.map(({ name, component: Icon }) => (
-                  <button
-                    key={name}
-                    type="button"
-                    onClick={() => field.onChange(name)}
-                    className={`w-10 h-10 flex items-center justify-center border-2 transition-all ${
-                      field.value === name
-                        ? "border-white bg-neutral-700"
-                        : "border-neutral-700 bg-neutral-800 hover:bg-neutral-700"
-                    }`}
-                  >
-                    <Icon className="w-5 h-5 text-white" />
-                  </button>
-                ))}
+              <div className="grid grid-cols-6 gap-3">
+                {ICONS.map(({ name, component: Icon }) => {
+                  const isSelected = field.value === name;
+                  const selectedColor = form.watch("color");
+                  return (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => field.onChange(name)}
+                      className={cn(
+                        "flex h-10 w-full items-center justify-center rounded-md border transition-all",
+                        isSelected
+                          ? "border-neutral-700 bg-neutral-900/50"
+                          : "border-neutral-800 bg-neutral-900 hover:border-neutral-700 hover:bg-neutral-800"
+                      )}
+                      style={
+                        isSelected
+                          ? {
+                              boxShadow: `inset 0 0 15px color-mix(in srgb, ${selectedColor}, transparent 80%)`,
+                            }
+                          : undefined
+                      }
+                    >
+                      <Icon
+                        className="h-5 w-5 transition-colors"
+                        style={{
+                          color: isSelected ? selectedColor : "#737373",
+                        }}
+                      />
+                    </button>
+                  );
+                })}
               </div>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className="border border-neutral-700 rounded-lg p-4 bg-neutral-800">
-          <FormLabel className="text-xs text-neutral-400 tracking-wider uppercase mb-2 block">
+
+        <div className="rounded-md border border-neutral-800 bg-neutral-900/50 p-4">
+          <FormLabel className="mb-3 block text-xs font-medium text-neutral-400 uppercase tracking-wider">
             Preview
           </FormLabel>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 rounded-md border border-neutral-800 bg-neutral-950/50 p-3">
             {(() => {
               const selectedIcon = ICONS.find(
                 (icon) => icon.name === form.watch("icon")
               );
               const IconComponent = selectedIcon?.component || ShoppingCart;
+              const color = form.watch("color");
               return (
                 <div
-                  className="w-10 h-10 flex items-center justify-center rounded"
-                  style={{ backgroundColor: form.watch("color") }}
+                  className="flex h-11 w-11 items-center justify-center rounded-md border border-neutral-800 bg-neutral-900/50"
+                  style={{
+                    boxShadow: `inset 0 0 15px color-mix(in srgb, ${color}, transparent 80%)`,
+                  }}
                 >
-                  <IconComponent className="w-5 h-5 text-white" />
+                  <IconComponent className="h-5 w-5" style={{ color: color }} />
                 </div>
               );
             })()}
-            <div>
-              <div className="text-white font-medium text-sm -mt-1">
+            <div className="flex flex-col">
+              <span className="font-medium text-neutral-200">
                 {form.watch("name") || "Category Name"}
-              </div>
-              <div className="mt-1.5 text-xs text-neutral-400 capitalize">
-                <span
+              </span>
+              <div>
+                <Badge
+                  variant="outline"
                   className={cn(
-                    "px-2 py-0.5 text-xs font-medium",
+                    "rounded-md border-0 px-2 py-0 font-normal capitalize",
                     form.watch("type") === "income"
-                      ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                      : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+                      ? "bg-emerald-500/10 text-emerald-500"
+                      : "bg-red-500/10 text-red-500"
                   )}
                 >
                   {form.watch("type")}
-                </span>
+                </Badge>
               </div>
             </div>
           </div>

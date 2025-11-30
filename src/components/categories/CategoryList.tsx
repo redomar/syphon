@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,7 +48,10 @@ export type GetCategoriesReturn = FunctionReturnType<
 export type Category = GetCategoriesReturn[0];
 
 // Icon map for dynamic icon rendering
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+const ICON_MAP: Record<
+  string,
+  React.ComponentType<{ className?: string; style?: React.CSSProperties }>
+> = {
   ShoppingCart,
   Home,
   Car,
@@ -93,12 +97,17 @@ export function CategoryList({
           return (
             <div className="flex items-center gap-3">
               <div
-                className="w-10 h-10 flex items-center justify-center rounded"
-                style={{ backgroundColor: row.original.color }}
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-neutral-800 bg-neutral-900/50 transition-colors hover:bg-neutral-900"
+                style={{
+                  boxShadow: `inset 0 0 15px color-mix(in srgb, ${row.original.color}, transparent 80%)`,
+                }}
               >
-                <Icon className="w-5 h-5 text-white" />
+                <Icon
+                  className="h-4 w-4"
+                  style={{ color: row.original.color }}
+                />
               </div>
-              <span className="font-medium text-white">
+              <span className="font-medium text-neutral-200">
                 {row.original.name}
               </span>
             </div>
@@ -111,15 +120,16 @@ export function CategoryList({
         cell: ({ getValue }) => {
           const type = getValue() as "income" | "expense";
           return (
-            <span
-              className={`px-2 py-1 rounded text-xs font-medium uppercase tracking-wider ${
+            <Badge
+              variant="outline"
+              className={`rounded-md border-0 px-2.5 py-0.5 font-medium capitalize ${
                 type === "income"
-                  ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                  : "bg-orange-500/10 text-orange-400 border border-orange-500/20"
+                  ? "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20"
+                  : "bg-red-500/10 text-red-500 hover:bg-red-500/20"
               }`}
             >
               {type}
-            </span>
+            </Badge>
           );
         },
       },
@@ -129,13 +139,19 @@ export function CategoryList({
         cell: ({ getValue }) => {
           const isDefault = getValue() as boolean;
           return isDefault ? (
-            <span className="text-xs text-neutral-400">Yes</span>
+            <Badge
+              variant="secondary"
+              className="rounded-md bg-neutral-800 text-neutral-400 hover:bg-neutral-700 font-normal"
+            >
+              Default
+            </Badge>
           ) : (
-            <span className="text-xs text-neutral-600">—</span>
+            <span className="text-xs text-neutral-600 pl-2">—</span>
           );
         },
       },
-      {        accessorKey: "createdAt",
+      {
+        accessorKey: "createdAt",
         header: "Created At",
         cell: ({ getValue }) => {
           const timestamp = getValue() as number;
@@ -149,7 +165,7 @@ export function CategoryList({
               })}
             </span>
           );
-        },  
+        },
       },
       {
         accessorKey: "updatedAt",
@@ -166,7 +182,7 @@ export function CategoryList({
               })}
             </span>
           );
-        },  
+        },
       },
       {
         id: "actions",
@@ -298,23 +314,25 @@ export function CategoryList({
         open={!!deleteId}
         onOpenChange={(open) => !open && setDeleteId(null)}
       >
-        <AlertDialogContent className="bg-neutral-900 border-neutral-700 text-white">
+        <AlertDialogContent className="bg-neutral-900 border-neutral-800 text-white rounded-md gap-6 max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Archive Category?</AlertDialogTitle>
-            <AlertDialogDescription className="text-neutral-400">
+            <AlertDialogTitle className="text-xl font-semibold tracking-tight">
+              Archive Category?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-neutral-400 text-base">
               This category will be archived and hidden from your active
               categories. You can restore it later if needed.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-neutral-800 border-neutral-700 text-white hover:bg-neutral-700">
+          <AlertDialogFooter className="gap-3 sm:justify-between">
+            <AlertDialogCancel className="rounded-md bg-transparent border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white mt-0">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onMouseDown={handleDeleteConfirm}
-              className="bg-red-500 hover:bg-red-600 text-white"
+              className="rounded-md bg-red-500 hover:bg-red-600 text-white font-medium px-6"
             >
-              Archive
+              Archive Category
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
