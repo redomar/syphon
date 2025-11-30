@@ -155,6 +155,35 @@ export const deleteCategory = mutation({
 });
 
 /**
+ * Restores an archived category by setting isArchived to false
+ */
+export const unarchiveCategory = mutation({
+  args: {
+    categoryId: v.id("categories"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+
+    const category = await ctx.db.get(args.categoryId);
+
+    if (!category || category.userId !== user._id) {
+      throw new Error("Category not found");
+    }
+
+    if (!category.isArchived) {
+      throw new Error("Category is not archived");
+    }
+
+    await ctx.db.patch(args.categoryId, {
+      isArchived: false,
+      updatedAt: Date.now(),
+    });
+
+    return args.categoryId;
+  },
+});
+
+/**
  * Gets categories for the authenticated user with optional filtering
  * All queries are fully indexed for maximum performance
  */

@@ -90,7 +90,13 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-6"
+        autoComplete="off"
+        data-1p-ignore
+        data-lpignore="true"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -104,6 +110,9 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
                   placeholder="e.g., Groceries"
                   {...field}
                   className="bg-neutral-800 border-neutral-700 text-white"
+                  autoComplete="off"
+                  data-1p-ignore
+                  data-lpignore="true"
                 />
               </FormControl>
               <FormMessage />
@@ -180,6 +189,9 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
                   placeholder="#FF5733"
                   {...field}
                   className="bg-neutral-800 border-neutral-700 text-white font-mono"
+                  autoComplete="off"
+                  data-1p-ignore
+                  data-lpignore="true"
                 />
               </FormControl>
               <FormDescription className="text-xs text-neutral-500">
