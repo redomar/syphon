@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Spinner } from "@/components/ui/spinner";
 import { SignInButton, SignUpButton } from "@clerk/clerk-react";
 import { useConvexAuth } from "convex/react";
 import { Check } from "lucide-react";
@@ -23,7 +24,7 @@ export default function LandingPage() {
   if (!isClient) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <Spinner className="h-12 w-12 text-orange-500" />
       </div>
     );
   }
@@ -37,7 +38,7 @@ function LandingClient() {
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <Spinner className="h-12 w-12 text-orange-500" />
       </div>
     );
   }

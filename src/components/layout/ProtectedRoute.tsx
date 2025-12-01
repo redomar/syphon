@@ -3,6 +3,8 @@ import { Navigate, Outlet } from "react-router";
 import { useEffect, useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { Spinner } from "@/components/ui/spinner";
+import { AppLayout } from "./AppLayout";
 
 export default function ProtectedRoute() {
   const [isClient, setIsClient] = useState(false);
@@ -15,14 +17,16 @@ export default function ProtectedRoute() {
   if (!isClient) {
     // During SSR, show loading state
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100 mx-auto"></div>
-          <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-            Loading...
+      <AppLayout showUserButton={false}>
+        <div className="flex h-full flex-col items-center justify-center gap-4">
+          <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-900 border border-neutral-800 shadow-inner">
+            <Spinner className="h-6 w-6 text-orange-500" />
+          </div>
+          <p className="text-sm font-medium text-neutral-500 animate-pulse">
+            Initializing...
           </p>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
@@ -44,14 +48,16 @@ function ProtectedRouteClient() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100 mx-auto"></div>
-          <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-            Loading...
+      <AppLayout>
+        <div className="flex h-full flex-col items-center justify-center gap-4">
+          <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-900 border border-neutral-800 shadow-inner">
+            <Spinner className="h-6 w-6 text-orange-500" />
+          </div>
+          <p className="text-sm font-medium text-neutral-500 animate-pulse">
+            Loading your workspace...
           </p>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 

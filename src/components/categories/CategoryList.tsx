@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Spinner } from "@/components/ui/spinner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -252,7 +253,7 @@ export function CategoryList({
       <div className="border border-neutral-700 bg-neutral-900 rounded-lg overflow-hidden">
         {isLoading ? (
           <div className="p-12 text-center">
-            <div className="inline-block w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+            <Spinner className="w-6 h-6 text-orange-500 mx-auto" />
             <p className="text-neutral-400 mt-4">Loading categories...</p>
           </div>
         ) : isEmpty ? (
