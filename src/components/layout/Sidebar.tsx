@@ -48,7 +48,7 @@ export function Sidebar() {
                   "flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all duration-200",
                   isActive
                     ? "bg-orange-500 text-white font-bold"
-                    : "text-neutral-400 hover:bg-neutral-800 hover:text-white",
+                    : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
                 )}
               >
                 <item.icon className="w-4 h-4 flex-shrink-0" />

@@ -15,10 +15,10 @@ export default function ProtectedRoute() {
   }, []);
 
   if (!isClient) {
-    // During SSR, show loading state
+    // During SSR, show loading state without AppLayout (to avoid Convex hook issues)
     return (
-      <AppLayout showUserButton={false}>
-        <div className="flex h-full flex-col items-center justify-center gap-4">
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center justify-center gap-4">
           <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-900 border border-neutral-800 shadow-inner">
             <Spinner className="h-6 w-6 text-orange-500" />
           </div>
@@ -26,7 +26,7 @@ export default function ProtectedRoute() {
             Initializing...
           </p>
         </div>
-      </AppLayout>
+      </div>
     );
   }
 

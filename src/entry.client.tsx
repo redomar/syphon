@@ -20,6 +20,6 @@ startTransition(() => {
           <HydratedRouter />
         </ConvexProviderWithClerk>
       </ClerkProvider>
-    </StrictMode>,
+    </StrictMode>
   );
 });

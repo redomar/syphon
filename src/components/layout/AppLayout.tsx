@@ -1,5 +1,7 @@
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
+import { Button } from "../ui/button";
+import { Feedback } from "./Feedback";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -14,6 +16,10 @@ export function AppLayout({ children, showUserButton = true }: AppLayoutProps) {
         <Header showUserButton={showUserButton} />
         <main className="flex-1 overflow-auto p-6">{children}</main>
       </div>
+
+      <span className="absolute right-2 bottom-2">
+        <Feedback />
+      </span>
     </div>
   );
 }
