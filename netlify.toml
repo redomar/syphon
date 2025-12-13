@@ -6,14 +6,14 @@
 
 # PostHog reverse proxy - prevents ad blockers from blocking analytics
 [[redirects]]
-  from = "/ingest/static/*"
+  from = "/a/static/*"
   to = "https://eu-assets.i.posthog.com/static/:splat"
   host = "eu-assets.i.posthog.com"
   status = 200
   force = true
 
 [[redirects]]
-  from = "/ingest/*"
+  from = "/a/*"
   to = "https://eu.i.posthog.com/:splat"
   host = "eu.i.posthog.com"
   status = 200

@@ -13,7 +13,7 @@ const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL);
 
 // Initialize PostHog
 posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, {
-  api_host: "/ingest",
+  api_host: "/a",
   ui_host: "https://eu.posthog.com",
   person_profiles: "identified_only",
   capture_pageview: true,
