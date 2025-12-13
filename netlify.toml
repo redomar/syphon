@@ -1,0 +1,26 @@
+# Netlify configuration
+
+[build]
+  command = "pnpm run build"
+  publish = "build/client"
+
+# PostHog reverse proxy - prevents ad blockers from blocking analytics
+[[redirects]]
+  from = "/ingest/static/*"
+  to = "https://eu-assets.i.posthog.com/static/:splat"
+  status = 200
+  force = true
+  headers = {Host = "eu-assets.i.posthog.com"}
+
+[[redirects]]
+  from = "/ingest/*"
+  to = "https://eu.i.posthog.com/:splat"
+  status = 200
+  force = true
+  headers = {Host = "eu.i.posthog.com"}
+
+# SPA fallback - must be last
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
