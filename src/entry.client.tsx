@@ -12,8 +12,10 @@ import { PostHogProvider } from "posthog-js/react";
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL);
 
 // Initialize PostHog
+// Use proxy in production (bypasses ad blockers), direct API in development
+const isProduction = import.meta.env.MODE === "production";
 posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, {
-  api_host: "/a",
+  api_host: isProduction ? "/a" : "https://eu.i.posthog.com",
   ui_host: "https://eu.posthog.com",
   person_profiles: "identified_only",
   capture_pageview: true,
