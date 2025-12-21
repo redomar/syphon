@@ -1,27 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import type { QueryCtx, MutationCtx } from "./_generated/server";
-
-/**
- * Helper function to get the current authenticated user
- */
-async function getCurrentUser(ctx: QueryCtx | MutationCtx) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) {
-    throw new Error("Unauthorized");
-  }
-
-  const user = await ctx.db
-    .query("users")
-    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-    .unique();
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  return user;
-}
+import { requireUser } from "./lib/auth";
 
 /**
  * Creates a new category for the authenticated user
@@ -34,7 +13,7 @@ export const createCategory = mutation({
     icon: v.string(),
   },
   handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+    const user = await requireUser(ctx);
 
     // Check if a category with the same name already exists (including archived ones)
     const existingCategories = await ctx.db
@@ -81,7 +60,7 @@ export const updateCategory = mutation({
     icon: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+    const user = await requireUser(ctx);
 
     const category = await ctx.db.get(args.categoryId);
 
@@ -133,7 +112,7 @@ export const deleteCategory = mutation({
     categoryId: v.id("categories"),
   },
   handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+    const user = await requireUser(ctx);
 
     const category = await ctx.db.get(args.categoryId);
 
@@ -162,7 +141,7 @@ export const unarchiveCategory = mutation({
     categoryId: v.id("categories"),
   },
   handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+    const user = await requireUser(ctx);
 
     const category = await ctx.db.get(args.categoryId);
 
@@ -190,7 +169,7 @@ export const unarchiveCategory = mutation({
 export const createDefaultCategories = mutation({
   args: {},
   handler: async (ctx) => {
-    const user = await getCurrentUser(ctx);
+    const user = await requireUser(ctx);
 
     // Check if user already has categories
     const existingCategories = await ctx.db
@@ -264,7 +243,7 @@ export const getCategories = query({
     includeArchived: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+    const user = await requireUser(ctx);
 
     let categories;
 

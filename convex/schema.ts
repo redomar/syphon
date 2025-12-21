@@ -38,4 +38,31 @@ export default defineSchema({
     .index("by_user_and_type", ["userId", "type"])
     .index("by_user_active", ["userId", "isArchived"])
     .index("by_user_type_active", ["userId", "type", "isArchived"]),
+  accounts: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    type: v.union(
+      v.literal("checking"),
+      v.literal("savings"),
+      v.literal("credit_card"),
+      v.literal("cash"),
+      v.literal("investment"),
+      v.literal("other")
+    ),
+    provider: v.string(),
+    lastFourDigits: v.string(),
+    balance: v.number(), // In smallest currency unit (e.g., cents)
+    currency: v.union(
+      v.literal("GBP"),
+      v.literal("USD"),
+      v.literal("EUR"),
+      v.literal("CAD"),
+      v.literal("AUD")
+    ),
+    isArchived: v.boolean(),
+    createdAt: v.number(), // Unix timestamp (ms)
+    updatedAt: v.number(), // Unix timestamp (ms)
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_active", ["userId", "isArchived"]),
 });
