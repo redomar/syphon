@@ -38,14 +38,21 @@ export default function SettingsPage() {
 
   const handleSubmit = async (values: AccountFormValues) => {
     try {
+      // Convert balance from dollars to cents
+      const balanceInCents = Math.round(values.balance * 100);
+
       if (editingAccount) {
         await updateAccount({
           accountId: editingAccount._id,
           ...values,
+          balance: balanceInCents,
         });
         toast.success("Account updated successfully");
       } else {
-        await createAccount(values);
+        await createAccount({
+          ...values,
+          balance: balanceInCents,
+        });
         toast.success("Account created successfully");
       }
       setIsOpen(false);
@@ -132,7 +139,7 @@ export default function SettingsPage() {
                         type: editingAccount.type,
                         provider: editingAccount.provider,
                         lastFourDigits: editingAccount.lastFourDigits,
-                        balance: editingAccount.balance,
+                        balance: editingAccount.balance / 100, // Convert cents to dollars
                         currency: editingAccount.currency,
                       }
                     : undefined

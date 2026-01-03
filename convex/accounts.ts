@@ -29,11 +29,6 @@ export const createAccount = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-
     const user = await requireUser(ctx);
 
     const existingUserAccounts = await ctx.db
@@ -100,8 +95,33 @@ export const updateAccount = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
 
-    const accountId = await ctx.db.patch(args.accountId, {
-      userId: user._id,
+    // Verify ownership
+    const account = await ctx.db.get(args.accountId);
+    if (!account || account.userId !== user._id) {
+      throw new Error("Account not found");
+    }
+
+    // Check for duplicates (excluding current account)
+    const existingAccounts = await ctx.db
+      .query("accounts")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+
+    const duplicate = existingAccounts.find(
+      (acc) =>
+        acc._id !== args.accountId &&
+        acc.name.toLowerCase() === args.name.toLowerCase() &&
+        acc.lastFourDigits === args.lastFourDigits &&
+        !acc.isArchived
+    );
+
+    if (duplicate) {
+      throw new Error(
+        "Account with this name and last four digits already exists"
+      );
+    }
+
+    await ctx.db.patch(args.accountId, {
       name: args.name,
       type: args.type,
       provider: args.provider,
@@ -109,10 +129,9 @@ export const updateAccount = mutation({
       balance: args.balance,
       currency: args.currency,
       updatedAt: Date.now(),
-      isArchived: false,
     });
 
-    return accountId;
+    return args.accountId;
   },
 });
 
