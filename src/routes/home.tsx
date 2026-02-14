@@ -1,5 +1,5 @@
+import { redirect } from "react-router";
 import type { Route } from "./+types/home";
-import { Navigate } from "react-router";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -8,6 +8,6 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function Home() {
-  return <Navigate to="/landing" replace />;
+export function loader() {
+  return redirect("/landing");
 }
