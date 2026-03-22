@@ -131,7 +131,7 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
               </FormLabel>
               <div className="grid grid-cols-2 gap-3">
                 <div
-                  onClick={() => field.onChange("expense")}
+                  onMouseDown={() => field.onChange("expense")}
                   className={cn(
                     "cursor-pointer rounded-md border p-3 text-center transition-all hover:bg-neutral-900",
                     field.value === "expense"
@@ -142,7 +142,7 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
                   <span className="text-sm font-medium">Expense</span>
                 </div>
                 <div
-                  onClick={() => field.onChange("income")}
+                  onMouseDown={() => field.onChange("income")}
                   className={cn(
                     "cursor-pointer rounded-md border p-3 text-center transition-all hover:bg-neutral-900",
                     field.value === "income"
@@ -171,7 +171,7 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
                   <button
                     key={color}
                     type="button"
-                    onClick={() => field.onChange(color)}
+                    onMouseDown={() => field.onChange(color)}
                     className={cn(
                       "h-10 w-full rounded-md border-2 transition-all",
                       field.value === color
@@ -215,7 +215,7 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
                     <button
                       key={name}
                       type="button"
-                      onClick={() => field.onChange(name)}
+                      onMouseDown={() => field.onChange(name)}
                       className={cn(
                         "flex h-10 w-full items-center justify-center rounded-md border transition-all",
                         isSelected

@@ -45,6 +45,7 @@ export default defineSchema({
       v.literal("checking"),
       v.literal("savings"),
       v.literal("credit_card"),
+      v.literal("debit_card"),
       v.literal("cash"),
       v.literal("investment"),
       v.literal("other")

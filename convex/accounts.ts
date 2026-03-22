@@ -1,47 +1,52 @@
-/**
- * Creates a new account for the authenticated user
- */
-
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireUser } from "./lib/auth";
 
+const accountType = v.union(
+  v.literal("checking"),
+  v.literal("savings"),
+  v.literal("credit_card"),
+  v.literal("debit_card"),
+  v.literal("cash"),
+  v.literal("investment"),
+  v.literal("other")
+);
+
+const currency = v.union(
+  v.literal("GBP"),
+  v.literal("USD"),
+  v.literal("EUR"),
+  v.literal("CAD"),
+  v.literal("AUD")
+);
+
+/**
+ * Creates a new account for the authenticated user.
+ */
 export const createAccount = mutation({
   args: {
     name: v.string(),
-    type: v.union(
-      v.literal("checking"),
-      v.literal("savings"),
-      v.literal("credit_card"),
-      v.literal("cash"),
-      v.literal("investment"),
-      v.literal("other")
-    ),
+    type: accountType,
     provider: v.string(),
     lastFourDigits: v.string(),
-    balance: v.number(), // In smallest currency unit (e.g., cents)
-    currency: v.union(
-      v.literal("GBP"),
-      v.literal("USD"),
-      v.literal("EUR"),
-      v.literal("CAD"),
-      v.literal("AUD")
-    ),
+    balance: v.number(),
+    currency,
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
 
-    const existingUserAccounts = await ctx.db
+    const activeAccounts = await ctx.db
       .query("accounts")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .withIndex("by_user_active", (q) =>
+        q.eq("userId", user._id).eq("isArchived", false)
+      )
       .collect();
 
     if (
-      existingUserAccounts.some(
+      activeAccounts.some(
         (account) =>
           account.name.toLowerCase() === args.name.toLowerCase() &&
-          account.lastFourDigits === args.lastFourDigits &&
-          !account.isArchived
+          account.lastFourDigits === args.lastFourDigits
       )
     ) {
       throw new Error(
@@ -49,7 +54,7 @@ export const createAccount = mutation({
       );
     }
 
-    const accountId = await ctx.db.insert("accounts", {
+    return await ctx.db.insert("accounts", {
       userId: user._id,
       name: args.name,
       type: args.type,
@@ -61,58 +66,42 @@ export const createAccount = mutation({
       updatedAt: Date.now(),
       isArchived: false,
     });
-
-    return accountId;
   },
 });
 
 /**
- * Updates an existing account for the authenticated user`
+ * Updates an existing account for the authenticated user.
  */
 export const updateAccount = mutation({
   args: {
     accountId: v.id("accounts"),
     name: v.string(),
-    type: v.union(
-      v.literal("checking"),
-      v.literal("savings"),
-      v.literal("credit_card"),
-      v.literal("cash"),
-      v.literal("investment"),
-      v.literal("other")
-    ),
+    type: accountType,
     provider: v.string(),
     lastFourDigits: v.string(),
-    balance: v.number(), // In smallest currency unit (e.g., cents)
-    currency: v.union(
-      v.literal("GBP"),
-      v.literal("USD"),
-      v.literal("EUR"),
-      v.literal("CAD"),
-      v.literal("AUD")
-    ),
+    balance: v.number(),
+    currency,
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
 
-    // Verify ownership
     const account = await ctx.db.get(args.accountId);
     if (!account || account.userId !== user._id) {
       throw new Error("Account not found");
     }
 
-    // Check for duplicates (excluding current account)
-    const existingAccounts = await ctx.db
+    const activeAccounts = await ctx.db
       .query("accounts")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .withIndex("by_user_active", (q) =>
+        q.eq("userId", user._id).eq("isArchived", false)
+      )
       .collect();
 
-    const duplicate = existingAccounts.find(
+    const duplicate = activeAccounts.find(
       (acc) =>
         acc._id !== args.accountId &&
         acc.name.toLowerCase() === args.name.toLowerCase() &&
-        acc.lastFourDigits === args.lastFourDigits &&
-        !acc.isArchived
+        acc.lastFourDigits === args.lastFourDigits
     );
 
     if (duplicate) {
@@ -136,10 +125,9 @@ export const updateAccount = mutation({
 });
 
 /**
- * Archives an existing account for the authenticated user
+ * Archives an account (soft delete).
  */
-
-export const deleteAccount = mutation({
+export const archiveAccount = mutation({
   args: {
     accountId: v.id("accounts"),
   },
@@ -147,7 +135,6 @@ export const deleteAccount = mutation({
     const user = await requireUser(ctx);
 
     const account = await ctx.db.get(args.accountId);
-
     if (!account || account.userId !== user._id) {
       throw new Error("Account not found");
     }
@@ -160,13 +147,11 @@ export const deleteAccount = mutation({
       isArchived: true,
       updatedAt: Date.now(),
     });
-
-    return;
   },
 });
 
 /**
- * Restores an archived account for the authenticated user
+ * Restores an archived account.
  */
 export const unarchiveAccount = mutation({
   args: {
@@ -176,7 +161,6 @@ export const unarchiveAccount = mutation({
     const user = await requireUser(ctx);
 
     const account = await ctx.db.get(args.accountId);
-
     if (!account || account.userId !== user._id) {
       throw new Error("Account not found");
     }
@@ -189,24 +173,52 @@ export const unarchiveAccount = mutation({
       isArchived: false,
       updatedAt: Date.now(),
     });
-
-    return;
   },
 });
 
 /**
- * Get all accounts for the authenticated user
+ * Get active (non-archived) accounts for the authenticated user.
  */
+export const getActiveAccounts = query({
+  handler: async (ctx) => {
+    const user = await requireUser(ctx);
 
+    return await ctx.db
+      .query("accounts")
+      .withIndex("by_user_active", (q) =>
+        q.eq("userId", user._id).eq("isArchived", false)
+      )
+      .collect();
+  },
+});
+
+/**
+ * Get archived accounts for the authenticated user.
+ */
+export const getArchivedAccounts = query({
+  handler: async (ctx) => {
+    const user = await requireUser(ctx);
+
+    return await ctx.db
+      .query("accounts")
+      .withIndex("by_user_active", (q) =>
+        q.eq("userId", user._id).eq("isArchived", true)
+      )
+      .collect();
+  },
+});
+
+/**
+ * Get all accounts for the authenticated user (active + archived).
+ * Useful for dropdowns where you need the full list.
+ */
 export const getAccounts = query({
   handler: async (ctx) => {
     const user = await requireUser(ctx);
 
-    const accounts = await ctx.db
+    return await ctx.db
       .query("accounts")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
-
-    return accounts;
   },
 });

@@ -16,6 +16,7 @@ import {
   Wallet,
   PiggyBank,
   CreditCard,
+  Landmark,
   Banknote,
   TrendingUp,
   MoreHorizontal,
@@ -27,7 +28,7 @@ const formSchema = z.object({
     .min(1, "Name is required")
     .max(50, "Name must be less than 50 characters"),
   type: z.enum(
-    ["checking", "savings", "credit_card", "cash", "investment", "other"],
+    ["checking", "savings", "credit_card", "debit_card", "cash", "investment", "other"],
     {
       message: "Please select an account type",
     }
@@ -52,6 +53,7 @@ const ACCOUNT_TYPES = [
   { value: "checking", label: "Checking", icon: Wallet },
   { value: "savings", label: "Savings", icon: PiggyBank },
   { value: "credit_card", label: "Credit", icon: CreditCard },
+  { value: "debit_card", label: "Debit", icon: Landmark },
   { value: "cash", label: "Cash", icon: Banknote },
   { value: "investment", label: "Investment", icon: TrendingUp },
   { value: "other", label: "Other", icon: MoreHorizontal },
@@ -107,11 +109,11 @@ export function AccountForm({ onSubmit, defaultValues }: AccountFormProps) {
               <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
                 Account Type
               </FormLabel>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-4 gap-3">
                 {ACCOUNT_TYPES.map(({ value, label, icon: Icon }) => (
                   <div
                     key={value}
-                    onClick={() => field.onChange(value)}
+                    onMouseDown={() => field.onChange(value)}
                     className={cn(
                       "cursor-pointer rounded-md border p-3 text-center transition-all hover:bg-neutral-900 flex flex-col items-center gap-2",
                       field.value === value
@@ -211,7 +213,7 @@ export function AccountForm({ onSubmit, defaultValues }: AccountFormProps) {
                     <button
                       key={currency}
                       type="button"
-                      onClick={() => field.onChange(currency)}
+                      onMouseDown={() => field.onChange(currency)}
                       className={cn(
                         "px-3 py-2 rounded-md text-xs font-medium transition-all",
                         field.value === currency

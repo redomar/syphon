@@ -28,17 +28,14 @@ export default function SettingsPage() {
 
   const createAccount = useMutation(api.accounts.createAccount);
   const updateAccount = useMutation(api.accounts.updateAccount);
-  const deleteAccount = useMutation(api.accounts.deleteAccount);
+  const archiveAccount = useMutation(api.accounts.archiveAccount);
   const unarchiveAccount = useMutation(api.accounts.unarchiveAccount);
 
-  const accounts = useQuery(api.accounts.getAccounts);
-
-  const activeAccounts = accounts?.filter((acc) => !acc.isArchived);
-  const archivedAccounts = accounts?.filter((acc) => acc.isArchived);
+  const activeAccounts = useQuery(api.accounts.getActiveAccounts);
+  const archivedAccounts = useQuery(api.accounts.getArchivedAccounts);
 
   const handleSubmit = async (values: AccountFormValues) => {
     try {
-      // Convert balance from dollars to cents
       const balanceInCents = Math.round(values.balance * 100);
 
       if (editingAccount) {
@@ -65,13 +62,13 @@ export default function SettingsPage() {
     }
   };
 
-  const handleDelete = async (accountId: Id<"accounts">) => {
+  const handleArchive = async (accountId: Id<"accounts">) => {
     try {
-      await deleteAccount({ accountId });
+      await archiveAccount({ accountId });
       toast.success("Account archived successfully");
     } catch (error) {
       toast.error("Failed to archive account");
-      console.error("Delete error:", error);
+      console.error("Archive error:", error);
     }
   };
 
@@ -96,8 +93,6 @@ export default function SettingsPage() {
       setEditingAccount(null);
     }
   };
-
-  const isLoading = accounts === undefined;
 
   return (
     <AppLayout>
@@ -139,7 +134,7 @@ export default function SettingsPage() {
                         type: editingAccount.type,
                         provider: editingAccount.provider,
                         lastFourDigits: editingAccount.lastFourDigits,
-                        balance: editingAccount.balance / 100, // Convert cents to dollars
+                        balance: editingAccount.balance / 100,
                         currency: editingAccount.currency,
                       }
                     : undefined
@@ -173,20 +168,15 @@ export default function SettingsPage() {
             <AccountList
               accounts={activeAccounts}
               onEdit={handleEdit}
-              onDelete={handleDelete}
-              isLoading={isLoading}
-              showArchived={false}
+              onArchive={handleArchive}
             />
           </TabsContent>
 
           <TabsContent value="archived" className="mt-6">
             <AccountList
               accounts={archivedAccounts}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
               onUnarchive={handleUnarchive}
-              isLoading={isLoading}
-              showArchived={true}
+              showArchived
             />
           </TabsContent>
         </Tabs>

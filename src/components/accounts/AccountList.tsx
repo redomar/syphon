@@ -21,16 +21,14 @@ import {
   Banknote,
   TrendingUp,
   MoreHorizontal,
+  Landmark,
 } from "lucide-react";
 import { useState } from "react";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "convex/_generated/api";
 import type { Id } from "convex/_generated/dataModel";
 
-export type GetAccountsReturn = FunctionReturnType<
-  typeof api.accounts.getAccounts
->;
-export type Account = GetAccountsReturn[0];
+export type Account = FunctionReturnType<typeof api.accounts.getActiveAccounts>[0];
 
 const ICON_MAP: Record<
   string,
@@ -39,6 +37,7 @@ const ICON_MAP: Record<
   checking: Wallet,
   savings: PiggyBank,
   credit_card: CreditCard,
+  debit_card: Landmark,
   cash: Banknote,
   investment: TrendingUp,
   other: MoreHorizontal,
@@ -48,44 +47,44 @@ const TYPE_LABELS: Record<string, string> = {
   checking: "Checking",
   savings: "Savings",
   credit_card: "Credit Card",
+  debit_card: "Debit Card",
   cash: "Cash",
   investment: "Investment",
   other: "Other",
 };
 
+function formatCurrency(amount: number, currency: string) {
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency,
+  }).format(amount);
+}
+
 interface AccountListProps {
   accounts: Account[] | undefined;
-  onEdit: (account: Account) => void;
-  onDelete: (accountId: Id<"accounts">) => void;
+  onEdit?: (account: Account) => void;
+  onArchive?: (accountId: Id<"accounts">) => void;
   onUnarchive?: (accountId: Id<"accounts">) => void;
-  isLoading?: boolean;
   showArchived?: boolean;
 }
 
 export function AccountList({
   accounts,
   onEdit,
-  onDelete,
+  onArchive,
   onUnarchive,
-  isLoading = false,
   showArchived = false,
 }: AccountListProps) {
-  const [deleteId, setDeleteId] = useState<Id<"accounts"> | null>(null);
+  const [archiveId, setArchiveId] = useState<Id<"accounts"> | null>(null);
 
+  const isLoading = accounts === undefined;
   const isEmpty = accounts?.length === 0;
 
-  const handleDeleteConfirm = () => {
-    if (deleteId) {
-      onDelete(deleteId);
-      setDeleteId(null);
+  const handleArchiveConfirm = () => {
+    if (archiveId && onArchive) {
+      onArchive(archiveId);
+      setArchiveId(null);
     }
-  };
-
-  const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat("en-GB", {
-      style: "currency",
-      currency: currency,
-    }).format(amount);
   };
 
   return (
@@ -161,36 +160,39 @@ export function AccountList({
                       <span
                         className={`font-medium ${account.balance >= 0 ? "text-emerald-400" : "text-red-400"}`}
                       >
-                        {formatCurrency(account.balance, account.currency)}
+                        {formatCurrency(account.balance / 100, account.currency)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2 justify-end">
-                        {!showArchived && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onMouseDown={() => onEdit(account)}
-                              className="text-neutral-400 hover:text-white hover:bg-neutral-800"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onMouseDown={() => setDeleteId(account._id)}
-                              className="text-neutral-400 hover:text-red-400 hover:bg-red-500/10"
-                            >
-                              <Archive className="w-4 h-4" />
-                            </Button>
-                          </>
+                        {!showArchived && onEdit && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onMouseDown={() => onEdit(account)}
+                            onClick={() => onEdit(account)}
+                            className="text-neutral-400 hover:text-white hover:bg-neutral-800"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                        )}
+                        {!showArchived && onArchive && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onMouseDown={() => setArchiveId(account._id)}
+                            onClick={() => setArchiveId(account._id)}
+                            className="text-neutral-400 hover:text-red-400 hover:bg-red-500/10"
+                          >
+                            <Archive className="w-4 h-4" />
+                          </Button>
                         )}
                         {showArchived && onUnarchive && (
                           <Button
                             variant="ghost"
                             size="sm"
                             onMouseDown={() => onUnarchive(account._id)}
+                            onClick={() => onUnarchive(account._id)}
                             className="text-neutral-400 hover:text-green-400 hover:bg-green-500/10"
                           >
                             <ArchiveRestore className="w-4 h-4" />
@@ -206,10 +208,10 @@ export function AccountList({
         )}
       </div>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Archive Confirmation Dialog */}
       <AlertDialog
-        open={!!deleteId}
-        onOpenChange={(open) => !open && setDeleteId(null)}
+        open={!!archiveId}
+        onOpenChange={(open) => !open && setArchiveId(null)}
       >
         <AlertDialogContent className="bg-neutral-900 border-neutral-800 text-white rounded-md gap-6 max-w-md">
           <AlertDialogHeader>
@@ -226,7 +228,8 @@ export function AccountList({
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              onMouseDown={handleDeleteConfirm}
+              onMouseDown={handleArchiveConfirm}
+              onClick={handleArchiveConfirm}
               className="rounded-md bg-red-500 hover:bg-red-600 text-white font-medium px-6"
             >
               Archive Account
