@@ -83,4 +83,29 @@ export default defineSchema({
     .index("by_user_and_type", ["userId", "type"])
     .index("by_user_and_category", ["userId", "categoryId"])
     .index("by_user_and_account", ["userId", "accountId"]),
+  budgets: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    periodStart: v.number(), // 1st of month, start of day
+    periodEnd: v.number(), // Last of month, end of day
+    totalAmount: v.optional(v.number()), // cents
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_and_period", ["userId", "periodStart"]),
+  budget_allocations: defineTable({
+    budgetId: v.id("budgets"),
+    categoryId: v.id("categories"),
+    userId: v.id("users"),
+    budgetGroup: v.union(
+      v.literal("NEEDS"),
+      v.literal("WANTS"),
+      v.literal("NICETIES")
+    ),
+    allocatedAmount: v.number(), // cents
+    createdAt: v.number(),
+  })
+    .index("by_budget", ["budgetId"])
+    .index("by_budget_and_category", ["budgetId", "categoryId"])
+    .index("by_user", ["userId"]),
 });

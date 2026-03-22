@@ -9,6 +9,7 @@ import {
   TrendingDown,
   Calendar,
 } from "lucide-react";
+import { BudgetSummaryCard } from "@/components/budgets";
 
 function formatCurrency(amount: number, currency = "GBP") {
   return new Intl.NumberFormat("en-GB", {
@@ -166,6 +167,9 @@ function DashboardClient() {
           </Card>
         </div>
 
+        {/* Budget summary */}
+        <BudgetSummaryCard />
+
         {/* Roadmap progress */}
         <Card className="bg-neutral-900 border-neutral-700">
           <CardHeader>
@@ -181,9 +185,9 @@ function DashboardClient() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-orange-500"></div>
-              <span className="text-neutral-400">
-                E3 · Budget system — coming soon
+              <div className="w-2 h-2 bg-emerald-500"></div>
+              <span className="text-neutral-300">
+                E3 · Budget system — <span className="text-emerald-400">done</span>
               </span>
             </div>
             <div className="flex items-center gap-2">
