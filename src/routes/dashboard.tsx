@@ -2,7 +2,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   PoundSterling,
   TrendingUp,
@@ -165,6 +165,41 @@ function DashboardClient() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Roadmap progress */}
+        <Card className="bg-neutral-900 border-neutral-700">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
+              ROADMAP
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-emerald-500"></div>
+              <span className="text-neutral-300">
+                E2 · Transaction management — <span className="text-emerald-400">done</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-orange-500"></div>
+              <span className="text-neutral-400">
+                E3 · Budget system — coming soon
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-neutral-600"></div>
+              <span className="text-neutral-500">
+                E4 · Savings goals — planned
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-neutral-600"></div>
+              <span className="text-neutral-500">
+                E5 · Debt tracking — planned
+              </span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </AppLayout>
   );
