@@ -1,12 +1,10 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import {
-  CategoryForm,
-  type CategoryFormValues,
-} from "@/components/categories/CategoryForm";
-import {
-  CategoryList,
-  type Category,
-} from "@/components/categories/CategoryList";
+  TransactionForm,
+  type TransactionFormValues,
+  TransactionList,
+  type Transaction,
+} from "@/components/transactions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,20 +14,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Plus, TrendingUp, TrendingDown } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 import { api } from "convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import { toast } from "sonner";
@@ -37,110 +23,74 @@ import type { Id } from "convex/_generated/dataModel";
 
 export default function TransactionsPage() {
   const [isOpen, setIsOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
-  const [showDefaultsDialog, setShowDefaultsDialog] = useState(false);
+  const [editingTransaction, setEditingTransaction] =
+    useState<Transaction | null>(null);
 
-  const createCategory = useMutation(api.categories.createCategory);
-  const updateCategory = useMutation(api.categories.updateCategory);
-  const deleteCategory = useMutation(api.categories.deleteCategory);
-  const unarchiveCategory = useMutation(api.categories.unarchiveCategory);
-  const createDefaultCategories = useMutation(
-    api.categories.createDefaultCategories
-  );
+  const createTransaction = useMutation(api.transactions.createTransaction);
+  const updateTransaction = useMutation(api.transactions.updateTransaction);
+  const deleteTransaction = useMutation(api.transactions.deleteTransaction);
 
-  const activeCategories = useQuery(api.categories.getCategories, {
+  const transactions = useQuery(api.transactions.getTransactions, {});
+  const categories = useQuery(api.categories.getCategories, {
     includeArchived: false,
   });
-  const archivedCategories = useQuery(api.categories.getCategories, {
-    includeArchived: true,
-  });
+  const activeAccounts = useQuery(api.accounts.getActiveAccounts);
 
-  const handleSubmit = async (values: CategoryFormValues) => {
+  const handleSubmit = async (values: TransactionFormValues) => {
     try {
-      if (editingCategory) {
-        await updateCategory({
-          categoryId: editingCategory._id,
-          name: values.name,
-          color: values.color,
-          icon: values.icon,
+      const amountInCents = Math.round(values.amount * 100);
+      const dateMs = values.date.getTime();
+
+      if (editingTransaction) {
+        await updateTransaction({
+          transactionId: editingTransaction._id,
+          type: values.type,
+          amount: amountInCents,
+          description: values.description,
+          date: dateMs,
+          categoryId: values.categoryId as Id<"categories"> | undefined,
+          accountId: values.accountId as Id<"accounts"> | undefined,
         });
-        toast.success("Category updated successfully");
+        toast.success("Transaction updated");
       } else {
-        await createCategory(values);
-        toast.success("Category created successfully");
+        await createTransaction({
+          type: values.type,
+          amount: amountInCents,
+          description: values.description,
+          date: dateMs,
+          categoryId: values.categoryId as Id<"categories"> | undefined,
+          accountId: values.accountId as Id<"accounts"> | undefined,
+        });
+        toast.success("Transaction added");
       }
       setIsOpen(false);
-      setEditingCategory(null);
-    } catch (error) {
+      setEditingTransaction(null);
+    } catch {
       toast.error(
-        editingCategory
-          ? "Failed to update category"
-          : "Failed to create category"
+        editingTransaction
+          ? "Failed to update transaction"
+          : "Failed to add transaction"
       );
-      console.error("Category mutation error:", error);
     }
   };
 
-  const handleDelete = async (categoryId: Id<"categories">) => {
-    try {
-      await deleteCategory({ categoryId });
-      toast.success("Category archived successfully");
-    } catch (error) {
-      toast.error("Failed to archive category");
-      console.error("Delete error:", error);
-    }
-  };
-
-  const handleUnarchive = async (categoryId: Id<"categories">) => {
-    try {
-      await unarchiveCategory({ categoryId });
-      toast.success("Category restored successfully");
-    } catch (error) {
-      toast.error("Failed to restore category");
-      console.error("Unarchive error:", error);
-    }
-  };
-
-  const handleEdit = (category: Category) => {
-    setEditingCategory(category);
+  const handleEdit = (transaction: Transaction) => {
+    setEditingTransaction(transaction);
     setIsOpen(true);
+  };
+
+  const handleDelete = async (transactionId: Id<"transactions">) => {
+    try {
+      await deleteTransaction({ transactionId });
+      toast.success("Transaction deleted");
+    } catch {
+      toast.error("Failed to delete transaction");
+    }
   };
 
   const handleDialogChange = (open: boolean) => {
     setIsOpen(open);
-    if (!open) {
-      setEditingCategory(null);
-    }
-  };
-
-  const isLoadingActive = activeCategories === undefined;
-  const isLoadingArchived = archivedCategories === undefined;
-
-  // Filter to show only archived categories
-  const filteredArchivedCategories = archivedCategories?.filter(
-    (cat) => cat.isArchived
-  );
-
-  // Check if user has 0 categories and show defaults dialog
-  useEffect(() => {
-    if (!isLoadingArchived && archivedCategories) {
-      const totalCategories = archivedCategories.length;
-      if (totalCategories === 0) {
-        setShowDefaultsDialog(true);
-      }
-    }
-  }, [archivedCategories, isLoadingArchived]);
-
-  const handleCreateDefaults = async () => {
-    try {
-      const result = await createDefaultCategories();
-      toast.success(`Created ${result.created} default categories`);
-      setShowDefaultsDialog(false);
-    } catch (error) {
-      toast.error("Failed to create default categories");
-      console.error("Create defaults error:", error);
-    }
+    if (!open) setEditingTransaction(null);
   };
 
   return (
@@ -150,39 +100,43 @@ export default function TransactionsPage() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-neutral-400 tracking-wider uppercase">
-              Categories
+              Transactions
             </p>
             <h2 className="text-2xl font-semibold text-white">
-              Manage your categories
+              Transaction ledger
             </h2>
           </div>
           <Dialog open={isOpen} onOpenChange={handleDialogChange}>
             <DialogTrigger asChild>
               <Button className="bg-orange-500 hover:bg-orange-600 text-white gap-2">
                 <Plus className="w-4 h-4" />
-                Add Category
+                Add Transaction
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-neutral-900 border-neutral-700 text-white max-w-2xl">
+            <DialogContent className="bg-neutral-900 border-neutral-700 text-white max-w-lg">
               <DialogHeader>
                 <DialogTitle className="text-xl font-semibold">
-                  {editingCategory ? "Edit Category" : "Create New Category"}
+                  {editingTransaction
+                    ? "Edit Transaction"
+                    : "Add New Transaction"}
                 </DialogTitle>
                 <DialogDescription className="text-neutral-400">
-                  {editingCategory
-                    ? "Update the category details below."
-                    : "Add a new category to organize your transactions."}
+                  {editingTransaction
+                    ? "Update the transaction details below."
+                    : "Record a new income or expense transaction."}
                 </DialogDescription>
               </DialogHeader>
-              <CategoryForm
+              <TransactionForm
                 onSubmit={handleSubmit}
                 defaultValues={
-                  editingCategory
+                  editingTransaction
                     ? {
-                        name: editingCategory.name,
-                        type: editingCategory.type,
-                        color: editingCategory.color,
-                        icon: editingCategory.icon,
+                        type: editingTransaction.type,
+                        amount: editingTransaction.amount / 100,
+                        description: editingTransaction.description,
+                        date: new Date(editingTransaction.date),
+                        categoryId: editingTransaction.categoryId ?? undefined,
+                        accountId: editingTransaction.accountId ?? undefined,
                       }
                     : undefined
                 }
@@ -191,123 +145,14 @@ export default function TransactionsPage() {
           </Dialog>
         </div>
 
-        {/* Category List with Tabs */}
-        <Tabs
-          value={activeTab}
-          onValueChange={(v) => setActiveTab(v as "active" | "archived")}
-        >
-          <TabsList className="bg-neutral-800 border-neutral-700">
-            <TabsTrigger
-              value="active"
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
-            >
-              Active
-            </TabsTrigger>
-            <TabsTrigger
-              value="archived"
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
-            >
-              Archived
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="active" className="mt-6">
-            <CategoryList
-              categories={activeCategories}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              isLoading={isLoadingActive}
-              showArchived={false}
-            />
-          </TabsContent>
-
-          <TabsContent value="archived" className="mt-6">
-            <CategoryList
-              categories={filteredArchivedCategories}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onUnarchive={handleUnarchive}
-              isLoading={isLoadingArchived}
-              showArchived={true}
-            />
-          </TabsContent>
-        </Tabs>
-
-        {/* Default Categories Dialog */}
-        <AlertDialog
-          open={showDefaultsDialog}
-          onOpenChange={setShowDefaultsDialog}
-        >
-          <AlertDialogContent className="bg-neutral-900 border-neutral-800 text-white rounded-md gap-6 max-w-2xl">
-            <AlertDialogHeader className="space-y-4">
-              <AlertDialogTitle className="text-xl font-semibold tracking-tight">
-                Get Started Quickly
-              </AlertDialogTitle>
-              <AlertDialogDescription className="text-neutral-400 text-base">
-                Start with a pre-configured set of categories to track your
-                finances immediately. You can always edit them later.
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-4 rounded-md bg-neutral-950/50 p-5 border border-neutral-800/50 hover:border-red-900/30 transition-colors">
-                    <div className="flex items-center gap-2.5 text-sm font-medium text-red-400 uppercase tracking-wider">
-                      <div className="p-1.5 rounded-md bg-red-500/10">
-                        <TrendingDown className="h-4 w-4" />
-                      </div>
-                      <span>Expenses</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        "Groceries",
-                        "Transport",
-                        "Utilities",
-                        "Entertainment",
-                        "Dining Out",
-                      ].map((cat) => (
-                        <Badge
-                          key={cat}
-                          variant="outline"
-                          className="rounded-sm border-neutral-800 bg-neutral-900 text-neutral-300 font-normal hover:border-neutral-700"
-                        >
-                          {cat}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-4 rounded-md bg-neutral-950/50 p-5 border border-neutral-800/50 hover:border-emerald-900/30 transition-colors">
-                    <div className="flex items-center gap-2.5 text-sm font-medium text-emerald-400 uppercase tracking-wider">
-                      <div className="p-1.5 rounded-md bg-emerald-500/10">
-                        <TrendingUp className="h-4 w-4" />
-                      </div>
-                      <span>Income</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {["Salary", "Freelance", "Gifts"].map((cat) => (
-                        <Badge
-                          key={cat}
-                          variant="outline"
-                          className="rounded-sm border-neutral-800 bg-neutral-900 text-neutral-300 font-normal hover:border-neutral-700"
-                        >
-                          {cat}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="sm:justify-between gap-4 border-t border-neutral-800 pt-6 mt-2">
-              <AlertDialogCancel className="rounded-md bg-transparent border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white mt-0">
-                I'll create my own
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onMouseDown={handleCreateDefaults}
-                className="rounded-md bg-orange-500 hover:bg-orange-600 text-white font-medium px-8"
-              >
-                Create Categories
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {/* Transaction list with filters */}
+        <TransactionList
+          transactions={transactions}
+          categories={categories ?? []}
+          accounts={activeAccounts ?? []}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       </div>
     </AppLayout>
   );

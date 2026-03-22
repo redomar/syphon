@@ -2,13 +2,20 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   PoundSterling,
   TrendingUp,
   TrendingDown,
   Calendar,
 } from "lucide-react";
+
+function formatCurrency(amount: number, currency = "GBP") {
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency,
+  }).format(amount);
+}
 
 export default function Dashboard() {
   const [isClient, setIsClient] = useState(false);
@@ -17,7 +24,6 @@ export default function Dashboard() {
     setIsClient(true);
   }, []);
 
-  // During SSR, show loading state
   if (!isClient) {
     return <DashboardLoading />;
   }
@@ -27,12 +33,16 @@ export default function Dashboard() {
 
 function DashboardClient() {
   const currentUser = useQuery(api.users.getCurrentUser);
+  const stats = useQuery(api.transactions.getDashboardStats);
+
+  const currency = stats?.currency ?? currentUser?.currency ?? "GBP";
+  const isLoading = stats === undefined;
 
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Greeting Card */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Greeting card */}
           <Card className="bg-neutral-900 border-neutral-700 md:col-span-2 lg:col-span-4">
             <CardContent className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="space-y-1">
@@ -57,7 +67,7 @@ function DashboardClient() {
             </CardContent>
           </Card>
 
-          {/* Stat Cards */}
+          {/* Current Balance */}
           <Card className="bg-neutral-900 border-neutral-700">
             <CardContent>
               <div className="flex items-center justify-between">
@@ -66,15 +76,24 @@ function DashboardClient() {
                     CURRENT BALANCE
                   </p>
                   <p className="text-2xl font-bold font-mono text-white">
-                    £0.00
+                    {isLoading ? (
+                      <span className="animate-pulse text-neutral-600">
+                        ···
+                      </span>
+                    ) : (
+                      formatCurrency(stats.totalBalance, currency)
+                    )}
                   </p>
-                  <p className="text-xs text-neutral-500">Available to spend</p>
+                  <p className="text-xs text-neutral-500">
+                    Sum of all accounts
+                  </p>
                 </div>
                 <PoundSterling className="w-8 h-8 text-white" />
               </div>
             </CardContent>
           </Card>
 
+          {/* Total Expenses */}
           <Card className="bg-neutral-900 border-neutral-700">
             <CardContent>
               <div className="flex items-center justify-between">
@@ -83,7 +102,13 @@ function DashboardClient() {
                     TOTAL EXPENSES
                   </p>
                   <p className="text-2xl font-bold font-mono text-orange-500">
-                    £0.00
+                    {isLoading ? (
+                      <span className="animate-pulse text-neutral-600">
+                        ···
+                      </span>
+                    ) : (
+                      formatCurrency(stats.monthExpenses, currency)
+                    )}
                   </p>
                   <p className="text-xs text-neutral-500">This month</p>
                 </div>
@@ -92,6 +117,7 @@ function DashboardClient() {
             </CardContent>
           </Card>
 
+          {/* Total Income */}
           <Card className="bg-neutral-900 border-neutral-700">
             <CardContent>
               <div className="flex items-center justify-between">
@@ -99,16 +125,23 @@ function DashboardClient() {
                   <p className="text-xs text-neutral-400 tracking-wider">
                     TOTAL INCOME
                   </p>
-                  <p className="text-2xl font-bold font-mono text-white">
-                    £0.00
+                  <p className="text-2xl font-bold font-mono text-emerald-400">
+                    {isLoading ? (
+                      <span className="animate-pulse text-neutral-600">
+                        ···
+                      </span>
+                    ) : (
+                      formatCurrency(stats.monthIncome, currency)
+                    )}
                   </p>
                   <p className="text-xs text-neutral-500">This month</p>
                 </div>
-                <TrendingUp className="w-8 h-8 text-white" />
+                <TrendingUp className="w-8 h-8 text-emerald-400" />
               </div>
             </CardContent>
           </Card>
 
+          {/* Transaction count */}
           <Card className="bg-neutral-900 border-neutral-700">
             <CardContent>
               <div className="flex items-center justify-between">
@@ -116,49 +149,22 @@ function DashboardClient() {
                   <p className="text-xs text-neutral-400 tracking-wider">
                     TRANSACTIONS
                   </p>
-                  <p className="text-2xl font-bold font-mono text-white">0</p>
-                  <p className="text-xs text-neutral-500">Total count</p>
+                  <p className="text-2xl font-bold font-mono text-white">
+                    {isLoading ? (
+                      <span className="animate-pulse text-neutral-600">
+                        ···
+                      </span>
+                    ) : (
+                      stats.transactionCount
+                    )}
+                  </p>
+                  <p className="text-xs text-neutral-500">Total recorded</p>
                 </div>
                 <Calendar className="w-8 h-8 text-white" />
               </div>
             </CardContent>
           </Card>
         </div>
-
-        {/* Coming Soon Section */}
-        <Card className="bg-neutral-900 border-neutral-700">
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
-              GETTING STARTED
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm">
-            <p className="text-neutral-400">
-              Welcome to Syphon v0.3.0. Website is currently under active
-              development. Here are some features coming soon:
-            </p>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-orange-500"></div>
-                <span className="text-neutral-300">
-                  Transaction management coming in E2
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-neutral-600"></div>
-                <span className="text-neutral-500">
-                  Budget system coming in E3
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-neutral-600"></div>
-                <span className="text-neutral-500">
-                  Savings goals coming in E4
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </AppLayout>
   );

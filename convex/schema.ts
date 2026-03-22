@@ -66,4 +66,21 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_user_active", ["userId", "isArchived"]),
+  transactions: defineTable({
+    userId: v.id("users"),
+    type: v.union(v.literal("INCOME"), v.literal("EXPENSE")),
+    amount: v.number(), // In smallest currency unit (e.g., cents)
+    description: v.string(),
+    date: v.number(), // Unix timestamp ms
+    categoryId: v.optional(v.id("categories")),
+    accountId: v.optional(v.id("accounts")),
+    isDemoData: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_and_date", ["userId", "date"])
+    .index("by_user_and_type", ["userId", "type"])
+    .index("by_user_and_category", ["userId", "categoryId"])
+    .index("by_user_and_account", ["userId", "accountId"]),
 });
