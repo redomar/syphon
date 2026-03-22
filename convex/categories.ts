@@ -94,9 +94,9 @@ export const updateCategory = mutation({
     }
 
     await ctx.db.patch(args.categoryId, {
-      ...(args.name && { name: args.name }),
-      ...(args.color && { color: args.color }),
-      ...(args.icon && { icon: args.icon }),
+      ...(args.name !== undefined && { name: args.name }),
+      ...(args.color !== undefined && { color: args.color }),
+      ...(args.icon !== undefined && { icon: args.icon }),
       updatedAt: Date.now(),
     });
 

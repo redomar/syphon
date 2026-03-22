@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireUser } from "./lib/auth";
+import type { Id } from "./_generated/dataModel";
 
 const budgetGroup = v.union(
   v.literal("NEEDS"),
@@ -22,6 +23,10 @@ export const createBudget = mutation({
 
     if (args.periodEnd <= args.periodStart) {
       throw new Error("Period end must be after period start");
+    }
+
+    if (args.totalAmount !== undefined && args.totalAmount <= 0) {
+      throw new Error("Total amount must be positive");
     }
 
     // Check for overlapping budgets
@@ -105,6 +110,10 @@ export const upsertAllocation = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
 
+    if (args.allocatedAmount < 0) {
+      throw new Error("Allocated amount must not be negative");
+    }
+
     const budget = await ctx.db.get(args.budgetId);
     if (!budget || budget.userId !== user._id) {
       throw new Error("Budget not found");
@@ -173,7 +182,14 @@ export const applyTemplate = mutation({
       throw new Error("Budget not found");
     }
 
+    if (args.totalAmount <= 0) {
+      throw new Error("Total amount must be positive");
+    }
+
     const { needs, wants, niceties } = args.ratios;
+    if (needs < 0 || wants < 0 || niceties < 0) {
+      throw new Error("Ratios must be non-negative");
+    }
     if (Math.round(needs + wants + niceties) !== 100) {
       throw new Error("Ratios must sum to 100");
     }
@@ -192,7 +208,11 @@ export const applyTemplate = mutation({
     }
 
     // Group assignments
-    const groups = { NEEDS: [] as string[], WANTS: [] as string[], NICETIES: [] as string[] };
+    const groups: Record<"NEEDS" | "WANTS" | "NICETIES", Id<"categories">[]> = {
+      NEEDS: [],
+      WANTS: [],
+      NICETIES: [],
+    };
     for (const a of args.assignments) {
       groups[a.group].push(a.categoryId);
     }
@@ -211,7 +231,7 @@ export const applyTemplate = mutation({
       for (const categoryId of categoryIds) {
         await ctx.db.insert("budget_allocations", {
           budgetId: args.budgetId,
-          categoryId: categoryId as any, // ID type from grouped string
+          categoryId,
           userId: user._id,
           budgetGroup: group as "NEEDS" | "WANTS" | "NICETIES",
           allocatedAmount: perCategory,

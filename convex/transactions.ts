@@ -19,6 +19,24 @@ export const createTransaction = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
 
+    if (args.amount <= 0) {
+      throw new Error("Amount must be positive");
+    }
+
+    if (args.categoryId) {
+      const category = await ctx.db.get(args.categoryId);
+      if (!category || category.userId !== user._id) {
+        throw new Error("Category not found");
+      }
+    }
+
+    if (args.accountId) {
+      const account = await ctx.db.get(args.accountId);
+      if (!account || account.userId !== user._id) {
+        throw new Error("Account not found");
+      }
+    }
+
     const now = Date.now();
     return await ctx.db.insert("transactions", {
       userId: user._id,
@@ -51,9 +69,27 @@ export const updateTransaction = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
 
+    if (args.amount <= 0) {
+      throw new Error("Amount must be positive");
+    }
+
     const transaction = await ctx.db.get(args.transactionId);
     if (!transaction || transaction.userId !== user._id) {
       throw new Error("Transaction not found");
+    }
+
+    if (args.categoryId) {
+      const category = await ctx.db.get(args.categoryId);
+      if (!category || category.userId !== user._id) {
+        throw new Error("Category not found");
+      }
+    }
+
+    if (args.accountId) {
+      const account = await ctx.db.get(args.accountId);
+      if (!account || account.userId !== user._id) {
+        throw new Error("Account not found");
+      }
     }
 
     await ctx.db.patch(args.transactionId, {
