@@ -99,10 +99,10 @@ export default function TransactionsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-neutral-400 tracking-wider uppercase">
+            <p className="text-xs text-muted-foreground tracking-wider uppercase">
               Transactions
             </p>
-            <h2 className="text-2xl font-semibold text-white">
+            <h2 className="text-2xl font-semibold text-foreground">
               Transaction ledger
             </h2>
           </div>
@@ -113,14 +113,14 @@ export default function TransactionsPage() {
                 Add Transaction
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-neutral-900 border-neutral-700 text-white max-w-lg">
+            <DialogContent className="bg-card border-border text-foreground max-w-lg">
               <DialogHeader>
                 <DialogTitle className="text-xl font-semibold">
                   {editingTransaction
                     ? "Edit Transaction"
                     : "Add New Transaction"}
                 </DialogTitle>
-                <DialogDescription className="text-neutral-400">
+                <DialogDescription className="text-muted-foreground">
                   {editingTransaction
                     ? "Update the transaction details below."
                     : "Record a new income or expense transaction."}

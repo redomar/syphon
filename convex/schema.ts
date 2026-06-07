@@ -15,6 +15,7 @@ export default defineSchema({
       v.literal("CAD"),
       v.literal("AUD")
     ),
+    theme: v.optional(v.union(v.literal("light"), v.literal("dark"))),
     timezone: v.string(), // Timezone identifier (e.g., "Europe/London", "America/New_York")
     onboardingComplete: v.boolean(),
     isDemoMode: v.boolean(),
@@ -93,6 +94,33 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_user_and_period", ["userId", "periodStart"]),
+  bills: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    amount: v.number(), // Monthly amount, in smallest currency unit (e.g., cents)
+    category: v.union(v.literal("necessary"), v.literal("luxury")),
+    isArchived: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_active", ["userId", "isArchived"])
+    .index("by_user_and_category", ["userId", "category"]),
+  monthly_budgets: defineTable({
+    userId: v.id("users"),
+    month: v.string(), // "YYYY-MM", e.g. "2026-06"
+    income: v.number(), // In smallest currency unit (e.g., cents)
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_user_and_month", ["userId", "month"]),
+  monthly_allocations: defineTable({
+    userId: v.id("users"),
+    month: v.string(), // "YYYY-MM", e.g. "2026-06"
+    name: v.string(), // e.g. "Activities", "Date nights", "New clothes"
+    amount: v.number(), // In smallest currency unit (e.g., cents)
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_user_and_month", ["userId", "month"]),
   budget_allocations: defineTable({
     budgetId: v.id("budgets"),
     categoryId: v.id("categories"),

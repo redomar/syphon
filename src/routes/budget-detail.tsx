@@ -64,17 +64,17 @@ export default function BudgetDetailPage() {
             variant="ghost"
             size="sm"
             onMouseDown={() => navigate("/budgets")}
-            className="text-neutral-400 hover:text-white hover:bg-neutral-800"
+            className="text-muted-foreground hover:text-foreground hover:bg-muted"
           >
             <ArrowLeft className="w-4 h-4 mr-1" />
             Back
           </Button>
           {budget && (
             <div>
-              <h2 className="text-2xl font-semibold text-white">
+              <h2 className="text-2xl font-semibold text-foreground">
                 {budget.name}
               </h2>
-              <p className="text-sm text-neutral-400">
+              <p className="text-sm text-muted-foreground">
                 {format(new Date(budget.periodStart), "dd MMM")} –{" "}
                 {format(new Date(budget.periodEnd), "dd MMM yyyy")}
               </p>
@@ -86,7 +86,7 @@ export default function BudgetDetailPage() {
         {isLoading ? (
           <div className="p-12 text-center">
             <Spinner className="w-6 h-6 text-orange-500 mx-auto" />
-            <p className="text-neutral-400 mt-4">Loading budget...</p>
+            <p className="text-muted-foreground mt-4">Loading budget...</p>
           </div>
         ) : (
           <BudgetDetailView

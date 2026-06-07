@@ -103,6 +103,7 @@ export const updateProfile = mutation({
         v.literal("AUD")
       )
     ),
+    theme: v.optional(v.union(v.literal("light"), v.literal("dark"))),
     timezone: v.optional(v.string()),
     onboardingComplete: v.optional(v.boolean()),
     isDemoMode: v.optional(v.boolean()),
