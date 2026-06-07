@@ -89,19 +89,19 @@ export function AccountList({
 
   return (
     <>
-      <div className="border border-neutral-700 bg-neutral-900 rounded-lg overflow-hidden">
+      <div className="border border-border bg-card rounded-lg overflow-hidden">
         {isLoading ? (
           <div className="p-12 text-center">
             <Spinner className="w-6 h-6 text-orange-500 mx-auto" />
-            <p className="text-neutral-400 mt-4">Loading accounts...</p>
+            <p className="text-muted-foreground mt-4">Loading accounts...</p>
           </div>
         ) : isEmpty ? (
           <div className="p-12 text-center">
-            <Wallet className="w-12 h-12 text-neutral-600 mx-auto mb-4" />
-            <p className="text-neutral-400 text-lg mb-2">
+            <Wallet className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground text-lg mb-2">
               {showArchived ? "No archived accounts" : "No accounts found"}
             </p>
-            <p className="text-neutral-500 text-sm">
+            <p className="text-muted-foreground text-sm">
               {showArchived
                 ? "Archived accounts will appear here when you archive them."
                 : "Add your first account to start tracking your finances."}
@@ -109,40 +109,40 @@ export function AccountList({
           </div>
         ) : (
           <table className="w-full">
-            <thead className="bg-neutral-800/50 border-b border-neutral-700">
+            <thead className="bg-muted/50 border-b border-border">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-400 tracking-wider uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider uppercase">
                   Account
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-400 tracking-wider uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider uppercase">
                   Type
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-neutral-400 tracking-wider uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider uppercase">
                   Balance
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-neutral-400 tracking-wider uppercase">
+                <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground tracking-wider uppercase">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-800">
+            <tbody className="divide-y divide-border">
               {accounts?.map((account) => {
                 const Icon = ICON_MAP[account.type] || Wallet;
                 return (
                   <tr
                     key={account._id}
-                    className="hover:bg-neutral-800/50 transition-colors"
+                    className="hover:bg-muted/50 transition-colors"
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-md border border-neutral-800 bg-neutral-900/50">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-card/50">
                           <Icon className="h-4 w-4 text-orange-400" />
                         </div>
                         <div>
-                          <span className="font-medium text-neutral-200 block">
+                          <span className="font-medium text-foreground block">
                             {account.name}
                           </span>
-                          <span className="text-xs text-neutral-500">
+                          <span className="text-xs text-muted-foreground">
                             {account.provider} •••• {account.lastFourDigits}
                           </span>
                         </div>
@@ -151,7 +151,7 @@ export function AccountList({
                     <td className="px-6 py-4">
                       <Badge
                         variant="outline"
-                        className="rounded-md border-neutral-700 bg-neutral-800 text-neutral-300"
+                        className="rounded-md border-border bg-muted text-foreground"
                       >
                         {TYPE_LABELS[account.type]}
                       </Badge>
@@ -171,7 +171,7 @@ export function AccountList({
                             size="sm"
                             onMouseDown={() => onEdit(account)}
                             onClick={() => onEdit(account)}
-                            className="text-neutral-400 hover:text-white hover:bg-neutral-800"
+                            className="text-muted-foreground hover:text-foreground hover:bg-muted"
                           >
                             <Pencil className="w-4 h-4" />
                           </Button>
@@ -182,7 +182,7 @@ export function AccountList({
                             size="sm"
                             onMouseDown={() => setArchiveId(account._id)}
                             onClick={() => setArchiveId(account._id)}
-                            className="text-neutral-400 hover:text-red-400 hover:bg-red-500/10"
+                            className="text-muted-foreground hover:text-red-400 hover:bg-red-500/10"
                           >
                             <Archive className="w-4 h-4" />
                           </Button>
@@ -193,7 +193,7 @@ export function AccountList({
                             size="sm"
                             onMouseDown={() => onUnarchive(account._id)}
                             onClick={() => onUnarchive(account._id)}
-                            className="text-neutral-400 hover:text-green-400 hover:bg-green-500/10"
+                            className="text-muted-foreground hover:text-green-400 hover:bg-green-500/10"
                           >
                             <ArchiveRestore className="w-4 h-4" />
                           </Button>
@@ -213,18 +213,18 @@ export function AccountList({
         open={!!archiveId}
         onOpenChange={(open) => !open && setArchiveId(null)}
       >
-        <AlertDialogContent className="bg-neutral-900 border-neutral-800 text-white rounded-md gap-6 max-w-md">
+        <AlertDialogContent className="bg-card border-border text-foreground rounded-md gap-6 max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-semibold tracking-tight">
               Archive Account?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-neutral-400 text-base">
+            <AlertDialogDescription className="text-muted-foreground text-base">
               This account will be archived and hidden from your active
               accounts. You can restore it later if needed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3 sm:justify-between">
-            <AlertDialogCancel className="rounded-md bg-transparent border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white mt-0">
+            <AlertDialogCancel className="rounded-md bg-transparent border-border text-muted-foreground hover:bg-muted hover:text-foreground mt-0">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

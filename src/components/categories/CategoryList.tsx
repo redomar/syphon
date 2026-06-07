@@ -98,7 +98,7 @@ export function CategoryList({
           return (
             <div className="flex items-center gap-3">
               <div
-                className="flex h-9 w-9 items-center justify-center rounded-md border border-neutral-800 bg-neutral-900/50 transition-colors hover:bg-neutral-900"
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-card/50 transition-colors hover:bg-card"
                 style={{
                   boxShadow: `inset 0 0 15px color-mix(in srgb, ${row.original.color}, transparent 80%)`,
                 }}
@@ -108,7 +108,7 @@ export function CategoryList({
                   style={{ color: row.original.color }}
                 />
               </div>
-              <span className="font-medium text-neutral-200">
+              <span className="font-medium text-foreground">
                 {row.original.name}
               </span>
             </div>
@@ -142,12 +142,12 @@ export function CategoryList({
           return isDefault ? (
             <Badge
               variant="secondary"
-              className="rounded-md bg-neutral-800 text-neutral-400 hover:bg-neutral-700 font-normal"
+              className="rounded-md bg-muted text-muted-foreground hover:bg-accent font-normal"
             >
               Default
             </Badge>
           ) : (
-            <span className="text-xs text-neutral-600 pl-2">—</span>
+            <span className="text-xs text-muted-foreground pl-2">—</span>
           );
         },
       },
@@ -158,7 +158,7 @@ export function CategoryList({
           const timestamp = getValue() as number;
           const date = new Date(timestamp);
           return (
-            <span className="text-xs text-neutral-400">
+            <span className="text-xs text-muted-foreground">
               {date.toLocaleDateString(undefined, {
                 year: "numeric",
                 month: "short",
@@ -175,7 +175,7 @@ export function CategoryList({
           const timestamp = getValue() as number;
           const date = new Date(timestamp);
           return (
-            <span className="text-xs text-neutral-400">
+            <span className="text-xs text-muted-foreground">
               {date.toLocaleDateString(undefined, {
                 year: "numeric",
                 month: "short",
@@ -196,7 +196,7 @@ export function CategoryList({
                   variant="ghost"
                   size="sm"
                   onMouseDown={() => onEdit(row.original)}
-                  className="text-neutral-400 hover:text-white hover:bg-neutral-800"
+                  className="text-muted-foreground hover:text-foreground hover:bg-muted"
                 >
                   <Pencil className="w-4 h-4" />
                 </Button>
@@ -204,7 +204,7 @@ export function CategoryList({
                   variant="ghost"
                   size="sm"
                   onMouseDown={() => setDeleteId(row.original._id)}
-                  className="text-neutral-400 hover:text-red-400 hover:bg-red-500/10"
+                  className="text-muted-foreground hover:text-red-400 hover:bg-red-500/10"
                 >
                   <Archive className="w-4 h-4" />
                 </Button>
@@ -215,7 +215,7 @@ export function CategoryList({
                 variant="ghost"
                 size="sm"
                 onMouseDown={() => onUnarchive(row.original._id)}
-                className="text-neutral-400 hover:text-green-400 hover:bg-green-500/10"
+                className="text-muted-foreground hover:text-green-400 hover:bg-green-500/10"
               >
                 <ArchiveRestore className="w-4 h-4" />
               </Button>
@@ -250,19 +250,19 @@ export function CategoryList({
 
   return (
     <>
-      <div className="border border-neutral-700 bg-neutral-900 rounded-lg overflow-hidden">
+      <div className="border border-border bg-card rounded-lg overflow-hidden">
         {isLoading ? (
           <div className="p-12 text-center">
             <Spinner className="w-6 h-6 text-orange-500 mx-auto" />
-            <p className="text-neutral-400 mt-4">Loading categories...</p>
+            <p className="text-muted-foreground mt-4">Loading categories...</p>
           </div>
         ) : isEmpty ? (
           <div className="p-12 text-center">
-            <Archive className="w-12 h-12 text-neutral-600 mx-auto mb-4" />
-            <p className="text-neutral-400 text-lg mb-2">
+            <Archive className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground text-lg mb-2">
               {showArchived ? "No archived categories" : "No categories found"}
             </p>
-            <p className="text-neutral-500 text-sm">
+            <p className="text-muted-foreground text-sm">
               {showArchived
                 ? "Archived categories will appear here when you archive them."
                 : "Start by adding a new category to organize your transactions."}
@@ -270,13 +270,13 @@ export function CategoryList({
           </div>
         ) : (
           <table className="w-full">
-            <thead className="bg-neutral-800/50 border-b border-neutral-700">
+            <thead className="bg-muted/50 border-b border-border">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-6 py-3 text-left text-xs font-medium text-neutral-400 tracking-wider uppercase"
+                      className="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider uppercase"
                     >
                       {header.isPlaceholder
                         ? null
@@ -289,11 +289,11 @@ export function CategoryList({
                 </tr>
               ))}
             </thead>
-            <tbody className="divide-y divide-neutral-800">
+            <tbody className="divide-y divide-border">
               {table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className="hover:bg-neutral-800/50 transition-colors"
+                  className="hover:bg-muted/50 transition-colors"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-6 py-4">
@@ -315,18 +315,18 @@ export function CategoryList({
         open={!!deleteId}
         onOpenChange={(open) => !open && setDeleteId(null)}
       >
-        <AlertDialogContent className="bg-neutral-900 border-neutral-800 text-white rounded-md gap-6 max-w-md">
+        <AlertDialogContent className="bg-card border-border text-foreground rounded-md gap-6 max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-semibold tracking-tight">
               Archive Category?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-neutral-400 text-base">
+            <AlertDialogDescription className="text-muted-foreground text-base">
               This category will be archived and hidden from your active
               categories. You can restore it later if needed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3 sm:justify-between">
-            <AlertDialogCancel className="rounded-md bg-transparent border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white mt-0">
+            <AlertDialogCancel className="rounded-md bg-transparent border-border text-muted-foreground hover:bg-muted hover:text-foreground mt-0">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

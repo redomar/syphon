@@ -10,7 +10,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ children, showUserButton = true }: AppLayoutProps) {
   return (
-    <div className="flex h-screen bg-background text-white">
+    <div className="flex h-screen bg-background text-foreground">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <Header showUserButton={showUserButton} />

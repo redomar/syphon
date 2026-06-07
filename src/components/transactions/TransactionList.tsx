@@ -106,7 +106,7 @@ export function TransactionList({
         accessorKey: "date",
         header: "Date",
         cell: ({ getValue }) => (
-          <span className="text-sm text-neutral-300">
+          <span className="text-sm text-foreground">
             {format(new Date(getValue() as number), "dd MMM yyyy")}
           </span>
         ),
@@ -115,7 +115,7 @@ export function TransactionList({
         accessorKey: "description",
         header: "Description",
         cell: ({ getValue }) => (
-          <span className="font-medium text-neutral-200">
+          <span className="font-medium text-foreground">
             {getValue() as string}
           </span>
         ),
@@ -127,14 +127,14 @@ export function TransactionList({
           const id = getValue() as string | undefined;
           const cat = id ? categoryMap.get(id as Id<"categories">) : undefined;
           if (!cat)
-            return <span className="text-xs text-neutral-600">—</span>;
+            return <span className="text-xs text-muted-foreground">—</span>;
           return (
             <span className="flex items-center gap-1.5">
               <span
                 className="inline-block w-2 h-2 rounded-full"
                 style={{ backgroundColor: cat.color }}
               />
-              <span className="text-sm text-neutral-300">{cat.name}</span>
+              <span className="text-sm text-foreground">{cat.name}</span>
             </span>
           );
         },
@@ -146,9 +146,9 @@ export function TransactionList({
           const id = getValue() as string | undefined;
           const acc = id ? accountMap.get(id as Id<"accounts">) : undefined;
           if (!acc)
-            return <span className="text-xs text-neutral-600">—</span>;
+            return <span className="text-xs text-muted-foreground">—</span>;
           return (
-            <span className="text-sm text-neutral-300">
+            <span className="text-sm text-foreground">
               {acc.name}
               {acc.lastFourDigits ? ` ···· ${acc.lastFourDigits}` : ""}
             </span>
@@ -185,7 +185,7 @@ export function TransactionList({
               size="sm"
               onMouseDown={() => onEdit(row.original)}
               onClick={() => onEdit(row.original)}
-              className="text-neutral-400 hover:text-white hover:bg-neutral-800"
+              className="text-muted-foreground hover:text-foreground hover:bg-muted"
             >
               <Pencil className="w-4 h-4" />
             </Button>
@@ -194,7 +194,7 @@ export function TransactionList({
               size="sm"
               onMouseDown={() => setDeleteId(row.original._id)}
               onClick={() => setDeleteId(row.original._id)}
-              className="text-neutral-400 hover:text-red-400 hover:bg-red-500/10"
+              className="text-muted-foreground hover:text-red-400 hover:bg-red-500/10"
             >
               <Trash2 className="w-4 h-4" />
             </Button>
@@ -222,7 +222,7 @@ export function TransactionList({
       {/* Filter bar */}
       <div className="flex flex-wrap gap-3 mb-4">
         {/* Type filter */}
-        <div className="flex rounded-md overflow-hidden border border-neutral-700">
+        <div className="flex rounded-md overflow-hidden border border-border">
           {(["ALL", "INCOME", "EXPENSE"] as TypeFilter[]).map((t) => (
             <button
               key={t}
@@ -231,7 +231,7 @@ export function TransactionList({
                 "px-3 py-1.5 text-xs font-medium transition-colors",
                 typeFilter === t
                   ? "bg-orange-500 text-white"
-                  : "bg-neutral-800 text-neutral-400 hover:text-white"
+                  : "bg-muted text-muted-foreground hover:text-foreground"
               )}
             >
               {t === "ALL" ? "All" : t === "INCOME" ? "Income" : "Expenses"}
@@ -240,7 +240,7 @@ export function TransactionList({
         </div>
 
         {/* Date range */}
-        <div className="flex rounded-md overflow-hidden border border-neutral-700">
+        <div className="flex rounded-md overflow-hidden border border-border">
           {(
             [
               { value: "7d", label: "7d" },
@@ -256,7 +256,7 @@ export function TransactionList({
                 "px-3 py-1.5 text-xs font-medium transition-colors",
                 dateRange === value
                   ? "bg-orange-500 text-white"
-                  : "bg-neutral-800 text-neutral-400 hover:text-white"
+                  : "bg-muted text-muted-foreground hover:text-foreground"
               )}
             >
               {label}
@@ -267,10 +267,10 @@ export function TransactionList({
         {/* Category filter */}
         {categories.length > 0 && (
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="h-8 w-40 text-xs bg-neutral-800 border-neutral-700 text-neutral-300">
+            <SelectTrigger className="h-8 w-40 text-xs bg-muted border-border text-foreground">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
-            <SelectContent className="bg-neutral-900 border-neutral-700 text-white">
+            <SelectContent className="bg-card border-border text-foreground">
               <SelectItem value="__all__" className="text-xs">
                 All categories
               </SelectItem>
@@ -292,10 +292,10 @@ export function TransactionList({
         {/* Account filter */}
         {accounts.length > 0 && (
           <Select value={accountFilter} onValueChange={setAccountFilter}>
-            <SelectTrigger className="h-8 w-40 text-xs bg-neutral-800 border-neutral-700 text-neutral-300">
+            <SelectTrigger className="h-8 w-40 text-xs bg-muted border-border text-foreground">
               <SelectValue placeholder="Account" />
             </SelectTrigger>
-            <SelectContent className="bg-neutral-900 border-neutral-700 text-white">
+            <SelectContent className="bg-card border-border text-foreground">
               <SelectItem value="__all__" className="text-xs">
                 All accounts
               </SelectItem>
@@ -321,7 +321,7 @@ export function TransactionList({
               setCategoryFilter("__all__");
               setAccountFilter("__all__");
             }}
-            className="px-3 py-1.5 text-xs text-neutral-400 hover:text-white transition-colors"
+            className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             Clear filters
           </button>
@@ -329,17 +329,17 @@ export function TransactionList({
       </div>
 
       {/* Table */}
-      <div className="border border-neutral-700 bg-neutral-900 rounded-lg overflow-hidden">
+      <div className="border border-border bg-card rounded-lg overflow-hidden">
         {isLoading ? (
           <div className="p-12 text-center">
             <Spinner className="w-6 h-6 text-orange-500 mx-auto" />
-            <p className="text-neutral-400 mt-4">Loading transactions...</p>
+            <p className="text-muted-foreground mt-4">Loading transactions...</p>
           </div>
         ) : isEmpty ? (
           <div className="p-12 text-center">
-            <Receipt className="w-12 h-12 text-neutral-600 mx-auto mb-4" />
-            <p className="text-neutral-400 text-lg mb-2">No transactions found</p>
-            <p className="text-neutral-500 text-sm">
+            <Receipt className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground text-lg mb-2">No transactions found</p>
+            <p className="text-muted-foreground text-sm">
               {typeFilter !== "ALL" ||
               dateRange !== "30d" ||
               categoryFilter !== "__all__" ||
@@ -350,13 +350,13 @@ export function TransactionList({
           </div>
         ) : (
           <table className="w-full">
-            <thead className="bg-neutral-800/50 border-b border-neutral-700">
+            <thead className="bg-muted/50 border-b border-border">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-6 py-3 text-left text-xs font-medium text-neutral-400 tracking-wider uppercase"
+                      className="px-6 py-3 text-left text-xs font-medium text-muted-foreground tracking-wider uppercase"
                     >
                       {header.isPlaceholder
                         ? null
@@ -369,11 +369,11 @@ export function TransactionList({
                 </tr>
               ))}
             </thead>
-            <tbody className="divide-y divide-neutral-800">
+            <tbody className="divide-y divide-border">
               {table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className="hover:bg-neutral-800/50 transition-colors"
+                  className="hover:bg-muted/50 transition-colors"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-6 py-4">
@@ -392,7 +392,7 @@ export function TransactionList({
 
       {/* Summary row */}
       {!isLoading && !isEmpty && (
-        <div className="flex justify-between text-xs text-neutral-500 mt-2 px-1">
+        <div className="flex justify-between text-xs text-muted-foreground mt-2 px-1">
           <span>{filtered.length} transaction{filtered.length !== 1 ? "s" : ""}</span>
           <span>
             {filtered.filter((t) => t.type === "INCOME").length} income ·{" "}
@@ -406,18 +406,18 @@ export function TransactionList({
         open={!!deleteId}
         onOpenChange={(open) => !open && setDeleteId(null)}
       >
-        <AlertDialogContent className="bg-neutral-900 border-neutral-800 text-white rounded-md gap-6 max-w-md">
+        <AlertDialogContent className="bg-card border-border text-foreground rounded-md gap-6 max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-semibold tracking-tight">
               Delete Transaction?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-neutral-400 text-base">
+            <AlertDialogDescription className="text-muted-foreground text-base">
               This transaction will be permanently deleted. This action cannot
               be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3 sm:justify-between">
-            <AlertDialogCancel className="rounded-md bg-transparent border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white mt-0">
+            <AlertDialogCancel className="rounded-md bg-transparent border-border text-muted-foreground hover:bg-muted hover:text-foreground mt-0">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

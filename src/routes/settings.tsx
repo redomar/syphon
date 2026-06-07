@@ -33,8 +33,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Plus, TrendingUp, TrendingDown } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown, Moon, Sun } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import { api } from "convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import { toast } from "sonner";
@@ -110,10 +111,10 @@ function AccountsSection() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs text-neutral-400 tracking-wider uppercase">
+          <p className="text-xs text-muted-foreground tracking-wider uppercase">
             Accounts
           </p>
-          <h2 className="text-2xl font-semibold text-white">
+          <h2 className="text-2xl font-semibold text-foreground">
             Manage your accounts
           </h2>
         </div>
@@ -124,12 +125,12 @@ function AccountsSection() {
               Add Account
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-neutral-900 border-neutral-700 text-white max-w-2xl">
+          <DialogContent className="bg-card border-border text-foreground max-w-2xl">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold">
                 {editingAccount ? "Edit Account" : "Add New Account"}
               </DialogTitle>
-              <DialogDescription className="text-neutral-400">
+              <DialogDescription className="text-muted-foreground">
                 {editingAccount
                   ? "Update the account details below."
                   : "Add a new account to track your finances."}
@@ -158,7 +159,7 @@ function AccountsSection() {
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as "active" | "archived")}
       >
-        <TabsList className="bg-neutral-800 border-neutral-700">
+        <TabsList className="bg-muted border-border">
           <TabsTrigger
             value="active"
             className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
@@ -291,10 +292,10 @@ function CategoriesSection() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs text-neutral-400 tracking-wider uppercase">
+          <p className="text-xs text-muted-foreground tracking-wider uppercase">
             Categories
           </p>
-          <h2 className="text-2xl font-semibold text-white">
+          <h2 className="text-2xl font-semibold text-foreground">
             Manage your categories
           </h2>
         </div>
@@ -305,12 +306,12 @@ function CategoriesSection() {
               Add Category
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-neutral-900 border-neutral-700 text-white max-w-2xl">
+          <DialogContent className="bg-card border-border text-foreground max-w-2xl">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold">
                 {editingCategory ? "Edit Category" : "Create New Category"}
               </DialogTitle>
-              <DialogDescription className="text-neutral-400">
+              <DialogDescription className="text-muted-foreground">
                 {editingCategory
                   ? "Update the category details below."
                   : "Add a new category to organize your transactions."}
@@ -337,7 +338,7 @@ function CategoriesSection() {
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as "active" | "archived")}
       >
-        <TabsList className="bg-neutral-800 border-neutral-700">
+        <TabsList className="bg-muted border-border">
           <TabsTrigger
             value="active"
             className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
@@ -379,16 +380,16 @@ function CategoriesSection() {
         open={showDefaultsDialog}
         onOpenChange={setShowDefaultsDialog}
       >
-        <AlertDialogContent className="bg-neutral-900 border-neutral-800 text-white rounded-md gap-6 max-w-2xl">
+        <AlertDialogContent className="bg-card border-border text-foreground rounded-md gap-6 max-w-2xl">
           <AlertDialogHeader className="space-y-4">
             <AlertDialogTitle className="text-xl font-semibold tracking-tight">
               Get Started Quickly
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-neutral-400 text-base">
+            <AlertDialogDescription className="text-muted-foreground text-base">
               Start with a pre-configured set of categories to track your
               finances immediately. You can always edit them later.
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <div className="space-y-4 rounded-md bg-neutral-950/50 p-5 border border-neutral-800/50 hover:border-red-900/30 transition-colors">
+                <div className="space-y-4 rounded-md bg-muted/50 p-5 border border-border/50 hover:border-red-900/30 transition-colors">
                   <div className="flex items-center gap-2.5 text-sm font-medium text-red-400 uppercase tracking-wider">
                     <div className="p-1.5 rounded-md bg-red-500/10">
                       <TrendingDown className="h-4 w-4" />
@@ -406,7 +407,7 @@ function CategoriesSection() {
                       <Badge
                         key={cat}
                         variant="outline"
-                        className="rounded-sm border-neutral-800 bg-neutral-900 text-neutral-300 font-normal hover:border-neutral-700"
+                        className="rounded-sm border-border bg-card text-foreground font-normal hover:border-border"
                       >
                         {cat}
                       </Badge>
@@ -414,7 +415,7 @@ function CategoriesSection() {
                   </div>
                 </div>
 
-                <div className="space-y-4 rounded-md bg-neutral-950/50 p-5 border border-neutral-800/50 hover:border-emerald-900/30 transition-colors">
+                <div className="space-y-4 rounded-md bg-muted/50 p-5 border border-border/50 hover:border-emerald-900/30 transition-colors">
                   <div className="flex items-center gap-2.5 text-sm font-medium text-emerald-400 uppercase tracking-wider">
                     <div className="p-1.5 rounded-md bg-emerald-500/10">
                       <TrendingUp className="h-4 w-4" />
@@ -426,7 +427,7 @@ function CategoriesSection() {
                       <Badge
                         key={cat}
                         variant="outline"
-                        className="rounded-sm border-neutral-800 bg-neutral-900 text-neutral-300 font-normal hover:border-neutral-700"
+                        className="rounded-sm border-border bg-card text-foreground font-normal hover:border-border"
                       >
                         {cat}
                       </Badge>
@@ -436,8 +437,8 @@ function CategoriesSection() {
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="sm:justify-between gap-4 border-t border-neutral-800 pt-6 mt-2">
-            <AlertDialogCancel className="rounded-md bg-transparent border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white mt-0">
+          <AlertDialogFooter className="sm:justify-between gap-4 border-t border-border pt-6 mt-2">
+            <AlertDialogCancel className="rounded-md bg-transparent border-border text-muted-foreground hover:bg-muted hover:text-foreground mt-0">
               I'll create my own
             </AlertDialogCancel>
             <AlertDialogAction
@@ -453,30 +454,125 @@ function CategoriesSection() {
   );
 }
 
+// ─── Theme section ───────────────────────────────────────────────────────────
+
+function ThemeSection() {
+  const { theme, setTheme } = useTheme();
+  const updateProfile = useMutation(api.users.updateProfile);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  const handleSelect = async (value: "light" | "dark") => {
+    setTheme(value);
+    try {
+      await updateProfile({ theme: value });
+    } catch {
+      toast.error("Failed to save theme preference");
+    }
+  };
+
+  const options = [
+    {
+      value: "dark" as const,
+      label: "Dark",
+      description: "Easy on the eyes — the current default.",
+      icon: Moon,
+      preview: "bg-neutral-950 border-neutral-700",
+      previewBar: "bg-neutral-800",
+      previewAccent: "bg-orange-500",
+    },
+    {
+      value: "light" as const,
+      label: "Light",
+      description: "Bright backgrounds with dark text.",
+      icon: Sun,
+      preview: "bg-white border-neutral-300",
+      previewBar: "bg-neutral-200",
+      previewAccent: "bg-orange-500",
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-sm font-medium text-foreground">Appearance</h3>
+        <p className="text-sm text-muted-foreground mt-1">
+          Choose how Syphon looks on this device. Your preference is saved to
+          your account, so it follows you when you sign in elsewhere.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
+        {options.map((opt) => {
+          const Icon = opt.icon;
+          const isActive = mounted && theme === opt.value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onMouseDown={() => handleSelect(opt.value)}
+              className={`text-left rounded-lg border p-4 transition-all ${
+                isActive
+                  ? "border-orange-500 bg-orange-500/5"
+                  : "border-border hover:border-border"
+              }`}
+            >
+              {/* Preview swatch */}
+              <div
+                className={`rounded-md border p-3 mb-3 space-y-2 ${opt.preview}`}
+              >
+                <div className={`h-2 w-2/3 rounded-full ${opt.previewBar}`} />
+                <div className={`h-2 w-1/2 rounded-full ${opt.previewBar}`} />
+                <div className={`h-2 w-5 rounded-full ${opt.previewAccent}`} />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <Icon className="w-4 h-4" />
+                  {opt.label}
+                </span>
+                {isActive && (
+                  <Badge className="bg-orange-500/15 text-orange-400 border-transparent">
+                    Active
+                  </Badge>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">{opt.description}</p>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
-  const [section, setSection] = useState<"accounts" | "categories">("accounts");
+  const [section, setSection] = useState<"accounts" | "categories" | "theme">(
+    "accounts"
+  );
 
   return (
     <AppLayout>
       <div className="space-y-6">
         <div>
-          <p className="text-xs text-neutral-400 tracking-wider uppercase">
+          <p className="text-xs text-muted-foreground tracking-wider uppercase">
             Settings
           </p>
-          <h1 className="text-2xl font-semibold text-white">Settings</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
         </div>
 
-        <div className="flex gap-1 border-b border-neutral-800">
-          {(["accounts", "categories"] as const).map((s) => (
+        <div className="flex gap-1 border-b border-border">
+          {(["accounts", "categories", "theme"] as const).map((s) => (
             <button
               key={s}
               onMouseDown={() => setSection(s)}
               className={`px-4 py-2 text-sm font-medium capitalize transition-colors border-b-2 -mb-px ${
                 section === s
-                  ? "border-orange-500 text-white"
-                  : "border-transparent text-neutral-400 hover:text-white"
+                  ? "border-orange-500 text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
               {s}
@@ -484,7 +580,13 @@ export default function SettingsPage() {
           ))}
         </div>
 
-        {section === "accounts" ? <AccountsSection /> : <CategoriesSection />}
+        {section === "accounts" ? (
+          <AccountsSection />
+        ) : section === "categories" ? (
+          <CategoriesSection />
+        ) : (
+          <ThemeSection />
+        )}
       </div>
     </AppLayout>
   );

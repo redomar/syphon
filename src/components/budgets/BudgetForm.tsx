@@ -66,13 +66,13 @@ export function BudgetForm({ onSubmit, defaultValues }: BudgetFormProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+              <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Budget Name
               </FormLabel>
               <FormControl>
                 <Input
                   placeholder="e.g. March 2026"
-                  className="bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500"
+                  className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
                   {...field}
                 />
               </FormControl>
@@ -88,7 +88,7 @@ export function BudgetForm({ onSubmit, defaultValues }: BudgetFormProps) {
             name="periodStart"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+                <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Start Date
                 </FormLabel>
                 <Popover>
@@ -97,16 +97,16 @@ export function BudgetForm({ onSubmit, defaultValues }: BudgetFormProps) {
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full justify-start text-left font-normal bg-neutral-800 border-neutral-700 hover:bg-neutral-700 hover:text-white",
-                          !field.value && "text-neutral-500"
+                          "w-full justify-start text-left font-normal bg-muted border-border hover:bg-accent hover:text-foreground",
+                          !field.value && "text-muted-foreground"
                         )}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4 text-neutral-400" />
+                        <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
                         {field.value ? format(field.value, "PPP") : "Pick a date"}
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-neutral-900 border-neutral-700" align="start">
+                  <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
                     <Calendar
                       mode="single"
                       selected={field.value}
@@ -125,7 +125,7 @@ export function BudgetForm({ onSubmit, defaultValues }: BudgetFormProps) {
             name="periodEnd"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+                <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   End Date
                 </FormLabel>
                 <Popover>
@@ -134,16 +134,16 @@ export function BudgetForm({ onSubmit, defaultValues }: BudgetFormProps) {
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full justify-start text-left font-normal bg-neutral-800 border-neutral-700 hover:bg-neutral-700 hover:text-white",
-                          !field.value && "text-neutral-500"
+                          "w-full justify-start text-left font-normal bg-muted border-border hover:bg-accent hover:text-foreground",
+                          !field.value && "text-muted-foreground"
                         )}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4 text-neutral-400" />
+                        <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
                         {field.value ? format(field.value, "PPP") : "Pick a date"}
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-neutral-900 border-neutral-700" align="start">
+                  <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
                     <Calendar
                       mode="single"
                       selected={field.value}
@@ -163,9 +163,9 @@ export function BudgetForm({ onSubmit, defaultValues }: BudgetFormProps) {
           name="totalAmount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+              <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Total Budget{" "}
-                <span className="normal-case text-neutral-500">(optional)</span>
+                <span className="normal-case text-muted-foreground">(optional)</span>
               </FormLabel>
               <FormControl>
                 <Input
@@ -173,7 +173,7 @@ export function BudgetForm({ onSubmit, defaultValues }: BudgetFormProps) {
                   step="0.01"
                   min="0.01"
                   placeholder="0.00"
-                  className="bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500"
+                  className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
                   value={field.value ?? ""}
                   onChange={(e) =>
                     field.onChange(
