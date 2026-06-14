@@ -106,6 +106,7 @@ export default defineSchema({
     periodStart: v.number(), // 1st of month, start of day
     periodEnd: v.number(), // Last of month, end of day
     totalAmount: v.optional(v.number()), // cents
+    isDemoData: v.optional(v.boolean()),
     createdAt: v.number(),
   })
     .index("by_user", ["userId"])
@@ -159,6 +160,7 @@ export default defineSchema({
     currentAmount: v.number(), // cents, denormalized sum of contributions
     deadline: v.optional(v.number()), // epoch ms, optional
     isArchived: v.boolean(),
+    isDemoData: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -192,6 +194,7 @@ export default defineSchema({
     lender: v.optional(v.string()),
     dueDay: v.optional(v.number()), // 1-31
     isClosed: v.boolean(),
+    isDemoData: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })

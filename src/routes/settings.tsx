@@ -563,6 +563,7 @@ function PreferencesSection() {
   const currentUser = useQuery(api.users.getCurrentUser);
   const recurring = useQuery(api.recurring.getRecurring);
   const updateProfile = useMutation(api.users.updateProfile);
+  const clearDemoData = useMutation(api.demo.clearDemoData);
 
   const [reminderDays, setReminderDays] = useState("7");
   const [payFrequency, setPayFrequency] = useState("none");
@@ -608,6 +609,33 @@ function PreferencesSection() {
 
   return (
     <div className="space-y-8 max-w-xl">
+      {/* Demo data */}
+      {currentUser?.isDemoMode && (
+        <div className="rounded-lg border border-orange-500/30 bg-orange-500/5 p-4 flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-medium text-foreground">Demo data active</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Sample records are loaded. Remove them when you're ready to use your
+              own data.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10 shrink-0"
+            onClick={async () => {
+              try {
+                await clearDemoData({});
+                toast.success("Demo data cleared");
+              } catch {
+                toast.error("Failed to clear demo data");
+              }
+            }}
+          >
+            Clear demo data
+          </Button>
+        </div>
+      )}
+
       {/* Bill reminders */}
       <div className="space-y-3">
         <div>

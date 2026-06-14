@@ -1,7 +1,7 @@
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
-import { Button } from "../ui/button";
 import { Feedback } from "./Feedback";
+import { OnboardingGate } from "./OnboardingGate";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -20,6 +20,8 @@ export function AppLayout({ children, showUserButton = true }: AppLayoutProps) {
       <span className="absolute right-2 bottom-2">
         <Feedback />
       </span>
+
+      <OnboardingGate />
     </div>
   );
 }
