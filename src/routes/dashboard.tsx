@@ -10,6 +10,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { BudgetSummaryCard } from "@/components/budgets";
+import { GoalsSummary } from "@/components/goals";
 
 function formatCurrency(amount: number, currency = "GBP") {
   return new Intl.NumberFormat("en-GB", {
@@ -170,6 +171,9 @@ function DashboardClient() {
         {/* Budget summary */}
         <BudgetSummaryCard />
 
+        {/* Savings goals */}
+        <GoalsSummary />
+
         {/* Roadmap progress */}
         <Card className="bg-card border-border">
           <CardHeader>
@@ -191,9 +195,9 @@ function DashboardClient() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-accent"></div>
-              <span className="text-muted-foreground">
-                E4 · Savings goals — planned
+              <div className="w-2 h-2 bg-emerald-500"></div>
+              <span className="text-foreground">
+                E4 · Savings goals — <span className="text-emerald-400">done</span>
               </span>
             </div>
             <div className="flex items-center gap-2">

@@ -13,6 +13,7 @@ import type * as bills from "../bills.js";
 import type * as budgets from "../budgets.js";
 import type * as categories from "../categories.js";
 import type * as feedback from "../feedback.js";
+import type * as goals from "../goals.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as monthlyBudgets from "../monthlyBudgets.js";
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   budgets: typeof budgets;
   categories: typeof categories;
   feedback: typeof feedback;
+  goals: typeof goals;
   http: typeof http;
   "lib/auth": typeof lib_auth;
   monthlyBudgets: typeof monthlyBudgets;

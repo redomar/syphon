@@ -136,4 +136,26 @@ export default defineSchema({
     .index("by_budget", ["budgetId"])
     .index("by_budget_and_category", ["budgetId", "categoryId"])
     .index("by_user", ["userId"]),
+  goals: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    targetAmount: v.number(), // cents
+    currentAmount: v.number(), // cents, denormalized sum of contributions
+    deadline: v.optional(v.number()), // epoch ms, optional
+    isArchived: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_active", ["userId", "isArchived"]),
+  goal_contributions: defineTable({
+    userId: v.id("users"),
+    goalId: v.id("goals"),
+    amount: v.number(), // cents
+    date: v.number(), // epoch ms
+    note: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_goal", ["goalId"])
+    .index("by_user", ["userId"]),
 });
