@@ -7,10 +7,15 @@ const USERNAME = "e2etester";
 const CODE = "424242"; // Clerk test-mode fixed code for +clerk_test emails
 
 async function logFields(page: Page, label: string) {
-  const names = await page
-    .locator("input:visible")
-    .evaluateAll((els) => els.map((e) => (e as HTMLInputElement).name));
-  console.log(`[${label}] url=${page.url()} inputs=[${names.join(", ")}]`);
+  // Debug-only; never let it fail the setup (it can race navigations).
+  try {
+    const names = await page
+      .locator("input:visible")
+      .evaluateAll((els) => els.map((e) => (e as HTMLInputElement).name));
+    console.log(`[${label}] url=${page.url()} inputs=[${names.join(", ")}]`);
+  } catch {
+    console.log(`[${label}] (skipped — navigation in flight)`);
+  }
 }
 
 async function fillIfPresent(page: Page, selector: string, value: string) {

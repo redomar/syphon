@@ -1,30 +1,15 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  Legend,
-} from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-function gbp(cents: number) {
+function gbp(cents: number, max0 = false) {
   return new Intl.NumberFormat("en-GB", {
     style: "currency",
     currency: "GBP",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: max0 ? 0 : 2,
   }).format(cents / 100);
 }
 
@@ -45,32 +30,21 @@ export default function ReportsPage() {
   const incomeExpense = useQuery(api.reports.getIncomeExpenseByMonth, { months });
   const netWorth = useQuery(api.reports.getNetWorthTrend, { months });
 
-  const now = new Date();
-  const endDate = now.getTime();
-  const startDate = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1).getTime();
+  // Stable across renders (only recompute when the range changes) — otherwise
+  // the query args change every render and re-subscribe infinitely.
+  const { startDate, endDate } = useMemo(() => {
+    const now = new Date();
+    return {
+      startDate: new Date(now.getFullYear(), now.getMonth() - (months - 1), 1).getTime(),
+      endDate: new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).getTime(),
+    };
+  }, [months]);
   const byCategory = useQuery(api.reports.getSpendingByCategory, { startDate, endDate });
 
   const totals = (incomeExpense ?? []).reduce(
     (acc, m) => ({ income: acc.income + m.income, expense: acc.expense + m.expense }),
     { income: 0, expense: 0 }
   );
-
-  const ieData = (incomeExpense ?? []).map((m) => ({
-    month: monthLabel(m.month),
-    Income: m.income / 100,
-    Expense: m.expense / 100,
-  }));
-  const nwData = (netWorth?.points ?? []).map((p) => ({
-    month: monthLabel(p.month),
-    "Net worth": p.netWorth / 100,
-  }));
-  const pieData = (byCategory ?? []).map((c) => ({
-    name: c.name,
-    value: c.total / 100,
-    color: c.color,
-  }));
-
-  const loading = incomeExpense === undefined;
 
   return (
     <AppLayout>
@@ -108,11 +82,11 @@ export default function ReportsPage() {
 
         {/* Summary cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <SummaryCard label="Income (range)" value={gbp(totals.income)} tone="emerald" />
-          <SummaryCard label="Expense (range)" value={gbp(totals.expense)} tone="orange" />
+          <SummaryCard label="Income (range)" value={gbp(totals.income, true)} tone="emerald" />
+          <SummaryCard label="Expense (range)" value={gbp(totals.expense, true)} tone="orange" />
           <SummaryCard
             label="Net worth"
-            value={netWorth ? gbp(netWorth.currentNetWorth) : "—"}
+            value={netWorth ? gbp(netWorth.currentNetWorth, true) : "—"}
             tone="default"
           />
         </div>
@@ -124,28 +98,17 @@ export default function ReportsPage() {
               INCOME VS EXPENSE
             </CardTitle>
           </CardHeader>
-          <CardContent className="h-72">
-            {loading ? (
-              <ChartSkeleton />
+          <CardContent>
+            {incomeExpense === undefined ? (
+              <Skeleton />
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={ieData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
-                  <YAxis stroke="var(--muted-foreground)" fontSize={12} />
-                  <Tooltip
-                    contentStyle={{
-                      background: "var(--card)",
-                      border: "1px solid var(--border)",
-                      borderRadius: 8,
-                    }}
-                    formatter={(v) => `£${Number(v).toFixed(0)}`}
-                  />
-                  <Legend />
-                  <Bar dataKey="Income" fill="#34d399" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="Expense" fill="#fb923c" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <IncomeExpenseChart
+                data={incomeExpense.map((m) => ({
+                  label: monthLabel(m.month),
+                  income: m.income,
+                  expense: m.expense,
+                }))}
+              />
             )}
           </CardContent>
         </Card>
@@ -158,37 +121,19 @@ export default function ReportsPage() {
                 SPENDING BY CATEGORY
               </CardTitle>
             </CardHeader>
-            <CardContent className="h-72">
+            <CardContent>
               {byCategory === undefined ? (
-                <ChartSkeleton />
-              ) : pieData.length === 0 ? (
-                <EmptyChart message="No expenses in this range." />
+                <Skeleton />
+              ) : byCategory.length === 0 ? (
+                <Empty message="No expenses in this range." />
               ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={90}
-                      label={(e: { name?: string }) => e.name ?? ""}
-                    >
-                      {pieData.map((entry, i) => (
-                        <Cell key={i} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        background: "var(--card)",
-                        border: "1px solid var(--border)",
-                        borderRadius: 8,
-                      }}
-                      formatter={(v) => `£${Number(v).toFixed(0)}`}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
+                <CategoryBars
+                  data={byCategory.map((c) => ({
+                    name: c.name,
+                    total: c.total,
+                    color: c.color,
+                  }))}
+                />
               )}
             </CardContent>
           </Card>
@@ -200,38 +145,132 @@ export default function ReportsPage() {
                 NET WORTH TREND
               </CardTitle>
             </CardHeader>
-            <CardContent className="h-72">
+            <CardContent>
               {netWorth === undefined ? (
-                <ChartSkeleton />
+                <Skeleton />
               ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={nwData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
-                    <YAxis stroke="var(--muted-foreground)" fontSize={12} />
-                    <Tooltip
-                      contentStyle={{
-                        background: "var(--card)",
-                        border: "1px solid var(--border)",
-                        borderRadius: 8,
-                      }}
-                      formatter={(v) => `£${Number(v).toFixed(0)}`}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="Net worth"
-                      stroke="#fb923c"
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                <LineTrend
+                  data={netWorth.points.map((p) => ({
+                    label: monthLabel(p.month),
+                    value: p.netWorth,
+                  }))}
+                />
               )}
             </CardContent>
           </Card>
         </div>
       </div>
     </AppLayout>
+  );
+}
+
+// ─── Charts (dependency-free SVG/CSS) ────────────────────────────────────────
+
+function IncomeExpenseChart({
+  data,
+}: {
+  data: { label: string; income: number; expense: number }[];
+}) {
+  const max = Math.max(1, ...data.flatMap((d) => [d.income, d.expense]));
+  return (
+    <div>
+      <div className="flex items-end justify-between gap-3 h-56">
+        {data.map((d) => (
+          <div key={d.label} className="flex flex-1 flex-col items-center gap-1 h-full justify-end">
+            <div className="flex items-end gap-1 w-full justify-center h-full">
+              <Bar heightPct={(d.income / max) * 100} className="bg-emerald-500" title={`Income ${gbp(d.income)}`} />
+              <Bar heightPct={(d.expense / max) * 100} className="bg-orange-500" title={`Expense ${gbp(d.expense)}`} />
+            </div>
+            <span className="text-xs text-muted-foreground">{d.label}</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+        <Legend color="bg-emerald-500" label="Income" />
+        <Legend color="bg-orange-500" label="Expense" />
+      </div>
+    </div>
+  );
+}
+
+function Bar({ heightPct, className, title }: { heightPct: number; className: string; title: string }) {
+  return (
+    <div
+      title={title}
+      className={cn("w-4 sm:w-6 rounded-t transition-all", className)}
+      style={{ height: `${Math.max(heightPct, 0)}%`, minHeight: heightPct > 0 ? 2 : 0 }}
+    />
+  );
+}
+
+function Legend({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <span className={cn("inline-block w-2.5 h-2.5 rounded-sm", color)} />
+      {label}
+    </span>
+  );
+}
+
+function CategoryBars({ data }: { data: { name: string; total: number; color: string }[] }) {
+  const max = Math.max(1, ...data.map((d) => d.total));
+  return (
+    <div className="space-y-3 py-1">
+      {data.map((d) => (
+        <div key={d.name}>
+          <div className="flex items-center justify-between text-sm mb-1">
+            <span className="text-foreground truncate">{d.name}</span>
+            <span className="font-mono text-muted-foreground">{gbp(d.total)}</span>
+          </div>
+          <div className="h-2.5 w-full rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-2.5 rounded-full"
+              style={{ width: `${(d.total / max) * 100}%`, backgroundColor: d.color }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LineTrend({ data }: { data: { label: string; value: number }[] }) {
+  const W = 480;
+  const H = 200;
+  const PAD = 8;
+  if (data.length === 0) return <Empty message="No data." />;
+
+  const values = data.map((d) => d.value);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const span = max - min || 1;
+  const stepX = data.length > 1 ? (W - PAD * 2) / (data.length - 1) : 0;
+  const y = (v: number) => H - PAD - ((v - min) / span) * (H - PAD * 2);
+  const points = data.map((d, i) => `${PAD + i * stepX},${y(d.value)}`).join(" ");
+
+  return (
+    <div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-56" preserveAspectRatio="none">
+        <polyline
+          points={points}
+          fill="none"
+          stroke="#fb923c"
+          strokeWidth={2}
+          vectorEffect="non-scaling-stroke"
+        />
+        {data.map((d, i) => (
+          <circle key={i} cx={PAD + i * stepX} cy={y(d.value)} r={3} fill="#fb923c" />
+        ))}
+      </svg>
+      <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+        {data.map((d) => (
+          <span key={d.label}>{d.label}</span>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground mt-2">
+        Range {gbp(min, true)} → {gbp(max, true)}
+      </p>
+    </div>
   );
 }
 
@@ -263,13 +302,13 @@ function SummaryCard({
   );
 }
 
-function ChartSkeleton() {
-  return <div className="h-full w-full animate-pulse rounded-md bg-muted" />;
+function Skeleton() {
+  return <div className="h-56 w-full animate-pulse rounded-md bg-muted" />;
 }
 
-function EmptyChart({ message }: { message: string }) {
+function Empty({ message }: { message: string }) {
   return (
-    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+    <div className="flex h-56 items-center justify-center text-sm text-muted-foreground">
       {message}
     </div>
   );
