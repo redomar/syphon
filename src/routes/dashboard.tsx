@@ -12,6 +12,8 @@ import {
 import { BudgetSummaryCard } from "@/components/budgets";
 import { GoalsSummary } from "@/components/goals";
 import { DebtSummary } from "@/components/debts";
+import { UpcomingBills } from "@/components/dashboard/UpcomingBills";
+import { PaydayCard } from "@/components/dashboard/PaydayCard";
 
 function formatCurrency(amount: number, currency = "GBP") {
   return new Intl.NumberFormat("en-GB", {
@@ -168,6 +170,12 @@ function DashboardClient() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Upcoming bills reminder (E8.S4) */}
+        <UpcomingBills />
+
+        {/* Payday (E8.S5) */}
+        <PaydayCard />
 
         {/* Budget summary */}
         <BudgetSummaryCard />

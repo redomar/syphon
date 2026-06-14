@@ -255,6 +255,41 @@ describe("markPaid / skip", () => {
   });
 });
 
+// ─── upcoming bills (E8.S4) ──────────────────────────────────────────────────
+
+describe("getUpcomingBills", () => {
+  test("returns pending EXPENSE occurrences within the window", async () => {
+    const { asUser } = await setupTestWithUser();
+    const today = new Date();
+    const todayMid = Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate()
+    );
+    // weekly expense starting today → at least one due within 7 days
+    await asUser.mutation(api.recurring.createRecurring, {
+      type: "EXPENSE",
+      amount: 1500,
+      description: "Weekly shop",
+      frequency: "weekly",
+      startDate: todayMid,
+    });
+    // an income template must NOT appear as a bill
+    await asUser.mutation(api.recurring.createRecurring, {
+      type: "INCOME",
+      amount: 50000,
+      description: "Pay",
+      frequency: "weekly",
+      startDate: todayMid,
+    });
+
+    const bills = await asUser.query(api.recurring.getUpcomingBills, { days: 7 });
+    expect(bills.length).toBeGreaterThan(0);
+    expect(bills.every((b) => b.description === "Weekly shop")).toBe(true);
+    expect(bills[0].daysUntil).toBeGreaterThanOrEqual(0);
+  });
+});
+
 // ─── convergence ─────────────────────────────────────────────────────────────
 
 describe("migrateBillsToRecurring", () => {

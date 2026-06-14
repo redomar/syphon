@@ -260,6 +260,62 @@ export const getProjectedTransactions = query({
   },
 });
 
+/**
+ * E8.S4: upcoming EXPENSE projections due within `days` days, soonest first.
+ */
+export const getUpcomingBills = query({
+  args: { days: v.number() },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const now = new Date();
+    const todayMidnight = Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate()
+    );
+    const end = todayMidnight + args.days * DAY;
+
+    const templates = await ctx.db
+      .query("recurring_transactions")
+      .withIndex("by_user_active", (q) =>
+        q.eq("userId", user._id).eq("isArchived", false)
+      )
+      .collect();
+
+    const bills: Array<{
+      recurringId: string;
+      description: string;
+      amount: number;
+      date: number;
+      daysUntil: number;
+    }> = [];
+
+    for (const tpl of templates) {
+      if (!tpl.isActive || tpl.type !== "EXPENSE") continue;
+      const occurrences = expandOccurrences(tpl, todayMidnight, end);
+      if (occurrences.length === 0) continue;
+      const instances = await ctx.db
+        .query("recurring_instances")
+        .withIndex("by_recurring", (q) => q.eq("recurringId", tpl._id))
+        .collect();
+      const resolved = new Set(instances.map((i) => i.occurrenceDate));
+      for (const occ of occurrences) {
+        if (resolved.has(occ)) continue;
+        bills.push({
+          recurringId: tpl._id,
+          description: tpl.description,
+          amount: tpl.amount,
+          date: occ,
+          daysUntil: Math.round((occ - todayMidnight) / DAY),
+        });
+      }
+    }
+
+    bills.sort((a, b) => a.date - b.date);
+    return bills;
+  },
+});
+
 // ─── Actualize (E6.S3) ──────────────────────────────────────────────────────
 
 export const markPaid = mutation({

@@ -19,6 +19,21 @@ export default defineSchema({
     timezone: v.string(), // Timezone identifier (e.g., "Europe/London", "America/New_York")
     onboardingComplete: v.boolean(),
     isDemoMode: v.boolean(),
+    // E8.S4 bill reminders
+    reminderDays: v.optional(v.number()), // notify for bills due within N days
+    // E8.S5 pay schedule
+    payFrequency: v.optional(
+      v.union(
+        v.literal("weekly"),
+        v.literal("biweekly"),
+        v.literal("semimonthly"),
+        v.literal("monthly"),
+        v.literal("fourweekly")
+      )
+    ),
+    payDayOfMonth: v.optional(v.number()), // 1-31, for monthly
+    payAnchorDate: v.optional(v.number()), // epoch ms, next payday anchor for cyclic
+    payRecurringId: v.optional(v.id("recurring_transactions")), // optional income link
     createdAt: v.number(), // Unix timestamp (ms)
     updatedAt: v.number(), // Unix timestamp (ms)
   })

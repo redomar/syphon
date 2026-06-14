@@ -33,6 +33,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus, TrendingUp, TrendingDown, Moon, Sun } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
@@ -549,10 +557,168 @@ function ThemeSection() {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function SettingsPage() {
-  const [section, setSection] = useState<"accounts" | "categories" | "theme">(
-    "accounts"
+// ─── Preferences section (E8.S4 reminders + E8.S5 pay schedule) ──────────────
+
+function PreferencesSection() {
+  const currentUser = useQuery(api.users.getCurrentUser);
+  const recurring = useQuery(api.recurring.getRecurring);
+  const updateProfile = useMutation(api.users.updateProfile);
+
+  const [reminderDays, setReminderDays] = useState("7");
+  const [payFrequency, setPayFrequency] = useState("none");
+  const [payDayOfMonth, setPayDayOfMonth] = useState("");
+  const [payAnchorDate, setPayAnchorDate] = useState("");
+  const [payRecurringId, setPayRecurringId] = useState("none");
+
+  useEffect(() => {
+    if (!currentUser) return;
+    setReminderDays(String(currentUser.reminderDays ?? 7));
+    setPayFrequency(currentUser.payFrequency ?? "none");
+    setPayDayOfMonth(currentUser.payDayOfMonth ? String(currentUser.payDayOfMonth) : "");
+    setPayAnchorDate(
+      currentUser.payAnchorDate
+        ? new Date(currentUser.payAnchorDate).toISOString().slice(0, 10)
+        : ""
+    );
+    setPayRecurringId(currentUser.payRecurringId ?? "none");
+  }, [currentUser]);
+
+  const incomeTemplates = (recurring ?? []).filter((r) => r.type === "INCOME");
+  const cyclic = ["weekly", "biweekly", "fourweekly"].includes(payFrequency);
+
+  const handleSave = async () => {
+    try {
+      await updateProfile({
+        reminderDays: parseInt(reminderDays, 10) || 7,
+        payFrequency: payFrequency === "none" ? undefined : (payFrequency as never),
+        payDayOfMonth:
+          payFrequency === "monthly" && payDayOfMonth
+            ? parseInt(payDayOfMonth, 10)
+            : undefined,
+        payAnchorDate:
+          cyclic && payAnchorDate ? new Date(payAnchorDate).getTime() : undefined,
+        payRecurringId:
+          payRecurringId === "none" ? undefined : (payRecurringId as never),
+      });
+      toast.success("Preferences saved");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save");
+    }
+  };
+
+  return (
+    <div className="space-y-8 max-w-xl">
+      {/* Bill reminders */}
+      <div className="space-y-3">
+        <div>
+          <h3 className="text-sm font-medium text-foreground">Bill reminders</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Show upcoming recurring bills due within this many days on your dashboard.
+          </p>
+        </div>
+        <Select value={reminderDays} onValueChange={setReminderDays}>
+          <SelectTrigger className="bg-muted border-border text-foreground max-w-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="bg-card border-border text-foreground">
+            {["7", "14", "30"].map((d) => (
+              <SelectItem key={d} value={d}>
+                {d} days
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Pay schedule */}
+      <div className="space-y-3">
+        <div>
+          <h3 className="text-sm font-medium text-foreground">Pay schedule</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Track your next payday on the dashboard.
+          </p>
+        </div>
+        <Select value={payFrequency} onValueChange={setPayFrequency}>
+          <SelectTrigger className="bg-muted border-border text-foreground max-w-xs">
+            <SelectValue placeholder="Frequency" />
+          </SelectTrigger>
+          <SelectContent className="bg-card border-border text-foreground">
+            <SelectItem value="none">Not set</SelectItem>
+            <SelectItem value="weekly">Weekly</SelectItem>
+            <SelectItem value="biweekly">Bi-weekly</SelectItem>
+            <SelectItem value="fourweekly">Every 4 weeks</SelectItem>
+            <SelectItem value="semimonthly">Semi-monthly (1st &amp; 15th)</SelectItem>
+            <SelectItem value="monthly">Monthly</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {payFrequency === "monthly" && (
+          <div>
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">
+              Day of month
+            </label>
+            <Input
+              type="number"
+              min="1"
+              max="31"
+              value={payDayOfMonth}
+              onChange={(e) => setPayDayOfMonth(e.target.value)}
+              placeholder="e.g. 28"
+              className="bg-muted border-border text-foreground max-w-xs"
+            />
+          </div>
+        )}
+
+        {cyclic && (
+          <div>
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">
+              Next payday (anchor)
+            </label>
+            <Input
+              type="date"
+              value={payAnchorDate}
+              onChange={(e) => setPayAnchorDate(e.target.value)}
+              className="bg-muted border-border text-foreground max-w-xs"
+            />
+          </div>
+        )}
+
+        {payFrequency !== "none" && (
+          <div>
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">
+              Expected amount (optional)
+            </label>
+            <Select value={payRecurringId} onValueChange={setPayRecurringId}>
+              <SelectTrigger className="bg-muted border-border text-foreground max-w-xs">
+                <SelectValue placeholder="Link recurring income" />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border text-foreground">
+                <SelectItem value="none">No link</SelectItem>
+                {incomeTemplates.map((t) => (
+                  <SelectItem key={t._id} value={t._id}>
+                    {t.description}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
+
+      <Button
+        onClick={handleSave}
+        className="bg-orange-500 hover:bg-orange-600 text-white"
+      >
+        Save preferences
+      </Button>
+    </div>
   );
+}
+
+export default function SettingsPage() {
+  const [section, setSection] = useState<
+    "accounts" | "categories" | "preferences" | "theme"
+  >("accounts");
 
   return (
     <AppLayout>
@@ -565,7 +731,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="flex gap-1 border-b border-border">
-          {(["accounts", "categories", "theme"] as const).map((s) => (
+          {(["accounts", "categories", "preferences", "theme"] as const).map((s) => (
             <button
               key={s}
               onMouseDown={() => setSection(s)}
@@ -584,6 +750,8 @@ export default function SettingsPage() {
           <AccountsSection />
         ) : section === "categories" ? (
           <CategoriesSection />
+        ) : section === "preferences" ? (
+          <PreferencesSection />
         ) : (
           <ThemeSection />
         )}
