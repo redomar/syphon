@@ -109,6 +109,17 @@ setup("authenticate via Clerk test email", async ({ page }) => {
   await page.screenshot({ path: "e2e/.auth/final.png", fullPage: true });
 
   expect(page.url(), `bounced to sign-in: ${page.url()}`).toContain("/dashboard");
-  await expect(page.getByRole("navigation").first()).toBeVisible({ timeout: 60000 });
+
+  // Dismiss the onboarding gate FIRST — it's a modal that aria-hides the rest of
+  // the page (incl. the nav), so it must be closed before asserting app chrome.
+  // (Persists onboardingComplete so it won't reappear in later flows.)
+  const skip = page.getByText("Skip for now");
+  await skip.waitFor({ state: "visible", timeout: 120000 }).catch(() => {});
+  if (await skip.count()) {
+    await skip.click().catch(() => {});
+    await page.waitForTimeout(2000);
+  }
+
+  await expect(page.getByRole("navigation").first()).toBeVisible({ timeout: 30000 });
   await page.context().storageState({ path: STATE });
 });

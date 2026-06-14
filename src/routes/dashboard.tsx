@@ -230,6 +230,12 @@ function DashboardClient() {
                 E7 · Analytics &amp; reports — <span className="text-emerald-400">done</span>
               </span>
             </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-emerald-500"></div>
+              <span className="text-foreground">
+                E8 · Polish &amp; launch — <span className="text-emerald-400">done</span>
+              </span>
+            </div>
           </CardContent>
         </Card>
       </div>

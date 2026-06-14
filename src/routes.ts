@@ -21,6 +21,8 @@ export default [
     route("goals", "routes/goals.tsx"),
     route("debts", "routes/debts.tsx"),
     route("reports", "routes/reports.tsx"),
+    route("import", "routes/import.tsx"),
+    route("receipts", "routes/receipts.tsx"),
     route("settings", "routes/settings.tsx"),
   ]),
   route("*", "routes/$.tsx"), // Catch-all for unmatched routes

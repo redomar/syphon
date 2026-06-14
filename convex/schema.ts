@@ -91,6 +91,7 @@ export default defineSchema({
     categoryId: v.optional(v.id("categories")),
     accountId: v.optional(v.id("accounts")),
     recurringTemplateId: v.optional(v.id("recurring_transactions")),
+    importId: v.optional(v.id("imports")),
     isDemoData: v.boolean(),
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -257,4 +258,21 @@ export default defineSchema({
     .index("by_recurring", ["recurringId"])
     .index("by_recurring_and_date", ["recurringId", "occurrenceDate"])
     .index("by_user", ["userId"]),
+  imports: defineTable({
+    userId: v.id("users"),
+    fileName: v.string(),
+    rowCount: v.number(),
+    createdAt: v.number(),
+  }).index("by_user", ["userId"]),
+  receipts: defineTable({
+    userId: v.id("users"),
+    transactionId: v.optional(v.id("transactions")),
+    storageId: v.id("_storage"),
+    name: v.string(),
+    contentType: v.string(),
+    size: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_transaction", ["transactionId"]),
 });

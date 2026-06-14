@@ -9,7 +9,9 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   retries: 0,
-  timeout: 60_000,
+  // Generous: Vite dev cold-compiles routes (and heavy modules like recharts)
+  // on first hit, which can exceed a minute.
+  timeout: 180_000,
   expect: { timeout: 15_000 },
   reporter: [["list"]],
   use: {

@@ -12,7 +12,7 @@ test.describe("Reports flow (E7)", () => {
     // recharts is a heavy module — generous timeout for Vite cold-compile.
     await expect(
       page.getByRole("heading", { name: /see where your money goes/i })
-    ).toBeVisible({ timeout: 90000 });
+    ).toBeVisible({ timeout: 150000 });
 
     // all three chart sections render
     await expect(page.getByText("INCOME VS EXPENSE")).toBeVisible();

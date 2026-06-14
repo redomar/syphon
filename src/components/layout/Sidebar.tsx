@@ -10,6 +10,8 @@ import {
   Receipt,
   CalendarRange,
   Repeat,
+  Upload,
+  FileImage,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +25,8 @@ const navigation = [
   { name: "Goals", href: "/goals", icon: Target },
   { name: "Debts", href: "/debts", icon: CreditCard },
   { name: "Reports", href: "/reports", icon: FileText },
+  { name: "Import", href: "/import", icon: Upload },
+  { name: "Receipts", href: "/receipts", icon: FileImage },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 

@@ -3,7 +3,12 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import { toast } from "sonner";
 import { Sparkles, Rocket, ArrowRight, ArrowLeft } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -78,6 +83,10 @@ export function OnboardingGate() {
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
+        <DialogTitle className="sr-only">Welcome to Syphon</DialogTitle>
+        <DialogDescription className="sr-only">
+          Choose how to get started with Syphon.
+        </DialogDescription>
         {step === 0 && (
           <div className="space-y-5 py-2 text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10">
