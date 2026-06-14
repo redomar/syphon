@@ -29,7 +29,7 @@ function monthKey(date: Date) {
   return format(date, "yyyy-MM");
 }
 
-export default function MonthlyBudgetsPage() {
+export default function CashflowPage() {
   const [monthDate, setMonthDate] = useState(() => startOfMonth(new Date()));
   const [incomeInput, setIncomeInput] = useState("");
 
@@ -101,7 +101,7 @@ export default function MonthlyBudgetsPage() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-muted-foreground tracking-wider uppercase">
-              Monthly Budget
+              Cashflow
             </p>
             <h2 className="text-2xl font-semibold text-foreground">
               Plan around what's left after your bills

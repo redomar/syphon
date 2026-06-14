@@ -16,7 +16,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
   { name: "Transactions", href: "/transactions", icon: DollarSign },
   { name: "Budgets", href: "/budgets", icon: TrendingUp },
-  { name: "Monthly Budget", href: "/monthly-budgets", icon: CalendarRange },
+  { name: "Cashflow", href: "/cashflow", icon: CalendarRange },
   { name: "Bills", href: "/bills", icon: Receipt },
   { name: "Goals", href: "/goals", icon: Target },
   { name: "Debts", href: "/debts", icon: CreditCard },
