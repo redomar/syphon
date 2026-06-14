@@ -17,6 +17,7 @@ export default [
     route("budgets/:id", "routes/budget-detail.tsx"),
     route("cashflow", "routes/cashflow.tsx"),
     route("bills", "routes/bills.tsx"),
+    route("recurring", "routes/recurring.tsx"),
     route("goals", "routes/goals.tsx"),
     route("debts", "routes/debts.tsx"),
     route("reports", "routes/reports.tsx"),

@@ -9,6 +9,7 @@ import {
   Settings,
   Receipt,
   CalendarRange,
+  Repeat,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,7 @@ const navigation = [
   { name: "Budgets", href: "/budgets", icon: TrendingUp },
   { name: "Cashflow", href: "/cashflow", icon: CalendarRange },
   { name: "Bills", href: "/bills", icon: Receipt },
+  { name: "Recurring", href: "/recurring", icon: Repeat },
   { name: "Goals", href: "/goals", icon: Target },
   { name: "Debts", href: "/debts", icon: CreditCard },
   { name: "Reports", href: "/reports", icon: FileText },

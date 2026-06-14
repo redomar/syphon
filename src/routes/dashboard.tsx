@@ -210,6 +210,12 @@ function DashboardClient() {
                 E5 · Debt tracking — <span className="text-emerald-400">done</span>
               </span>
             </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-emerald-500"></div>
+              <span className="text-foreground">
+                E6 · Recurring transactions — <span className="text-emerald-400">done</span>
+              </span>
+            </div>
           </CardContent>
         </Card>
       </div>

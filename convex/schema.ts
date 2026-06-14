@@ -75,6 +75,7 @@ export default defineSchema({
     date: v.number(), // Unix timestamp ms
     categoryId: v.optional(v.id("categories")),
     accountId: v.optional(v.id("accounts")),
+    recurringTemplateId: v.optional(v.id("recurring_transactions")),
     isDemoData: v.boolean(),
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -192,5 +193,50 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_debt", ["debtId"])
+    .index("by_user", ["userId"]),
+  recurring_transactions: defineTable({
+    userId: v.id("users"),
+    type: v.union(v.literal("INCOME"), v.literal("EXPENSE")),
+    amount: v.number(), // cents
+    description: v.string(),
+    categoryId: v.optional(v.id("categories")),
+    accountId: v.optional(v.id("accounts")),
+    // Budget group hint (used by bills converged into recurring expenses).
+    budgetGroup: v.optional(
+      v.union(v.literal("NEEDS"), v.literal("WANTS"), v.literal("NICETIES"))
+    ),
+    frequency: v.union(
+      v.literal("daily"),
+      v.literal("weekly"),
+      v.literal("biweekly"),
+      v.literal("monthly"),
+      v.literal("yearly")
+    ),
+    dayOfMonth: v.optional(v.number()), // 1-31, for monthly/yearly
+    dayOfWeek: v.optional(v.number()), // 0-6, for weekly/biweekly
+    startDate: v.number(), // epoch ms
+    endDate: v.optional(v.number()), // epoch ms, null = ongoing
+    isActive: v.boolean(),
+    isArchived: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_active", ["userId", "isArchived"]),
+  recurring_instances: defineTable({
+    userId: v.id("users"),
+    recurringId: v.id("recurring_transactions"),
+    occurrenceDate: v.number(), // the projected date this instance resolves
+    status: v.union(
+      v.literal("PAID"),
+      v.literal("SKIPPED"),
+      v.literal("MODIFIED")
+    ),
+    actualAmount: v.optional(v.number()), // cents, if modified
+    actualTransactionId: v.optional(v.id("transactions")),
+    createdAt: v.number(),
+  })
+    .index("by_recurring", ["recurringId"])
+    .index("by_recurring_and_date", ["recurringId", "occurrenceDate"])
     .index("by_user", ["userId"]),
 });

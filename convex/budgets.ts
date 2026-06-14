@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireUser } from "./lib/auth";
 import type { Id } from "./_generated/dataModel";
+import { expandOccurrences } from "./recurring";
 
 const budgetGroup = v.union(
   v.literal("NEEDS"),
@@ -345,13 +346,45 @@ export const getBudgetProgress = query({
       }
     }
 
+    // E6.S5: include projected recurring EXPENSE occurrences not yet actualized.
+    const projectedByCategory = new Map<string, number>();
+    const templates = await ctx.db
+      .query("recurring_transactions")
+      .withIndex("by_user_active", (q) =>
+        q.eq("userId", user._id).eq("isArchived", false)
+      )
+      .collect();
+    for (const tpl of templates) {
+      if (!tpl.isActive || tpl.type !== "EXPENSE" || !tpl.categoryId) continue;
+      const occurrences = expandOccurrences(
+        tpl,
+        budget.periodStart,
+        budget.periodEnd
+      );
+      if (occurrences.length === 0) continue;
+      const instances = await ctx.db
+        .query("recurring_instances")
+        .withIndex("by_recurring", (q) => q.eq("recurringId", tpl._id))
+        .collect();
+      const resolved = new Set(instances.map((i) => i.occurrenceDate));
+      const pending = occurrences.filter((o) => !resolved.has(o)).length;
+      if (pending > 0) {
+        projectedByCategory.set(
+          tpl.categoryId,
+          (projectedByCategory.get(tpl.categoryId) ?? 0) + pending * tpl.amount
+        );
+      }
+    }
+
     return allocations.map((alloc) => {
       const category = alloc.categoryId;
       const spentAmount = spentByCategory.get(category) ?? 0;
-      const remainingAmount = alloc.allocatedAmount - spentAmount;
+      const projectedAmount = projectedByCategory.get(category) ?? 0;
+      const totalCommitted = spentAmount + projectedAmount;
+      const remainingAmount = alloc.allocatedAmount - totalCommitted;
       const percentage =
         alloc.allocatedAmount > 0
-          ? Math.round((spentAmount / alloc.allocatedAmount) * 100)
+          ? Math.round((totalCommitted / alloc.allocatedAmount) * 100)
           : 0;
 
       let status: "green" | "yellow" | "red" = "green";
@@ -364,6 +397,7 @@ export const getBudgetProgress = query({
         budgetGroup: alloc.budgetGroup,
         allocatedAmount: alloc.allocatedAmount,
         spentAmount,
+        projectedAmount,
         remainingAmount,
         percentage,
         status,

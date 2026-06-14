@@ -3,7 +3,8 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import type { Id } from "convex/_generated/dataModel";
 import { toast } from "sonner";
-import { Plus, ShieldCheck, Sparkles, Receipt } from "lucide-react";
+import { Plus, ShieldCheck, Sparkles, Receipt, Repeat } from "lucide-react";
+import { useNavigate } from "react-router";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,6 +34,20 @@ export default function BillsPage() {
   const createBill = useMutation(api.bills.createBill);
   const updateBill = useMutation(api.bills.updateBill);
   const deleteBill = useMutation(api.bills.deleteBill);
+  const migrateBills = useMutation(api.recurring.migrateBillsToRecurring);
+  const navigate = useNavigate();
+
+  const handleMigrate = async () => {
+    try {
+      const { migrated } = await migrateBills({});
+      toast.success(
+        `Moved ${migrated} bill${migrated !== 1 ? "s" : ""} into Recurring`
+      );
+      navigate("/recurring");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to move bills");
+    }
+  };
 
   const totals = useMemo(() => {
     if (!bills) return { necessary: 0, luxury: 0, total: 0 };
@@ -149,6 +164,31 @@ export default function BillsPage() {
             </DialogContent>
           </Dialog>
         </div>
+
+        {/* Convergence: move bills into the unified Recurring model */}
+        {bills && bills.length > 0 && (
+          <Card className="bg-card border-orange-500/30">
+            <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3">
+              <div className="flex items-start gap-2">
+                <Repeat className="w-4 h-4 text-orange-400 mt-0.5" />
+                <p className="text-sm text-muted-foreground">
+                  Bills are becoming part of <span className="text-foreground">Recurring</span>.
+                  Move them over to get projections and budget integration —
+                  necessary → NEEDS, luxury → WANTS. Your bills are archived, not
+                  deleted.
+                </p>
+              </div>
+              <Button
+                onClick={handleMigrate}
+                variant="outline"
+                className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10 gap-2 shrink-0"
+              >
+                <Repeat className="w-4 h-4" />
+                Move to Recurring
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Summary cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
