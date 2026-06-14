@@ -158,4 +158,39 @@ export default defineSchema({
   })
     .index("by_goal", ["goalId"])
     .index("by_user", ["userId"]),
+  debts: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    type: v.union(
+      v.literal("credit_card"),
+      v.literal("student_loan"),
+      v.literal("mortgage"),
+      v.literal("personal"),
+      v.literal("auto"),
+      v.literal("other")
+    ),
+    initialBalance: v.number(), // cents
+    currentBalance: v.number(), // cents
+    apr: v.optional(v.number()), // annual percentage rate, e.g. 19.9
+    minPayment: v.number(), // cents
+    lender: v.optional(v.string()),
+    dueDay: v.optional(v.number()), // 1-31
+    isClosed: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_open", ["userId", "isClosed"]),
+  debt_payments: defineTable({
+    userId: v.id("users"),
+    debtId: v.id("debts"),
+    amount: v.number(), // cents
+    date: v.number(), // epoch ms
+    principal: v.optional(v.number()), // cents
+    interest: v.optional(v.number()), // cents
+    note: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_debt", ["debtId"])
+    .index("by_user", ["userId"]),
 });

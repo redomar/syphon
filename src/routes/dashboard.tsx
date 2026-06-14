@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { BudgetSummaryCard } from "@/components/budgets";
 import { GoalsSummary } from "@/components/goals";
+import { DebtSummary } from "@/components/debts";
 
 function formatCurrency(amount: number, currency = "GBP") {
   return new Intl.NumberFormat("en-GB", {
@@ -174,6 +175,9 @@ function DashboardClient() {
         {/* Savings goals */}
         <GoalsSummary />
 
+        {/* Debt */}
+        <DebtSummary />
+
         {/* Roadmap progress */}
         <Card className="bg-card border-border">
           <CardHeader>
@@ -201,9 +205,9 @@ function DashboardClient() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-accent"></div>
-              <span className="text-muted-foreground">
-                E5 · Debt tracking — planned
+              <div className="w-2 h-2 bg-emerald-500"></div>
+              <span className="text-foreground">
+                E5 · Debt tracking — <span className="text-emerald-400">done</span>
               </span>
             </div>
           </CardContent>
