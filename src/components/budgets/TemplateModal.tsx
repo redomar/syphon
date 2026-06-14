@@ -105,12 +105,12 @@ export function TemplateModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-neutral-900 border-neutral-700 text-white max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="bg-card border-border text-foreground max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
             50/30/20 Budget Template
           </DialogTitle>
-          <DialogDescription className="text-neutral-400">
+          <DialogDescription className="text-muted-foreground">
             Set your total budget, adjust ratios, and assign categories to each
             group.
           </DialogDescription>
@@ -119,7 +119,7 @@ export function TemplateModal({
         <div className="space-y-6 pt-2">
           {/* Total amount */}
           <div>
-            <label className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Total Budget Amount
             </label>
             <Input
@@ -129,13 +129,13 @@ export function TemplateModal({
               placeholder="2000.00"
               value={totalAmount}
               onChange={(e) => setTotalAmount(e.target.value)}
-              className="mt-2 bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500"
+              className="mt-2 bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
           {/* Ratios */}
           <div>
-            <label className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Ratios{" "}
               <span
                 className={
@@ -165,9 +165,9 @@ export function TemplateModal({
                             [key]: parseInt(e.target.value) || 0,
                           }))
                         }
-                        className="h-8 text-sm bg-neutral-800 border-neutral-700 text-white"
+                        className="h-8 text-sm bg-muted border-border text-foreground"
                       />
-                      <span className="text-xs text-neutral-500">%</span>
+                      <span className="text-xs text-muted-foreground">%</span>
                     </div>
                   </div>
                 );
@@ -177,7 +177,7 @@ export function TemplateModal({
 
           {/* Category assignments */}
           <div>
-            <label className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Assign Categories
             </label>
             <div className="grid grid-cols-3 gap-4 mt-2">
@@ -196,14 +196,14 @@ export function TemplateModal({
                         className={`flex items-center gap-2 text-xs cursor-pointer ${
                           assignedElsewhere
                             ? "opacity-30"
-                            : "text-neutral-300 hover:text-white"
+                            : "text-foreground hover:text-foreground"
                         }`}
                       >
                         <Checkbox
                           checked={isAssigned}
                           disabled={assignedElsewhere}
                           onCheckedChange={() => toggleCategory(cat._id, g)}
-                          className="border-neutral-600 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                          className="border-border data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
                         />
                         <span
                           className="inline-block w-2 h-2 rounded-full"
@@ -220,19 +220,19 @@ export function TemplateModal({
 
           {/* Preview */}
           {preview && (
-            <div className="border border-neutral-800 rounded-md p-4 space-y-2 bg-neutral-950/50">
-              <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+            <div className="border border-border rounded-md p-4 space-y-2 bg-muted/50">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Preview
               </p>
               {preview.map((p) => (
                 <div key={p.group} className="flex justify-between text-sm">
-                  <span className="text-neutral-300">
+                  <span className="text-foreground">
                     {GROUP_LABELS[p.group]} ({p.ratio}%)
                   </span>
-                  <span className="text-neutral-400 font-mono">
+                  <span className="text-muted-foreground font-mono">
                     {formatCurrency(p.groupTotal)}
                     {p.count > 0 && (
-                      <span className="text-neutral-600">
+                      <span className="text-muted-foreground">
                         {" "}
                         · {formatCurrency(p.perCategory)}/cat
                       </span>
@@ -248,7 +248,7 @@ export function TemplateModal({
             <Button
               variant="outline"
               onMouseDown={() => onOpenChange(false)}
-              className="border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+              className="border-border text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               Cancel
             </Button>

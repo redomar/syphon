@@ -44,10 +44,10 @@ function DashboardClient() {
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Greeting card */}
-          <Card className="bg-neutral-900 border-neutral-700 md:col-span-2 lg:col-span-4">
+          <Card className="bg-card border-border md:col-span-2 lg:col-span-4">
             <CardContent className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="space-y-1">
-                <p className="text-xs text-neutral-400 tracking-wider">
+                <p className="text-xs text-muted-foreground tracking-wider">
                   WELCOME
                 </p>
                 <p className="text-2xl font-semibold">
@@ -55,7 +55,7 @@ function DashboardClient() {
                   — Here is your snapshot.
                 </p>
               </div>
-              <div className="text-xs text-neutral-500 max-w-sm md:text-right">
+              <div className="text-xs text-muted-foreground max-w-sm md:text-right">
                 {currentUser ? (
                   <span>
                     Member since{" "}
@@ -69,49 +69,49 @@ function DashboardClient() {
           </Card>
 
           {/* Current Balance */}
-          <Card className="bg-neutral-900 border-neutral-700">
+          <Card className="bg-card border-border">
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-neutral-400 tracking-wider">
+                  <p className="text-xs text-muted-foreground tracking-wider">
                     CURRENT BALANCE
                   </p>
-                  <p className="text-2xl font-bold font-mono text-white">
+                  <p className="text-2xl font-bold font-mono text-foreground">
                     {isLoading ? (
-                      <span className="animate-pulse text-neutral-600">
+                      <span className="animate-pulse text-muted-foreground">
                         ···
                       </span>
                     ) : (
                       formatCurrency(stats.totalBalance, currency)
                     )}
                   </p>
-                  <p className="text-xs text-neutral-500">
+                  <p className="text-xs text-muted-foreground">
                     Sum of all accounts
                   </p>
                 </div>
-                <PoundSterling className="w-8 h-8 text-white" />
+                <PoundSterling className="w-8 h-8 text-foreground" />
               </div>
             </CardContent>
           </Card>
 
           {/* Total Expenses */}
-          <Card className="bg-neutral-900 border-neutral-700">
+          <Card className="bg-card border-border">
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-neutral-400 tracking-wider">
+                  <p className="text-xs text-muted-foreground tracking-wider">
                     TOTAL EXPENSES
                   </p>
                   <p className="text-2xl font-bold font-mono text-orange-500">
                     {isLoading ? (
-                      <span className="animate-pulse text-neutral-600">
+                      <span className="animate-pulse text-muted-foreground">
                         ···
                       </span>
                     ) : (
                       formatCurrency(stats.monthExpenses, currency)
                     )}
                   </p>
-                  <p className="text-xs text-neutral-500">This month</p>
+                  <p className="text-xs text-muted-foreground">This month</p>
                 </div>
                 <TrendingDown className="w-8 h-8 text-orange-500" />
               </div>
@@ -119,23 +119,23 @@ function DashboardClient() {
           </Card>
 
           {/* Total Income */}
-          <Card className="bg-neutral-900 border-neutral-700">
+          <Card className="bg-card border-border">
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-neutral-400 tracking-wider">
+                  <p className="text-xs text-muted-foreground tracking-wider">
                     TOTAL INCOME
                   </p>
                   <p className="text-2xl font-bold font-mono text-emerald-400">
                     {isLoading ? (
-                      <span className="animate-pulse text-neutral-600">
+                      <span className="animate-pulse text-muted-foreground">
                         ···
                       </span>
                     ) : (
                       formatCurrency(stats.monthIncome, currency)
                     )}
                   </p>
-                  <p className="text-xs text-neutral-500">This month</p>
+                  <p className="text-xs text-muted-foreground">This month</p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-emerald-400" />
               </div>
@@ -143,25 +143,25 @@ function DashboardClient() {
           </Card>
 
           {/* Transaction count */}
-          <Card className="bg-neutral-900 border-neutral-700">
+          <Card className="bg-card border-border">
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-neutral-400 tracking-wider">
+                  <p className="text-xs text-muted-foreground tracking-wider">
                     TRANSACTIONS
                   </p>
-                  <p className="text-2xl font-bold font-mono text-white">
+                  <p className="text-2xl font-bold font-mono text-foreground">
                     {isLoading ? (
-                      <span className="animate-pulse text-neutral-600">
+                      <span className="animate-pulse text-muted-foreground">
                         ···
                       </span>
                     ) : (
                       stats.transactionCount
                     )}
                   </p>
-                  <p className="text-xs text-neutral-500">Total recorded</p>
+                  <p className="text-xs text-muted-foreground">Total recorded</p>
                 </div>
-                <Calendar className="w-8 h-8 text-white" />
+                <Calendar className="w-8 h-8 text-foreground" />
               </div>
             </CardContent>
           </Card>
@@ -171,34 +171,34 @@ function DashboardClient() {
         <BudgetSummaryCard />
 
         {/* Roadmap progress */}
-        <Card className="bg-neutral-900 border-neutral-700">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
+            <CardTitle className="text-sm font-medium text-foreground tracking-wider">
               ROADMAP
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-emerald-500"></div>
-              <span className="text-neutral-300">
+              <span className="text-foreground">
                 E2 · Transaction management — <span className="text-emerald-400">done</span>
               </span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-emerald-500"></div>
-              <span className="text-neutral-300">
+              <span className="text-foreground">
                 E3 · Budget system — <span className="text-emerald-400">done</span>
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-neutral-600"></div>
-              <span className="text-neutral-500">
+              <div className="w-2 h-2 bg-accent"></div>
+              <span className="text-muted-foreground">
                 E4 · Savings goals — planned
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-neutral-600"></div>
-              <span className="text-neutral-500">
+              <div className="w-2 h-2 bg-accent"></div>
+              <span className="text-muted-foreground">
                 E5 · Debt tracking — planned
               </span>
             </div>
@@ -214,20 +214,20 @@ function DashboardLoading() {
     <AppLayout>
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="bg-neutral-900 border-neutral-700 md:col-span-2 lg:col-span-4">
+          <Card className="bg-card border-border md:col-span-2 lg:col-span-4">
             <CardContent>
               <div className="animate-pulse">
-                <div className="h-4 bg-neutral-700 w-1/4 mb-2"></div>
-                <div className="h-8 bg-neutral-700 w-1/2"></div>
+                <div className="h-4 bg-accent w-1/4 mb-2"></div>
+                <div className="h-8 bg-accent w-1/2"></div>
               </div>
             </CardContent>
           </Card>
           {[...Array(4)].map((_, i) => (
-            <Card key={i} className="bg-neutral-900 border-neutral-700">
+            <Card key={i} className="bg-card border-border">
               <CardContent>
                 <div className="animate-pulse">
-                  <div className="h-3 bg-neutral-700 w-1/2 mb-2"></div>
-                  <div className="h-8 bg-neutral-700 w-3/4"></div>
+                  <div className="h-3 bg-accent w-1/2 mb-2"></div>
+                  <div className="h-8 bg-accent w-3/4"></div>
                 </div>
               </CardContent>
             </Card>
