@@ -1,7 +1,7 @@
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
-import { Button } from "../ui/button";
 import { Feedback } from "./Feedback";
+import { OnboardingGate } from "./OnboardingGate";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -10,7 +10,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ children, showUserButton = true }: AppLayoutProps) {
   return (
-    <div className="flex h-screen bg-background text-white">
+    <div className="flex h-screen bg-background text-foreground">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <Header showUserButton={showUserButton} />
@@ -20,6 +20,8 @@ export function AppLayout({ children, showUserButton = true }: AppLayoutProps) {
       <span className="absolute right-2 bottom-2">
         <Feedback />
       </span>
+
+      <OnboardingGate />
     </div>
   );
 }

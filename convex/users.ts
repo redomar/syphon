@@ -103,9 +103,23 @@ export const updateProfile = mutation({
         v.literal("AUD")
       )
     ),
+    theme: v.optional(v.union(v.literal("light"), v.literal("dark"))),
     timezone: v.optional(v.string()),
     onboardingComplete: v.optional(v.boolean()),
     isDemoMode: v.optional(v.boolean()),
+    reminderDays: v.optional(v.number()),
+    payFrequency: v.optional(
+      v.union(
+        v.literal("weekly"),
+        v.literal("biweekly"),
+        v.literal("semimonthly"),
+        v.literal("monthly"),
+        v.literal("fourweekly")
+      )
+    ),
+    payDayOfMonth: v.optional(v.number()),
+    payAnchorDate: v.optional(v.number()),
+    payRecurringId: v.optional(v.id("recurring_transactions")),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();

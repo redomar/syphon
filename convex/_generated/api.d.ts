@@ -9,11 +9,20 @@
  */
 
 import type * as accounts from "../accounts.js";
+import type * as bills from "../bills.js";
 import type * as budgets from "../budgets.js";
 import type * as categories from "../categories.js";
+import type * as debts from "../debts.js";
+import type * as demo from "../demo.js";
 import type * as feedback from "../feedback.js";
+import type * as goals from "../goals.js";
 import type * as http from "../http.js";
+import type * as imports from "../imports.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as monthlyBudgets from "../monthlyBudgets.js";
+import type * as receipts from "../receipts.js";
+import type * as recurring from "../recurring.js";
+import type * as reports from "../reports.js";
 import type * as transactions from "../transactions.js";
 import type * as users from "../users.js";
 
@@ -25,11 +34,20 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   accounts: typeof accounts;
+  bills: typeof bills;
   budgets: typeof budgets;
   categories: typeof categories;
+  debts: typeof debts;
+  demo: typeof demo;
   feedback: typeof feedback;
+  goals: typeof goals;
   http: typeof http;
+  imports: typeof imports;
   "lib/auth": typeof lib_auth;
+  monthlyBudgets: typeof monthlyBudgets;
+  receipts: typeof receipts;
+  recurring: typeof recurring;
+  reports: typeof reports;
   transactions: typeof transactions;
   users: typeof users;
 }>;
@@ -61,14 +79,5 @@ export declare const internal: FilterApi<
 >;
 
 export declare const components: {
-  feedbackComponent: {
-    feedback: {
-      createFeedback: FunctionReference<
-        "mutation",
-        "internal",
-        { email: string; message: string; type?: "bug" | "feature" },
-        any
-      >;
-    };
-  };
+  feedbackComponent: import("../components/feedbackComponent/_generated/component.js").ComponentApi<"feedbackComponent">;
 };

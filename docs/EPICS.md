@@ -1,8 +1,24 @@
 # Syphon v1.0.0 - Epic Breakdown
 
 **Version:** 1.0.0
-**Last Updated:** 2025-11-08
+**Last Updated:** 2026-06-14
 **Total Epics:** 8
+
+---
+
+## Release Strategy (updated 2026-06-14)
+
+The `v1.0.0-rewrite` branch **is** v1.0.0 — the per-epic version numbers below
+(v0.3.0…v0.9.0) are historical planning labels, not separate releases. v1.0.0
+ships when epics E1–E8 are complete, then `v1.0.0-rewrite` is promoted to `master`
+and tagged `v1.0.0`.
+
+**Status:** E1–E3 ✅ done · E4–E8 ⬜ in progress (built linearly on `v1.0.0-rewrite`).
+
+**Added outside the original plan:** Bills + Cashflow (income vs. bills planner,
+merged from PR #8). This coexists with the E3 category Budget system as a separate
+lens; the two budgeting models converge during **E6** (bills fold into recurring
+expenses; income moves onto the budget period).
 
 ---
 

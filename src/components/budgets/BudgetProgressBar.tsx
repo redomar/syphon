@@ -21,7 +21,7 @@ export function BudgetProgressBar({
   return (
     <div
       className={cn(
-        "w-full rounded-full bg-neutral-800",
+        "w-full rounded-full bg-muted",
         size === "sm" ? "h-1.5" : "h-3"
       )}
     >

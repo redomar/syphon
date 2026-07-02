@@ -134,10 +134,10 @@ export default function BudgetsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-neutral-400 tracking-wider uppercase">
+            <p className="text-xs text-muted-foreground tracking-wider uppercase">
               Budgets
             </p>
-            <h2 className="text-2xl font-semibold text-white">
+            <h2 className="text-2xl font-semibold text-foreground">
               Budget planner
             </h2>
           </div>
@@ -149,12 +149,12 @@ export default function BudgetsPage() {
                   Create Budget
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-neutral-900 border-neutral-700 text-white max-w-lg">
+              <DialogContent className="bg-card border-border text-foreground max-w-lg">
                 <DialogHeader>
                   <DialogTitle className="text-xl font-semibold">
                     Create New Budget
                   </DialogTitle>
-                  <DialogDescription className="text-neutral-400">
+                  <DialogDescription className="text-muted-foreground">
                     Set up a new budget period to track your spending.
                   </DialogDescription>
                 </DialogHeader>
@@ -165,7 +165,7 @@ export default function BudgetsPage() {
             {budgets && budgets.length > 0 && (
               <Button
                 variant="outline"
-                className="border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-white gap-2"
+                className="border-border text-muted-foreground hover:bg-muted hover:text-foreground gap-2"
                 onMouseDown={() => {
                   // Use the most recent budget for template
                   setTemplateBudgetId(budgets[0]._id);
@@ -189,12 +189,12 @@ export default function BudgetsPage() {
 
         {/* Edit dialog */}
         <Dialog open={!!editingBudget} onOpenChange={handleEditDialogChange}>
-          <DialogContent className="bg-neutral-900 border-neutral-700 text-white max-w-lg">
+          <DialogContent className="bg-card border-border text-foreground max-w-lg">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold">
                 Edit Budget
               </DialogTitle>
-              <DialogDescription className="text-neutral-400">
+              <DialogDescription className="text-muted-foreground">
                 Update your budget details.
               </DialogDescription>
             </DialogHeader>
