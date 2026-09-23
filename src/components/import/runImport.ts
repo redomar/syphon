@@ -171,14 +171,14 @@ export async function runImport(convex: ConvexReactClient, input: RunInput, onPr
   }
 
   // 8. finish + profile (store real ids so the next import is one click)
-  const categoryMap: Record<string, string> = {};
-  for (const [value, choice] of Object.entries(input.catChoices)) {
-    categoryMap[value] = choice === CREATE ? created.get(NEW_PREFIX + tidyLabel(value)) ?? choice : choice;
-  }
-  const accountMap: Record<string, string> = {};
-  for (const [value, choice] of Object.entries(input.acctChoices)) {
-    accountMap[value] = choice === CREATE ? created.get(NEW_PREFIX + value) ?? choice : choice;
-  }
+  const categoryTargets = Object.entries(input.catChoices).map(([value, choice]) => ({
+    value,
+    target: choice === CREATE ? created.get(NEW_PREFIX + tidyLabel(value)) ?? choice : choice,
+  }));
+  const accountTargets = Object.entries(input.acctChoices).map(([value, choice]) => ({
+    value,
+    target: choice === CREATE ? created.get(NEW_PREFIX + value) ?? choice : choice,
+  }));
   await convex.mutation(api.imports.finishImport, {
     importId,
     excluded: summary.excluded,
@@ -189,8 +189,8 @@ export async function runImport(convex: ConvexReactClient, input: RunInput, onPr
       name: input.profileName,
       headerFingerprint: input.fingerprint,
       mapping: input.mapping,
-      categoryMap,
-      accountMap,
+      categoryTargets,
+      accountTargets,
     },
   });
 

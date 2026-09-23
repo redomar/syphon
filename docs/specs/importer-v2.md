@@ -1,6 +1,6 @@
 # Spec: Importer v2 (E9)
 
-**Status:** Draft, awaiting go-ahead · **Owner:** Mohamed · **Created:** 2026-09-23
+**Status:** Implemented 2026-09-23 on `feat/importer-v2` (see §10 for commits, §14 for deviations) · **Owner:** Mohamed · **Created:** 2026-09-23
 **Branch (when started):** `feat/importer-v2` off `v1.0.0-epics`, merged back into `v1.0.0-epics`
 **Supersedes:** E8.S1 CSV import (`src/routes/import.tsx`, `convex/imports.ts`)
 
@@ -232,15 +232,15 @@ A shared helper `convex/lib/amounts.ts` → `spendAmount(t)` (`isRefund ? -amoun
 
 Each story is its own commit, gated on `pnpm typecheck` + `pnpm test:once` + `pnpm build`, like E4–E8.
 
-- [ ] **E9.S1 Schema & helpers**: extend `transactions`/`imports`/`accounts`; add `import_profiles`, `merchant_rules`, indexes; `spendAmount` helper; TRANSFER in the validators. Existing 185 tests still green.
-- [ ] **E9.S2 Parsing & sniffing** (`src/lib/import/`): mapping model, auto-mapper with content sniffing, date-format inference, split/indicator amount modes. Tests: the reference-shaped fixture + a simple TSB-style + a split-column fixture.
-- [ ] **E9.S3 Merchant resolution**: cleaner + normalised key + rule lookup. Tests: ≥ 30 raw→merchant cases.
-- [ ] **E9.S4 Classification, dedupe & transfer pairing**: §7.3–7.5 as pure functions. Tests cover each outcome and the reference numbers (7,617 imported / 875+ transfers / 360 pairs / 1 pending / 1 zero) on an anonymised fixture.
-- [ ] **E9.S5 Batched write path**: `startImport`/`appendBatch`/`finishImport`, server-side dedupe, batched undo, rule learning, profile upsert. Convex tests, including resume after a partial import.
-- [ ] **E9.S6 Wizard UI**: steps 1–5, profile detection, value matching, review tabs, progress.
-- [ ] **E9.S7 Surfacing**: transactions list merchant/raw/transfer styling and filter; refund netting in reports and budgets.
-- [ ] **E9.S8 E2E + real-file dry run**: extend `e2e/flows.import.spec.ts` (rich + simple CSV). Manually import the real export on the dev backend (2026 slice first, then the full file) and reconcile totals against the reconciliation report.
-- [ ] **E9.S9 Docs**: update `docs/SCHEMA.md` and `docs/EPICS.md` (add E9, fix the stale E4–E8 status line); note the prod `convex deploy` requirement.
+- [x] `55e5f2c` **E9.S1 Schema & helpers**: extend `transactions`/`imports`/`accounts`; add `import_profiles`, `merchant_rules`, indexes; `spendAmount` helper; TRANSFER in the validators. Existing 185 tests still green.
+- [x] `d920d16` **E9.S2 Parsing & sniffing** (`src/lib/import/`): mapping model, auto-mapper with content sniffing, date-format inference, split/indicator amount modes. Tests: the reference-shaped fixture + a simple TSB-style + a split-column fixture.
+- [x] `17b0453` **E9.S3 Merchant resolution**: cleaner + normalised key + rule lookup. Tests: ≥ 30 raw→merchant cases.
+- [x] `a73291f` **E9.S4 Classification, dedupe & transfer pairing**: §7.3–7.5 as pure functions. Tests cover each outcome and the reference numbers (7,617 imported / 875+ transfers / 360 pairs / 1 pending / 1 zero) on an anonymised fixture.
+- [x] `7192998` **E9.S5 Batched write path**: `startImport`/`appendBatch`/`finishImport`, server-side dedupe, batched undo, rule learning, profile upsert. Convex tests, including resume after a partial import.
+- [x] `ea21c1f` **E9.S6 Wizard UI**: steps 1–5, profile detection, value matching, review tabs, progress.
+- [x] `2bac784` **E9.S7 Surfacing**: transactions list merchant/raw/transfer styling and filter; refund netting in reports and budgets.
+- [x] `c716eea` **E9.S8 E2E + real-file dry run**: extend `e2e/flows.import.spec.ts` (rich + simple CSV). Manually import the real export on the dev backend (2026 slice first, then the full file) and reconcile totals against the reconciliation report.
+- [x] **E9.S9 Docs**: update `docs/SCHEMA.md` and `docs/EPICS.md` (add E9, fix the stale E4–E8 status line); note the prod `convex deploy` requirement.
 
 ## 11. Acceptance criteria
 
@@ -262,3 +262,24 @@ Each story is its own commit, gated on `pnpm typecheck` + `pnpm test:once` + `pn
 - **Convex limits** on large undo and dedupe lookups. Mitigated by indexes and batching.
 - **Cleaner over-stripping** real names. Mitigated by the source tag, inline correction and manual rules.
 - **Prod deploy**: schema changes need `convex deploy` alongside the release (already pending for v1.0.0).
+
+## 14. Deviations from this spec (as built)
+
+- **Accounts stay strict.** Instead of making `lastFourDigits`/`balance` optional (§5), accounts
+  created during an import get `""` and `0`. Same outcome, no change to account UI or validation.
+- **Rule categories.** `merchant_rules.categoryId` exists and is applied when a file has no
+  category column, but nothing sets it yet (no UI). Learned rules store merchant names only.
+- **Duplicates are counted at write time**, not shown in Review (the server checks `dedupeKey`
+  per batch). The Review page says so; the done screen and history show the duplicate count.
+- **Editing an imported row** keeps `merchant` in step with the edited description. Editing a
+  TRANSFER leg in the form turns it into income/expense and un-pairs its partner (the form has
+  no transfer option).
+- **"All" in the ledger hides transfers**; they have their own filter tab.
+- **Manual rules come from the Review step only.** Renaming a merchant later on the Transactions
+  page updates that row but doesn't create a rule yet.
+- **No `matchType` on rules.** Lookup is always exact key first, then longest prefix on a word
+  boundary (`RuleIndex`), so the field wasn't needed.
+- **Real-file dry run** (E9.S8) was done up to the Review step in the browser (no write, to keep
+  personal data off the dev backend). The full write path was exercised at the same scale with a
+  synthetic 8,500-row file in the same layout. See the final report for numbers.
+

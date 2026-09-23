@@ -162,7 +162,12 @@ export default function ImportPage() {
       setMapping(m);
       setNotes([]);
       setProfileName(profile.name);
-      fillChoices(m, rows, profile);
+      const toMap = (pairs?: { value: string; target: string }[], legacy?: Record<string, string>) =>
+        pairs ? Object.fromEntries(pairs.map((p) => [p.value, p.target])) : legacy ?? {};
+      fillChoices(m, rows, {
+        categoryMap: toMap(profile.categoryTargets, profile.categoryMap),
+        accountMap: toMap(profile.accountTargets, profile.accountMap),
+      });
       setStep("review");
       return;
     }

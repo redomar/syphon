@@ -13,7 +13,7 @@ const AGGREGATOR = [
   `2026-01-16,E2E Shop,E2E SHOP ${TOKEN},-30.00,Shopping,,E2E Bank,E2E Current,,`,
   `2026-01-17,E2E Shop,E2E SHOP ${TOKEN},30.00,Shopping,,E2E Bank,E2E Current,,`,
   `2026-01-18,E2E Current,TO SAVER ${TOKEN},-200.00,Internal Transfers,,E2E Bank,E2E Current,,`,
-  `2026-01-18,E2E Saver,FROM CURRENT ${TOKEN},200.00,Internal Transfers,,E2E Bank,E2E Saver,,`,
+  `2026-01-18,E2E Saver,FROM CURRENT ${TOKEN},200.00,Internal Transfers,,E2E Bank,E2E Saver™,,`,
   `2026-01-19,E2E Cafe,SQ *E2E CAFE ${TOKEN},-4.00,Eating Out,,E2E Bank,E2E Current,Pending,`,
 ].join("\n");
 

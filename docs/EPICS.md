@@ -1,8 +1,8 @@
 # Syphon v1.0.0 - Epic Breakdown
 
 **Version:** 1.0.0
-**Last Updated:** 2026-06-14
-**Total Epics:** 8
+**Last Updated:** 2026-09-23
+**Total Epics:** 9
 
 ---
 
@@ -13,7 +13,8 @@ The `v1.0.0-rewrite` branch **is** v1.0.0 — the per-epic version numbers below
 ships when epics E1–E8 are complete, then `v1.0.0-rewrite` is promoted to `master`
 and tagged `v1.0.0`.
 
-**Status:** E1–E3 ✅ done · E4–E8 ⬜ in progress (built linearly on `v1.0.0-rewrite`).
+**Status:** E1–E8 ✅ done (PR #9, see `docs/V1.0.0-SUMMARY.md`) · E9 Importer v2 ✅ done on
+`feat/importer-v2` (spec + tracking: `docs/specs/importer-v2.md`).
 
 **Added outside the original plan:** Bills + Cashflow (income vs. bills planner,
 merged from PR #8). This coexists with the E3 category Budget system as a separate
@@ -34,6 +35,7 @@ expenses; income moves onto the budget period).
 | **E6** | Recurring Transactions | v0.7.0 | 🟡 High | 5-7 days | 5 |
 | **E7** | Analytics & Reports | v0.8.0 | 🟢 Medium | 5-7 days | 4 |
 | **E8** | Polish & Launch | v0.9.0 | 🟢 Medium | 5-7 days | 5 |
+| **E9** | Importer v2 (merchants, transfers, refunds, batched) | v1.0.0 | 🟡 High | 1 day | 9 |
 
 **Total Estimated Duration:** 35-49 days (7-10 weeks)
 
@@ -265,6 +267,21 @@ expenses; income moves onto the budget period).
 - Onboarding wizard
 - Bill alerts
 - Pay schedule tracker
+
+---
+
+## E9: Importer v2 (added 2026-09-23)
+
+Replaces the E8.S1 importer after a real 8.5k-row aggregator export exposed data loss
+(income booked as spending, blank-merchant rows dropped, categories discarded, transfers
+double-counted). Full spec, decisions and tracking: **`docs/specs/importer-v2.md`**.
+
+### Deliverables
+- Content-sniffing auto-mapper; signed / paid-in-out / CR-DR amount layouts; dmy/mdy inference
+- Merchant vs raw bank text kept separately; merchant cleaner + learned/manual merchant rules
+- TRANSFER type with paired legs; refunds net against category spend
+- Value matching for categories/accounts; import profiles by header fingerprint
+- Batched, idempotent write path (dedupe keys) with batched undo; review step with no silent drops
 
 ---
 

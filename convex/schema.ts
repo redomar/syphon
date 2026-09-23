@@ -303,8 +303,13 @@ export default defineSchema({
     name: v.string(),
     headerFingerprint: v.string(),
     mapping: v.any(), // ImportMapping (src/lib/import/types.ts)
-    categoryMap: v.record(v.string(), v.string()), // CSV value -> categoryId | "__exclude__" | "__transfer__" | "__none__"
-    accountMap: v.record(v.string(), v.string()), // CSV value -> accountId
+    // CSV value -> categoryId | "__exclude__" | "__transfer__" | "__none__". Stored as pairs, not
+    // objects, because CSV values ("Barclaycard™") aren't valid Convex field names.
+    categoryTargets: v.optional(v.array(v.object({ value: v.string(), target: v.string() }))),
+    accountTargets: v.optional(v.array(v.object({ value: v.string(), target: v.string() }))),
+    // legacy (pre-fix) object maps; read-only fallback
+    categoryMap: v.optional(v.record(v.string(), v.string())),
+    accountMap: v.optional(v.record(v.string(), v.string())),
     lastUsedAt: v.number(),
     createdAt: v.number(),
     updatedAt: v.number(),

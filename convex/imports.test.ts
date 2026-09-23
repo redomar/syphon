@@ -125,8 +125,8 @@ describe("batched import", () => {
       name: "Aggregator export",
       headerFingerprint: "fp1",
       mapping: { date: 0 },
-      categoryMap: { "Eating Out": "__none__" },
-      accountMap: {},
+      categoryTargets: [{ value: "Eating Out", target: "__none__" }],
+      accountTargets: [{ value: "Barclaycard™", target: "__none__" }], // non-ASCII CSV value
     };
     const a = await start(asUser);
     const { profileId } = await asUser.mutation(api.imports.finishImport, {
@@ -135,11 +135,12 @@ describe("batched import", () => {
     const b = await start(asUser);
     const again = await asUser.mutation(api.imports.finishImport, {
       importId: b, excluded: 0, skipped: 0, transfers: 0, refunds: 0,
-      profile: { ...profile, categoryMap: { "Eating Out": "__exclude__" } },
+      profile: { ...profile, categoryTargets: [{ value: "Eating Out", target: "__exclude__" }] },
     });
     expect(again.profileId).toBe(profileId);
     const saved = await asUser.query(api.importProfiles.getByFingerprint, { headerFingerprint: "fp1" });
-    expect(saved?.categoryMap).toEqual({ "Eating Out": "__exclude__" });
+    expect(saved?.categoryTargets).toEqual([{ value: "Eating Out", target: "__exclude__" }]);
+    expect(saved?.accountTargets).toEqual([{ value: "Barclaycard™", target: "__none__" }]);
   });
 
   test("requires authentication", async () => {

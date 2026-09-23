@@ -160,12 +160,13 @@ export const linkTransfers = mutation({
   },
 });
 
+const pair = v.object({ value: v.string(), target: v.string() });
 const profileArg = v.object({
   name: v.string(),
   headerFingerprint: v.string(),
   mapping: v.any(),
-  categoryMap: v.record(v.string(), v.string()),
-  accountMap: v.record(v.string(), v.string()),
+  categoryTargets: v.array(pair),
+  accountTargets: v.array(pair),
 });
 
 /** Marks the import complete with final client-side counts and remembers the profile. */
@@ -192,7 +193,13 @@ export const finishImport = mutation({
         )
         .first();
       if (existing) {
-        await ctx.db.patch(existing._id, { ...args.profile, lastUsedAt: now, updatedAt: now });
+        await ctx.db.patch(existing._id, {
+          ...args.profile,
+          categoryMap: undefined,
+          accountMap: undefined,
+          lastUsedAt: now,
+          updatedAt: now,
+        });
         profileId = existing._id;
       } else {
         profileId = await ctx.db.insert("import_profiles", {
