@@ -1,8 +1,15 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireUser } from "./lib/auth";
+import { sumIncome, sumSpend } from "./lib/amounts";
 
+// Manual create/update stays INCOME/EXPENSE; TRANSFER rows come from imports (E9).
 const transactionType = v.union(v.literal("INCOME"), v.literal("EXPENSE"));
+const anyTransactionType = v.union(
+  v.literal("INCOME"),
+  v.literal("EXPENSE"),
+  v.literal("TRANSFER")
+);
 
 /**
  * Creates a new transaction for the authenticated user.
@@ -129,7 +136,7 @@ export const deleteTransaction = mutation({
  */
 export const getTransactions = query({
   args: {
-    type: v.optional(transactionType),
+    type: v.optional(anyTransactionType),
     categoryId: v.optional(v.id("categories")),
     accountId: v.optional(v.id("accounts")),
     dateFrom: v.optional(v.number()),
@@ -212,13 +219,8 @@ export const getDashboardStats = query({
       )
       .collect();
 
-    const monthIncomeCents = monthTransactions
-      .filter((t) => t.type === "INCOME")
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    const monthExpensesCents = monthTransactions
-      .filter((t) => t.type === "EXPENSE")
-      .reduce((sum, t) => sum + t.amount, 0);
+    const monthIncomeCents = sumIncome(monthTransactions);
+    const monthExpensesCents = sumSpend(monthTransactions);
 
     const transactionCount = await ctx.db
       .query("transactions")

@@ -84,7 +84,8 @@ export default defineSchema({
     .index("by_user_active", ["userId", "isArchived"]),
   transactions: defineTable({
     userId: v.id("users"),
-    type: v.union(v.literal("INCOME"), v.literal("EXPENSE")),
+    // E9: TRANSFER = money moving between the user's own accounts (excluded from totals).
+    type: v.union(v.literal("INCOME"), v.literal("EXPENSE"), v.literal("TRANSFER")),
     amount: v.number(), // In smallest currency unit (e.g., cents)
     description: v.string(),
     date: v.number(), // Unix timestamp ms
@@ -93,6 +94,19 @@ export default defineSchema({
     recurringTemplateId: v.optional(v.id("recurring_transactions")),
     importId: v.optional(v.id("imports")),
     isDemoData: v.boolean(),
+    // E9 importer v2 — all optional; most are stored for future use and not yet shown.
+    merchant: v.optional(v.string()), // clean name, e.g. "Eis Cafe"
+    merchantSource: v.optional(
+      v.union(v.literal("csv"), v.literal("rule"), v.literal("cleaner"), v.literal("raw"))
+    ),
+    rawDescription: v.optional(v.string()), // exact bank text
+    externalCategory: v.optional(v.string()), // source's own category label
+    status: v.optional(v.union(v.literal("posted"), v.literal("pending"))),
+    isRefund: v.optional(v.boolean()), // EXPENSE that reduces category spend
+    direction: v.optional(v.union(v.literal("in"), v.literal("out"))), // for TRANSFER legs
+    transferPairId: v.optional(v.id("transactions")),
+    dedupeKey: v.optional(v.string()),
+    sourceRow: v.optional(v.record(v.string(), v.string())), // original CSV row
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -100,7 +114,9 @@ export default defineSchema({
     .index("by_user_and_date", ["userId", "date"])
     .index("by_user_and_type", ["userId", "type"])
     .index("by_user_and_category", ["userId", "categoryId"])
-    .index("by_user_and_account", ["userId", "accountId"]),
+    .index("by_user_and_account", ["userId", "accountId"])
+    .index("by_user_and_dedupe", ["userId", "dedupeKey"])
+    .index("by_user_and_import", ["userId", "importId"]),
   budgets: defineTable({
     userId: v.id("users"),
     name: v.string(),
@@ -261,9 +277,51 @@ export default defineSchema({
   imports: defineTable({
     userId: v.id("users"),
     fileName: v.string(),
-    rowCount: v.number(),
+    rowCount: v.number(), // rows actually inserted
+    // E9: batched imports
+    profileId: v.optional(v.id("import_profiles")),
+    status: v.optional(
+      v.union(v.literal("in_progress"), v.literal("complete"), v.literal("failed"))
+    ),
+    counts: v.optional(
+      v.object({
+        total: v.number(),
+        inserted: v.number(),
+        duplicate: v.number(),
+        excluded: v.number(),
+        skipped: v.number(),
+        transfers: v.number(),
+        refunds: v.number(),
+      })
+    ),
+    mappingSnapshot: v.optional(v.any()),
     createdAt: v.number(),
   }).index("by_user", ["userId"]),
+  // E9: remembered per-source import settings, matched by header fingerprint.
+  import_profiles: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    headerFingerprint: v.string(),
+    mapping: v.any(), // ImportMapping (src/lib/import/types.ts)
+    categoryMap: v.record(v.string(), v.string()), // CSV value -> categoryId | "__exclude__" | "__transfer__" | "__none__"
+    accountMap: v.record(v.string(), v.string()), // CSV value -> accountId
+    lastUsedAt: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_user_and_fingerprint", ["userId", "headerFingerprint"]),
+  // E9: raw-description key -> clean merchant (learned from rich imports or set by hand).
+  merchant_rules: defineTable({
+    userId: v.id("users"),
+    pattern: v.string(),
+    merchant: v.string(),
+    categoryId: v.optional(v.id("categories")),
+    source: v.union(v.literal("learned"), v.literal("manual")),
+    hits: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_and_pattern", ["userId", "pattern"]),
   receipts: defineTable({
     userId: v.id("users"),
     transactionId: v.optional(v.id("transactions")),

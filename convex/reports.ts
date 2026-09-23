@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
 import { requireUser } from "./lib/auth";
+import { spendAmount, sumIncome, sumSpend } from "./lib/amounts";
 
 /** Returns the [start, end) epoch-ms bounds for `n` months ending this month. */
 function monthBuckets(months: number): { key: string; start: number; end: number }[] {
@@ -36,12 +37,8 @@ export const getIncomeExpenseByMonth = query({
 
     return buckets.map((b) => {
       const inBucket = txns.filter((t) => t.date >= b.start && t.date < b.end);
-      const income = inBucket
-        .filter((t) => t.type === "INCOME")
-        .reduce((s, t) => s + t.amount, 0);
-      const expense = inBucket
-        .filter((t) => t.type === "EXPENSE")
-        .reduce((s, t) => s + t.amount, 0);
+      const income = sumIncome(inBucket);
+      const expense = sumSpend(inBucket);
       return { month: b.key, income, expense, net: income - expense };
     });
   },
@@ -67,14 +64,15 @@ export const getSpendingByCategory = query({
     let uncategorized = 0;
     for (const t of expenses) {
       if (t.categoryId) {
-        byCategory.set(t.categoryId, (byCategory.get(t.categoryId) ?? 0) + t.amount);
+        byCategory.set(t.categoryId, (byCategory.get(t.categoryId) ?? 0) + spendAmount(t));
       } else {
-        uncategorized += t.amount;
+        uncategorized += spendAmount(t);
       }
     }
 
     const result: { categoryId: string | null; name: string; color: string; total: number }[] = [];
     for (const [categoryId, total] of byCategory) {
+      if (total <= 0) continue; // fully refunded
       const cat = await ctx.db.get(categoryId as never);
       result.push({
         categoryId,
@@ -137,8 +135,8 @@ export const getNetWorthTrend = query({
     // net cashflow per bucket
     const netByBucket = buckets.map((b) => {
       const inBucket = txns.filter((t) => t.date >= b.start && t.date < b.end);
-      const income = inBucket.filter((t) => t.type === "INCOME").reduce((s, t) => s + t.amount, 0);
-      const expense = inBucket.filter((t) => t.type === "EXPENSE").reduce((s, t) => s + t.amount, 0);
+      const income = sumIncome(inBucket);
+      const expense = sumSpend(inBucket);
       return income - expense;
     });
 

@@ -131,7 +131,14 @@ export default function TransactionsPage() {
                 defaultValues={
                   editingTransaction
                     ? {
-                        type: editingTransaction.type,
+                        // The form has no TRANSFER option; saving converts a transfer
+                        // leg back to income/expense by its direction.
+                        type:
+                          editingTransaction.type === "TRANSFER"
+                            ? editingTransaction.direction === "in"
+                              ? "INCOME"
+                              : "EXPENSE"
+                            : editingTransaction.type,
                         amount: editingTransaction.amount / 100,
                         description: editingTransaction.description,
                         date: new Date(editingTransaction.date),

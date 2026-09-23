@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireUser } from "./lib/auth";
+import { spendAmount } from "./lib/amounts";
 import type { Id } from "./_generated/dataModel";
 import { expandOccurrences } from "./recurring";
 
@@ -341,7 +342,7 @@ export const getBudgetProgress = query({
       if (tx.categoryId) {
         spentByCategory.set(
           tx.categoryId,
-          (spentByCategory.get(tx.categoryId) ?? 0) + tx.amount
+          (spentByCategory.get(tx.categoryId) ?? 0) + spendAmount(tx)
         );
       }
     }
@@ -378,7 +379,7 @@ export const getBudgetProgress = query({
 
     return allocations.map((alloc) => {
       const category = alloc.categoryId;
-      const spentAmount = spentByCategory.get(category) ?? 0;
+      const spentAmount = Math.max(0, spentByCategory.get(category) ?? 0); // refunds can't push below 0
       const projectedAmount = projectedByCategory.get(category) ?? 0;
       const totalCommitted = spentAmount + projectedAmount;
       const remainingAmount = alloc.allocatedAmount - totalCommitted;
@@ -456,7 +457,7 @@ export const getActiveBudgetSummary = query({
       if (tx.categoryId) {
         spentByCategory.set(
           tx.categoryId,
-          (spentByCategory.get(tx.categoryId) ?? 0) + tx.amount
+          (spentByCategory.get(tx.categoryId) ?? 0) + spendAmount(tx)
         );
       }
     }
@@ -466,7 +467,7 @@ export const getActiveBudgetSummary = query({
       0
     );
     const totalSpent = allocations.reduce(
-      (sum, a) => sum + (spentByCategory.get(a.categoryId) ?? 0),
+      (sum, a) => sum + Math.max(0, spentByCategory.get(a.categoryId) ?? 0),
       0
     );
     const overallPercentage =
