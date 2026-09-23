@@ -140,7 +140,7 @@ export default function TransactionsPage() {
                               : "EXPENSE"
                             : editingTransaction.type,
                         amount: editingTransaction.amount / 100,
-                        description: editingTransaction.description,
+                        description: editingTransaction.merchant ?? editingTransaction.description,
                         date: new Date(editingTransaction.date),
                         categoryId: editingTransaction.categoryId ?? undefined,
                         accountId: editingTransaction.accountId ?? undefined,

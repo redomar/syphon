@@ -38,7 +38,7 @@ export type Transaction = FunctionReturnType<
 >[0];
 
 type DateRange = "7d" | "30d" | "90d" | "all";
-type TypeFilter = "ALL" | "INCOME" | "EXPENSE";
+type TypeFilter = "ALL" | "INCOME" | "EXPENSE" | "TRANSFER";
 
 interface TransactionListProps {
   transactions: Transaction[] | undefined;
@@ -90,7 +90,8 @@ export function TransactionList({
         : startOfDay(subDays(now, dateRange === "7d" ? 7 : dateRange === "30d" ? 30 : 90)).getTime();
 
     return transactions.filter((t) => {
-      if (typeFilter !== "ALL" && t.type !== typeFilter) return false;
+      // "All" hides transfers between the user's own accounts (E9); they have their own tab.
+      if (typeFilter === "ALL" ? t.type === "TRANSFER" : t.type !== typeFilter) return false;
       if (dateRange !== "all" && t.date < cutoff) return false;
       if (categoryFilter !== "__all__" && t.categoryId !== categoryFilter)
         return false;
@@ -112,13 +113,22 @@ export function TransactionList({
         ),
       },
       {
-        accessorKey: "description",
+        id: "description",
+        accessorFn: (t) => t.merchant ?? t.description,
         header: "Description",
-        cell: ({ getValue }) => (
-          <span className="font-medium text-foreground">
-            {getValue() as string}
-          </span>
-        ),
+        cell: ({ row }) => {
+          const t = row.original;
+          return (
+            <span className="font-medium text-foreground" title={t.rawDescription ?? undefined}>
+              {t.merchant ?? t.description}
+              {t.isRefund && (
+                <span className="ml-2 rounded bg-sky-500/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-sky-400">
+                  refund
+                </span>
+              )}
+            </span>
+          );
+        },
       },
       {
         accessorKey: "categoryId",
@@ -159,17 +169,28 @@ export function TransactionList({
         accessorKey: "amount",
         header: () => <div className="text-right">Amount</div>,
         cell: ({ row }) => {
-          const isIncome = row.original.type === "INCOME";
+          const t = row.original;
+          if (t.type === "TRANSFER") {
+            return (
+              <div className="text-right">
+                <span className="font-medium font-mono text-muted-foreground" title="Transfer between your accounts">
+                  ⇄ {t.direction === "in" ? "+" : "-"}
+                  {formatCurrency(t.amount)}
+                </span>
+              </div>
+            );
+          }
+          const moneyIn = t.type === "INCOME" || t.isRefund;
           return (
             <div className="text-right">
               <span
                 className={cn(
                   "font-medium font-mono",
-                  isIncome ? "text-emerald-400" : "text-orange-400"
+                  t.isRefund ? "text-sky-400" : moneyIn ? "text-emerald-400" : "text-orange-400"
                 )}
               >
-                {isIncome ? "+" : "-"}
-                {formatCurrency(row.original.amount)}
+                {moneyIn ? "+" : "-"}
+                {formatCurrency(t.amount)}
               </span>
             </div>
           );
@@ -223,7 +244,7 @@ export function TransactionList({
       <div className="flex flex-wrap gap-3 mb-4">
         {/* Type filter */}
         <div className="flex rounded-md overflow-hidden border border-border">
-          {(["ALL", "INCOME", "EXPENSE"] as TypeFilter[]).map((t) => (
+          {(["ALL", "INCOME", "EXPENSE", "TRANSFER"] as TypeFilter[]).map((t) => (
             <button
               key={t}
               onMouseDown={() => setTypeFilter(t)}
@@ -234,7 +255,7 @@ export function TransactionList({
                   : "bg-muted text-muted-foreground hover:text-foreground"
               )}
             >
-              {t === "ALL" ? "All" : t === "INCOME" ? "Income" : "Expenses"}
+              {t === "ALL" ? "All" : t === "INCOME" ? "Income" : t === "EXPENSE" ? "Expenses" : "Transfers"}
             </button>
           ))}
         </div>

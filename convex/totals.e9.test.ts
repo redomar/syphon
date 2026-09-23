@@ -79,3 +79,45 @@ describe("E9 totals: refunds and transfers", () => {
     expect(progress[0].spentAmount).toBe(3000);
   });
 });
+
+describe("E9 editing imported rows", () => {
+  test("editing keeps merchant in step and un-pairs an edited transfer", async () => {
+    const { t, asUser, userId } = await setupTestWithUser();
+    const ids = await t.run(async (db) => {
+      const base = { userId, date: now, isDemoData: false, createdAt: now, updatedAt: now };
+      const a = await db.db.insert("transactions", { ...base, type: "EXPENSE", amount: 390, description: "Eis Cafe", merchant: "Eis Cafe", rawDescription: "SQ *EIS CAFE" });
+      const out = await db.db.insert("transactions", { ...base, type: "TRANSFER", amount: 500, description: "To TSB", direction: "out" });
+      return { a, out };
+    });
+    await asUser.mutation(api.transactions.updateTransaction, {
+      transactionId: ids.a, type: "EXPENSE", amount: 390, description: "Eis Café", date: now,
+    });
+    await asUser.mutation(api.transactions.updateTransaction, {
+      transactionId: ids.out, type: "EXPENSE", amount: 500, description: "Rent", date: now,
+    });
+    const all = await asUser.query(api.transactions.getTransactions, {});
+    const cafe = all.find((x) => x._id === ids.a)!;
+    expect(cafe.merchant).toBe("Eis Café");
+    expect(cafe.rawDescription).toBe("SQ *EIS CAFE");
+    const rent = all.find((x) => x._id === ids.out)!;
+    expect(rent.type).toBe("EXPENSE");
+    expect(rent.direction).toBeUndefined();
+  });
+});
+
+describe("E9 transfer legs", () => {
+  test("deleting one leg unlinks the other", async () => {
+    const { t, asUser, userId } = await setupTestWithUser();
+    const { a, b } = await t.run(async (db) => {
+      const base = { userId, date: now, isDemoData: false, createdAt: now, updatedAt: now, amount: 500 };
+      const a = await db.db.insert("transactions", { ...base, type: "TRANSFER", description: "Out", direction: "out" });
+      const b = await db.db.insert("transactions", { ...base, type: "TRANSFER", description: "In", direction: "in", transferPairId: a });
+      await db.db.patch(a, { transferPairId: b });
+      return { a, b };
+    });
+    await asUser.mutation(api.transactions.deleteTransaction, { transactionId: a });
+    const [left] = await asUser.query(api.transactions.getTransactions, {});
+    expect(left._id).toBe(b);
+    expect(left.transferPairId).toBeUndefined();
+  });
+});

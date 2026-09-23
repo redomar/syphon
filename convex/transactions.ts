@@ -1,7 +1,17 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, type MutationCtx } from "./_generated/server";
+import type { Doc } from "./_generated/dataModel";
 import { requireUser } from "./lib/auth";
 import { sumIncome, sumSpend } from "./lib/amounts";
+
+/** Clears the other leg's link when a transfer leg is edited or deleted (E9). */
+async function unlinkPartner(ctx: MutationCtx, t: Doc<"transactions">) {
+  if (t.type !== "TRANSFER" || !t.transferPairId) return;
+  const partner = await ctx.db.get(t.transferPairId);
+  if (partner && partner.transferPairId === t._id) {
+    await ctx.db.patch(partner._id, { transferPairId: undefined });
+  }
+}
 
 // Manual create/update stays INCOME/EXPENSE; TRANSFER rows come from imports (E9).
 const transactionType = v.union(v.literal("INCOME"), v.literal("EXPENSE"));
@@ -99,10 +109,15 @@ export const updateTransaction = mutation({
       }
     }
 
+    await unlinkPartner(ctx, transaction);
     await ctx.db.patch(args.transactionId, {
       type: args.type,
       amount: args.amount,
       description: args.description,
+      // imported rows display `merchant`; keep it in step with the user's edit
+      ...(transaction.merchant !== undefined && { merchant: args.description }),
+      // an edited transfer leg is no longer a transfer
+      ...(transaction.type === "TRANSFER" && { transferPairId: undefined, direction: undefined }),
       date: args.date,
       categoryId: args.categoryId,
       accountId: args.accountId,
@@ -126,6 +141,7 @@ export const deleteTransaction = mutation({
       throw new Error("Transaction not found");
     }
 
+    await unlinkPartner(ctx, transaction);
     await ctx.db.delete(args.transactionId);
   },
 });
