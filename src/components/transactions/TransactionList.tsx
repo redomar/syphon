@@ -37,7 +37,13 @@ export type Transaction = FunctionReturnType<
   typeof api.transactions.getTransactions
 >[0];
 
-type DateRange = "7d" | "30d" | "90d" | "all";
+export type DateRange = "7d" | "30d" | "90d" | "all";
+
+/** Start of the range in epoch ms, or undefined for all time. */
+export function rangeStart(range: DateRange, now = Date.now()): number | undefined {
+  if (range === "all") return undefined;
+  return startOfDay(subDays(now, range === "7d" ? 7 : range === "30d" ? 30 : 90)).getTime();
+}
 type TypeFilter = "ALL" | "INCOME" | "EXPENSE" | "TRANSFER";
 
 interface TransactionListProps {
@@ -46,6 +52,10 @@ interface TransactionListProps {
   accounts: { _id: Id<"accounts">; name: string; lastFourDigits: string }[];
   onEdit: (transaction: Transaction) => void;
   onDelete: (transactionId: Id<"transactions">) => void;
+  /** Lets the page fetch only the selected range from the server. */
+  onDateRangeChange?: (range: DateRange) => void;
+  /** True when the server capped the result (more rows exist in this range). */
+  truncated?: boolean;
 }
 
 function formatCurrency(amount: number) {
@@ -61,13 +71,19 @@ export function TransactionList({
   accounts,
   onEdit,
   onDelete,
+  onDateRangeChange,
+  truncated,
 }: TransactionListProps) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: "date", desc: true },
   ]);
   const [deleteId, setDeleteId] = useState<Id<"transactions"> | null>(null);
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("ALL");
-  const [dateRange, setDateRange] = useState<DateRange>("30d");
+  const [dateRange, setDateRangeState] = useState<DateRange>("30d");
+  const setDateRange = (r: DateRange) => {
+    setDateRangeState(r);
+    onDateRangeChange?.(r);
+  };
   const [categoryFilter, setCategoryFilter] = useState<string>("__all__");
   const [accountFilter, setAccountFilter] = useState<string>("__all__");
 
@@ -410,6 +426,12 @@ export function TransactionList({
           </table>
         )}
       </div>
+
+      {truncated && (
+        <p className="text-xs text-amber-400 mt-2 px-1">
+          Showing the newest {transactions?.length.toLocaleString()} transactions in this range. Pick a shorter range to see older ones.
+        </p>
+      )}
 
       {/* Summary row */}
       {!isLoading && !isEmpty && (

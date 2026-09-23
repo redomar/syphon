@@ -121,3 +121,21 @@ describe("E9 transfer legs", () => {
     expect(left.transferPairId).toBeUndefined();
   });
 });
+
+describe("getTransactions limits", () => {
+  test("caps results and filters server-side before the cap", async () => {
+    const { t, asUser, userId } = await setupTestWithUser();
+    await t.run(async (db) => {
+      for (let i = 0; i < 30; i++) {
+        await db.db.insert("transactions", {
+          userId, type: i % 3 === 0 ? "INCOME" : "EXPENSE", amount: 100, description: `t${i}`,
+          date: now - i * 1000, isDemoData: false, createdAt: now, updatedAt: now,
+        });
+      }
+    });
+    expect(await asUser.query(api.transactions.getTransactions, { limit: 5 })).toHaveLength(5);
+    const income = await asUser.query(api.transactions.getTransactions, { type: "INCOME", limit: 100 });
+    expect(income).toHaveLength(10);
+    expect(await asUser.query(api.transactions.getTransactions, { limit: 99999 })).toHaveLength(30);
+  });
+});

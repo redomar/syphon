@@ -4,6 +4,8 @@ import {
   type TransactionFormValues,
   TransactionList,
   type Transaction,
+  type DateRange,
+  rangeStart,
 } from "@/components/transactions";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +32,14 @@ export default function TransactionsPage() {
   const updateTransaction = useMutation(api.transactions.updateTransaction);
   const deleteTransaction = useMutation(api.transactions.deleteTransaction);
 
-  const transactions = useQuery(api.transactions.getTransactions, {});
+  // Fetch only the selected range; Convex caps results (see getTransactions).
+  const [range, setRange] = useState<DateRange>("30d");
+  const [rangeFrom] = useState(() => Date.now());
+  const LIMIT = 5000;
+  const transactions = useQuery(api.transactions.getTransactions, {
+    dateFrom: rangeStart(range, rangeFrom),
+    limit: LIMIT,
+  });
   const categories = useQuery(api.categories.getCategories, {
     includeArchived: false,
   });
@@ -159,6 +168,8 @@ export default function TransactionsPage() {
           accounts={activeAccounts ?? []}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onDateRangeChange={setRange}
+          truncated={transactions?.length === LIMIT}
         />
       </div>
     </AppLayout>

@@ -4,6 +4,8 @@ import type { Doc } from "./_generated/dataModel";
 import { requireUser } from "./lib/auth";
 import { sumIncome, sumSpend } from "./lib/amounts";
 
+const MAX_RESULTS = 5000;
+
 /** Clears the other leg's link when a transfer leg is edited or deleted (E9). */
 async function unlinkPartner(ctx: MutationCtx, t: Doc<"transactions">) {
   if (t.type !== "TRANSFER" || !t.transferPairId) return;
@@ -157,11 +159,14 @@ export const getTransactions = query({
     accountId: v.optional(v.id("accounts")),
     dateFrom: v.optional(v.number()),
     dateTo: v.optional(v.number()),
+    limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
+    // Convex return arrays max out at 8192 items; imports can exceed that.
+    const limit = Math.min(Math.max(args.limit ?? MAX_RESULTS, 1), MAX_RESULTS);
 
-    let transactions = await ctx.db
+    const transactions = await ctx.db
       .query("transactions")
       .withIndex("by_user_and_date", (q) => {
         const base = q.eq("userId", user._id);
@@ -177,19 +182,14 @@ export const getTransactions = query({
         return base;
       })
       .order("desc")
-      .collect();
-
-    if (args.type) {
-      transactions = transactions.filter((t) => t.type === args.type);
-    }
-    if (args.categoryId) {
-      transactions = transactions.filter(
-        (t) => t.categoryId === args.categoryId
-      );
-    }
-    if (args.accountId) {
-      transactions = transactions.filter((t) => t.accountId === args.accountId);
-    }
+      .filter((q) =>
+        q.and(
+          args.type ? q.eq(q.field("type"), args.type) : true,
+          args.categoryId ? q.eq(q.field("categoryId"), args.categoryId) : true,
+          args.accountId ? q.eq(q.field("accountId"), args.accountId) : true
+        )
+      )
+      .take(limit);
 
     return transactions;
   },
