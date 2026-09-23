@@ -94,7 +94,7 @@ export function TransactionForm({
           name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+              <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Type
               </FormLabel>
               <div className="grid grid-cols-2 gap-3">
@@ -103,12 +103,12 @@ export function TransactionForm({
                     key={t}
                     onMouseDown={() => field.onChange(t)}
                     className={cn(
-                      "cursor-pointer rounded-md border p-3 text-center transition-all hover:bg-neutral-800",
+                      "cursor-pointer rounded-md border p-3 text-center transition-all hover:bg-muted",
                       field.value === t
                         ? t === "EXPENSE"
                           ? "border-orange-500 bg-orange-500/10 text-orange-400"
                           : "border-emerald-500 bg-emerald-500/10 text-emerald-400"
-                        : "border-neutral-700 text-neutral-400"
+                        : "border-border text-muted-foreground"
                     )}
                   >
                     <span className="text-sm font-medium capitalize">
@@ -128,7 +128,7 @@ export function TransactionForm({
           name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+              <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Amount
               </FormLabel>
               <FormControl>
@@ -137,7 +137,7 @@ export function TransactionForm({
                   step="0.01"
                   min="0.01"
                   placeholder="0.00"
-                  className="bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500"
+                  className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
                   {...field}
                   value={field.value ?? ""}
                   onChange={(e) =>
@@ -158,14 +158,14 @@ export function TransactionForm({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+              <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Description
               </FormLabel>
               <FormControl>
                 <Input
                   placeholder="e.g. Weekly groceries"
                   maxLength={200}
-                  className="bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500"
+                  className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
                   {...field}
                 />
               </FormControl>
@@ -180,7 +180,7 @@ export function TransactionForm({
           name="date"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+              <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Date
               </FormLabel>
               <Popover>
@@ -189,11 +189,11 @@ export function TransactionForm({
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal bg-neutral-800 border-neutral-700 hover:bg-neutral-700 hover:text-white",
-                        !field.value && "text-neutral-500"
+                        "w-full justify-start text-left font-normal bg-muted border-border hover:bg-accent hover:text-foreground",
+                        !field.value && "text-muted-foreground"
                       )}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4 text-neutral-400" />
+                      <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
                       {field.value ? (
                         format(field.value, "PPP")
                       ) : (
@@ -203,7 +203,7 @@ export function TransactionForm({
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent
-                  className="w-auto p-0 bg-neutral-900 border-neutral-700"
+                  className="w-auto p-0 bg-card border-border"
                   align="start"
                 >
                   <Calendar
@@ -225,9 +225,9 @@ export function TransactionForm({
           name="categoryId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+              <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Category{" "}
-                <span className="normal-case text-neutral-500">(optional)</span>
+                <span className="normal-case text-muted-foreground">(optional)</span>
               </FormLabel>
               <Select
                 onValueChange={(val) =>
@@ -236,12 +236,12 @@ export function TransactionForm({
                 value={field.value ?? "__none__"}
               >
                 <FormControl>
-                  <SelectTrigger className="bg-neutral-800 border-neutral-700 text-white">
+                  <SelectTrigger className="bg-muted border-border text-foreground">
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent className="bg-neutral-900 border-neutral-700 text-white">
-                  <SelectItem value="__none__" className="text-neutral-400">
+                <SelectContent className="bg-card border-border text-foreground">
+                  <SelectItem value="__none__" className="text-muted-foreground">
                     No category
                   </SelectItem>
                   {categories?.map((cat) => (
@@ -268,9 +268,9 @@ export function TransactionForm({
           name="accountId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+              <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Account{" "}
-                <span className="normal-case text-neutral-500">(optional)</span>
+                <span className="normal-case text-muted-foreground">(optional)</span>
               </FormLabel>
               <Select
                 onValueChange={(val) =>
@@ -279,12 +279,12 @@ export function TransactionForm({
                 value={field.value ?? "__none__"}
               >
                 <FormControl>
-                  <SelectTrigger className="bg-neutral-800 border-neutral-700 text-white">
+                  <SelectTrigger className="bg-muted border-border text-foreground">
                     <SelectValue placeholder="Select an account" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent className="bg-neutral-900 border-neutral-700 text-white">
-                  <SelectItem value="__none__" className="text-neutral-400">
+                <SelectContent className="bg-card border-border text-foreground">
+                  <SelectItem value="__none__" className="text-muted-foreground">
                     No account
                   </SelectItem>
                   {activeAccounts?.map((acc) => (

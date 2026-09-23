@@ -86,14 +86,14 @@ export function AccountForm({ onSubmit, defaultValues }: AccountFormProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs text-neutral-400 tracking-wider uppercase">
+              <FormLabel className="text-xs text-muted-foreground tracking-wider uppercase">
                 Account Name
               </FormLabel>
               <FormControl>
                 <Input
                   placeholder="e.g., Main Checking"
                   {...field}
-                  className="bg-neutral-800 border-neutral-700 text-white"
+                  className="bg-muted border-border text-foreground"
                 />
               </FormControl>
               <FormMessage />
@@ -106,7 +106,7 @@ export function AccountForm({ onSubmit, defaultValues }: AccountFormProps) {
           name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+              <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Account Type
               </FormLabel>
               <div className="grid grid-cols-4 gap-3">
@@ -115,10 +115,10 @@ export function AccountForm({ onSubmit, defaultValues }: AccountFormProps) {
                     key={value}
                     onMouseDown={() => field.onChange(value)}
                     className={cn(
-                      "cursor-pointer rounded-md border p-3 text-center transition-all hover:bg-neutral-900 flex flex-col items-center gap-2",
+                      "cursor-pointer rounded-md border p-3 text-center transition-all hover:bg-card flex flex-col items-center gap-2",
                       field.value === value
                         ? "border-orange-500/50 bg-orange-500/10 text-orange-400"
-                        : "border-neutral-800 bg-neutral-900/50 text-neutral-400 hover:border-neutral-700"
+                        : "border-border bg-card/50 text-muted-foreground hover:border-border"
                     )}
                   >
                     <Icon className="h-5 w-5" />
@@ -137,14 +137,14 @@ export function AccountForm({ onSubmit, defaultValues }: AccountFormProps) {
             name="provider"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs text-neutral-400 tracking-wider uppercase">
+                <FormLabel className="text-xs text-muted-foreground tracking-wider uppercase">
                   Provider / Bank
                 </FormLabel>
                 <FormControl>
                   <Input
                     placeholder="e.g., Chase, Barclays"
                     {...field}
-                    className="bg-neutral-800 border-neutral-700 text-white"
+                    className="bg-muted border-border text-foreground"
                   />
                 </FormControl>
                 <FormMessage />
@@ -157,7 +157,7 @@ export function AccountForm({ onSubmit, defaultValues }: AccountFormProps) {
             name="lastFourDigits"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs text-neutral-400 tracking-wider uppercase">
+                <FormLabel className="text-xs text-muted-foreground tracking-wider uppercase">
                   Last 4 Digits
                 </FormLabel>
                 <FormControl>
@@ -165,7 +165,7 @@ export function AccountForm({ onSubmit, defaultValues }: AccountFormProps) {
                     placeholder="1234"
                     maxLength={4}
                     {...field}
-                    className="bg-neutral-800 border-neutral-700 text-white"
+                    className="bg-muted border-border text-foreground"
                   />
                 </FormControl>
                 <FormMessage />
@@ -180,7 +180,7 @@ export function AccountForm({ onSubmit, defaultValues }: AccountFormProps) {
             name="balance"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs text-neutral-400 tracking-wider uppercase">
+                <FormLabel className="text-xs text-muted-foreground tracking-wider uppercase">
                   Current Balance
                 </FormLabel>
                 <FormControl>
@@ -192,7 +192,7 @@ export function AccountForm({ onSubmit, defaultValues }: AccountFormProps) {
                     onChange={(e) =>
                       field.onChange(parseFloat(e.target.value) || 0)
                     }
-                    className="bg-neutral-800 border-neutral-700 text-white"
+                    className="bg-muted border-border text-foreground"
                   />
                 </FormControl>
                 <FormMessage />
@@ -205,7 +205,7 @@ export function AccountForm({ onSubmit, defaultValues }: AccountFormProps) {
             name="currency"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs text-neutral-400 tracking-wider uppercase">
+                <FormLabel className="text-xs text-muted-foreground tracking-wider uppercase">
                   Currency
                 </FormLabel>
                 <div className="flex gap-2">
@@ -218,7 +218,7 @@ export function AccountForm({ onSubmit, defaultValues }: AccountFormProps) {
                         "px-3 py-2 rounded-md text-xs font-medium transition-all",
                         field.value === currency
                           ? "bg-orange-500/20 text-orange-400 border border-orange-500/50"
-                          : "bg-neutral-800 text-neutral-400 border border-neutral-700 hover:border-neutral-600"
+                          : "bg-muted text-muted-foreground border border-border hover:border-border"
                       )}
                     >
                       {currency}

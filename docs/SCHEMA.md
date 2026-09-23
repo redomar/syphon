@@ -394,7 +394,7 @@ export default defineSchema({
 |-------|------|----------|-------------|
 | userId | Id<users> | ✅ | Owner of category |
 | name | string | ✅ | Category name (e.g., "Groceries") |
-| type | enum | ✅ | INCOME or EXPENSE |
+| type | enum | ✅ | INCOME, EXPENSE or TRANSFER (E9: transfers are excluded from income/spend totals) |
 | color | string | ✅ | Hex color for UI (e.g., "#3b82f6") |
 | icon | string | ✅ | Lucide icon name (e.g., "ShoppingCart") |
 | isArchived | boolean | ✅ | Soft delete flag |
@@ -455,12 +455,12 @@ export default defineSchema({
 
 ### 4. transactions
 
-**Purpose:** Record actual income/expense transactions
+**Purpose:** Record actual income/expense transactions, plus transfers between the user's own accounts (E9)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | userId | Id<users> | ✅ | Owner of transaction |
-| type | enum | ✅ | INCOME or EXPENSE |
+| type | enum | ✅ | INCOME, EXPENSE or TRANSFER (E9: transfers are excluded from income/spend totals) |
 | amount | number | ✅ | Amount in cents (£10.50 = 1050) |
 | description | string | ✅ | Transaction description |
 | date | number | ✅ | Transaction date (timestamp) |
@@ -470,8 +470,20 @@ export default defineSchema({
 | importId | Id<imports> | ❌ | If imported from CSV |
 | receiptId | Id<receipts> | ❌ | Attached receipt |
 | isDemoData | boolean | ✅ | For demo mode cleanup |
+| merchant | string | ❌ | E9: clean merchant name shown in the ledger ("Eis Cafe") |
+| merchantSource | enum | ❌ | E9: csv / rule / cleaner / raw — where the merchant came from |
+| rawDescription | string | ❌ | E9: exact bank text ("SQ *EIS CAFE   Birmingham   GBR") |
+| externalCategory | string | ❌ | E9: the source file's own category label |
+| status | enum | ❌ | E9: posted / pending (pending rows are skipped on import) |
+| isRefund | boolean | ❌ | E9: EXPENSE that reduces its category's spend |
+| direction | enum | ❌ | E9: in / out, for TRANSFER legs |
+| transferPairId | Id<transactions> | ❌ | E9: the other leg of a transfer |
+| dedupeKey | string | ❌ | E9: hash(account, day, signed amount, raw text, nth identical row) |
+| sourceRow | record<string,string> | ❌ | E9: the original CSV row, kept for future use (not shown) |
 | createdAt | number | ✅ | Creation timestamp |
 | updatedAt | number | ✅ | Last update timestamp |
+
+**Totals (E9):** income = Σ INCOME; spend = Σ EXPENSE − Σ refunds (`convex/lib/amounts.ts`). TRANSFER never counts.
 
 **Indexes:**
 - `by_user`: All transactions for user
@@ -479,7 +491,8 @@ export default defineSchema({
 - `by_user_and_type`: Filter by income/expense
 - `by_user_and_category`: Spending by category
 - `by_user_and_account`: Transactions per account
-- `by_import`: Find transactions from specific import
+- `by_user_and_import`: Find transactions from a specific import (batched undo)
+- `by_user_and_dedupe`: Server-side duplicate check on import
 - `by_recurring_template`: Find instances of recurring
 
 ---
@@ -491,7 +504,7 @@ export default defineSchema({
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | userId | Id<users> | ✅ | Owner of template |
-| type | enum | ✅ | INCOME or EXPENSE |
+| type | enum | ✅ | INCOME, EXPENSE or TRANSFER (E9: transfers are excluded from income/spend totals) |
 | amount | number | ✅ | Amount in cents |
 | description | string | ✅ | Description |
 | categoryId | Id<categories> | ❌ | Default category |
@@ -703,28 +716,54 @@ export default defineSchema({
 
 ### 14. imports
 
-**Purpose:** Track CSV imports
+**Purpose:** Track CSV imports (E8, batched in E9)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | userId | Id<users> | ✅ | Owner |
 | fileName | string | ✅ | Original filename |
-| storageId | Id<_storage> | ✅ | Convex file storage ID |
-| rowCount | number | ✅ | Number of rows imported |
-| columnMapping | object | ✅ | CSV column → field mapping |
-| importedAt | number | ✅ | Import timestamp |
-| expiresAt | number | ✅ | 30 days from import (GDPR) |
+| rowCount | number | ✅ | Rows actually inserted |
+| status | enum | ❌ | in_progress / complete / failed |
+| counts | object | ❌ | total, inserted, duplicate, excluded, skipped, transfers, refunds |
+| profileId | Id<import_profiles> | ❌ | Profile used/saved for this layout |
+| mappingSnapshot | any | ❌ | The `ImportMapping` used (audit/replay) |
+| createdAt | number | ✅ | Import timestamp |
 
-**Column Mapping Structure:**
-```typescript
-{
-  date: "Transaction Date",      // CSV column name
-  amount: "Amount",
-  description: "Description",
-  category: "Category",           // Optional
-  account: "Account"              // Optional
-}
-```
+The raw file is not stored. Write path: `startImport` → `appendBatch` (≤500 rows) →
+`linkTransfers` → `finishImport`; `undoImport` deletes in batches of 500 until `done`.
+
+### 14b. import_profiles (E9)
+
+Remembered settings per CSV layout, matched by a header fingerprint (same headers in any order/case).
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| userId | Id<users> | ✅ | Owner |
+| name | string | ✅ | Display name (from the first file) |
+| headerFingerprint | string | ✅ | Hash of the normalised, sorted header list |
+| mapping | any | ✅ | `ImportMapping` (src/lib/import/types.ts) |
+| categoryMap | record<string,string> | ✅ | CSV category → categoryId or `__transfer__` / `__exclude__` / `__none__` |
+| accountMap | record<string,string> | ✅ | CSV account → accountId or `__none__` |
+| lastUsedAt / createdAt / updatedAt | number | ✅ | Timestamps |
+
+**Indexes:** `by_user_and_fingerprint`
+
+### 14c. merchant_rules (E9)
+
+Raw-description key → clean merchant. Learned from rich imports (CSV merchant + raw text,
+majority vote per key) or set manually by renaming in the import review. Manual always wins.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| userId | Id<users> | ✅ | Owner |
+| pattern | string | ✅ | `merchantKey(raw)`: lowercased head of the bank text, digits → `#` |
+| merchant | string | ✅ | Clean name |
+| categoryId | Id<categories> | ❌ | Optional category hint |
+| source | enum | ✅ | learned / manual |
+| hits | number | ✅ | Times upserted |
+| createdAt / updatedAt | number | ✅ | Timestamps |
+
+**Indexes:** `by_user`, `by_user_and_pattern`
 
 ---
 

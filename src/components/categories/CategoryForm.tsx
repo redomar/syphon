@@ -103,14 +103,14 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs text-neutral-400 tracking-wider uppercase">
+              <FormLabel className="text-xs text-muted-foreground tracking-wider uppercase">
                 Category Name
               </FormLabel>
               <FormControl>
                 <Input
                   placeholder="e.g., Groceries"
                   {...field}
-                  className="bg-neutral-800 border-neutral-700 text-white"
+                  className="bg-muted border-border text-foreground"
                   autoComplete="off"
                   data-1p-ignore
                   data-lpignore="true"
@@ -126,17 +126,17 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
           name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+              <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Type
               </FormLabel>
               <div className="grid grid-cols-2 gap-3">
                 <div
                   onMouseDown={() => field.onChange("expense")}
                   className={cn(
-                    "cursor-pointer rounded-md border p-3 text-center transition-all hover:bg-neutral-900",
+                    "cursor-pointer rounded-md border p-3 text-center transition-all hover:bg-card",
                     field.value === "expense"
                       ? "border-red-500/50 bg-red-500/10 text-red-400"
-                      : "border-neutral-800 bg-neutral-900/50 text-neutral-400 hover:border-neutral-700"
+                      : "border-border bg-card/50 text-muted-foreground hover:border-border"
                   )}
                 >
                   <span className="text-sm font-medium">Expense</span>
@@ -144,10 +144,10 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
                 <div
                   onMouseDown={() => field.onChange("income")}
                   className={cn(
-                    "cursor-pointer rounded-md border p-3 text-center transition-all hover:bg-neutral-900",
+                    "cursor-pointer rounded-md border p-3 text-center transition-all hover:bg-card",
                     field.value === "income"
                       ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
-                      : "border-neutral-800 bg-neutral-900/50 text-neutral-400 hover:border-neutral-700"
+                      : "border-border bg-card/50 text-muted-foreground hover:border-border"
                   )}
                 >
                   <span className="text-sm font-medium">Income</span>
@@ -163,7 +163,7 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
           name="color"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+              <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Color
               </FormLabel>
               <div className="grid grid-cols-6 gap-3">
@@ -188,7 +188,7 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
                   type="text"
                   placeholder="#FF5733"
                   {...field}
-                  className="bg-neutral-900 border-neutral-800 text-white font-mono text-sm h-9"
+                  className="bg-card border-border text-foreground font-mono text-sm h-9"
                   autoComplete="off"
                   data-1p-ignore
                   data-lpignore="true"
@@ -204,7 +204,7 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
           name="icon"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+              <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Icon
               </FormLabel>
               <div className="grid grid-cols-6 gap-3">
@@ -219,8 +219,8 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
                       className={cn(
                         "flex h-10 w-full items-center justify-center rounded-md border transition-all",
                         isSelected
-                          ? "border-neutral-700 bg-neutral-900/50"
-                          : "border-neutral-800 bg-neutral-900 hover:border-neutral-700 hover:bg-neutral-800"
+                          ? "border-border bg-card/50"
+                          : "border-border bg-card hover:border-border hover:bg-muted"
                       )}
                       style={
                         isSelected
@@ -245,11 +245,11 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
           )}
         />
 
-        <div className="rounded-md border border-neutral-800 bg-neutral-900/50 p-4">
-          <FormLabel className="mb-3 block text-xs font-medium text-neutral-400 uppercase tracking-wider">
+        <div className="rounded-md border border-border bg-card/50 p-4">
+          <FormLabel className="mb-3 block text-xs font-medium text-muted-foreground uppercase tracking-wider">
             Preview
           </FormLabel>
-          <div className="flex items-center gap-3 rounded-md border border-neutral-800 bg-neutral-950/50 p-3">
+          <div className="flex items-center gap-3 rounded-md border border-border bg-muted/50 p-3">
             {(() => {
               const selectedIcon = ICONS.find(
                 (icon) => icon.name === form.watch("icon")
@@ -258,7 +258,7 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
               const color = form.watch("color");
               return (
                 <div
-                  className="flex h-11 w-11 items-center justify-center rounded-md border border-neutral-800 bg-neutral-900/50"
+                  className="flex h-11 w-11 items-center justify-center rounded-md border border-border bg-card/50"
                   style={{
                     boxShadow: `inset 0 0 15px color-mix(in srgb, ${color}, transparent 80%)`,
                   }}
@@ -268,7 +268,7 @@ export function CategoryForm({ onSubmit, defaultValues }: CategoryFormProps) {
               );
             })()}
             <div className="flex flex-col">
-              <span className="font-medium text-neutral-200">
+              <span className="font-medium text-foreground">
                 {form.watch("name") || "Category Name"}
               </span>
               <div>

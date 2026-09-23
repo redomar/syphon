@@ -4,6 +4,8 @@ import {
   type TransactionFormValues,
   TransactionList,
   type Transaction,
+  type DateRange,
+  rangeStart,
 } from "@/components/transactions";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +32,14 @@ export default function TransactionsPage() {
   const updateTransaction = useMutation(api.transactions.updateTransaction);
   const deleteTransaction = useMutation(api.transactions.deleteTransaction);
 
-  const transactions = useQuery(api.transactions.getTransactions, {});
+  // Fetch only the selected range; Convex caps results (see getTransactions).
+  const [range, setRange] = useState<DateRange>("30d");
+  const [rangeFrom] = useState(() => Date.now());
+  const LIMIT = 5000;
+  const transactions = useQuery(api.transactions.getTransactions, {
+    dateFrom: rangeStart(range, rangeFrom),
+    limit: LIMIT,
+  });
   const categories = useQuery(api.categories.getCategories, {
     includeArchived: false,
   });
@@ -99,10 +108,10 @@ export default function TransactionsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-neutral-400 tracking-wider uppercase">
+            <p className="text-xs text-muted-foreground tracking-wider uppercase">
               Transactions
             </p>
-            <h2 className="text-2xl font-semibold text-white">
+            <h2 className="text-2xl font-semibold text-foreground">
               Transaction ledger
             </h2>
           </div>
@@ -113,14 +122,14 @@ export default function TransactionsPage() {
                 Add Transaction
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-neutral-900 border-neutral-700 text-white max-w-lg">
+            <DialogContent className="bg-card border-border text-foreground max-w-lg">
               <DialogHeader>
                 <DialogTitle className="text-xl font-semibold">
                   {editingTransaction
                     ? "Edit Transaction"
                     : "Add New Transaction"}
                 </DialogTitle>
-                <DialogDescription className="text-neutral-400">
+                <DialogDescription className="text-muted-foreground">
                   {editingTransaction
                     ? "Update the transaction details below."
                     : "Record a new income or expense transaction."}
@@ -131,9 +140,16 @@ export default function TransactionsPage() {
                 defaultValues={
                   editingTransaction
                     ? {
-                        type: editingTransaction.type,
+                        // The form has no TRANSFER option; saving converts a transfer
+                        // leg back to income/expense by its direction.
+                        type:
+                          editingTransaction.type === "TRANSFER"
+                            ? editingTransaction.direction === "in"
+                              ? "INCOME"
+                              : "EXPENSE"
+                            : editingTransaction.type,
                         amount: editingTransaction.amount / 100,
-                        description: editingTransaction.description,
+                        description: editingTransaction.merchant ?? editingTransaction.description,
                         date: new Date(editingTransaction.date),
                         categoryId: editingTransaction.categoryId ?? undefined,
                         accountId: editingTransaction.accountId ?? undefined,
@@ -152,6 +168,8 @@ export default function TransactionsPage() {
           accounts={activeAccounts ?? []}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onDateRangeChange={setRange}
+          truncated={transactions?.length === LIMIT}
         />
       </div>
     </AppLayout>

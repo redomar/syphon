@@ -17,11 +17,11 @@ export function BudgetSummaryCard() {
 
   if (summary === undefined) {
     return (
-      <Card className="bg-neutral-900 border-neutral-700">
+      <Card className="bg-card border-border">
         <CardContent>
           <div className="animate-pulse">
-            <div className="h-3 bg-neutral-700 w-1/2 mb-2"></div>
-            <div className="h-8 bg-neutral-700 w-3/4"></div>
+            <div className="h-3 bg-accent w-1/2 mb-2"></div>
+            <div className="h-8 bg-accent w-3/4"></div>
           </div>
         </CardContent>
       </Card>
@@ -30,15 +30,15 @@ export function BudgetSummaryCard() {
 
   if (summary === null) {
     return (
-      <Card className="bg-neutral-900 border-neutral-700">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
+          <CardTitle className="text-sm font-medium text-foreground tracking-wider">
             BUDGET
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex items-center gap-3 text-neutral-400">
-            <Wallet className="w-8 h-8 text-neutral-600" />
+          <div className="flex items-center gap-3 text-muted-foreground">
+            <Wallet className="w-8 h-8 text-muted-foreground" />
             <div>
               <p className="text-sm">No active budget</p>
               <Link
@@ -55,10 +55,10 @@ export function BudgetSummaryCard() {
   }
 
   return (
-    <Card className="bg-neutral-900 border-neutral-700">
+    <Card className="bg-card border-border">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
+          <CardTitle className="text-sm font-medium text-foreground tracking-wider">
             BUDGET
           </CardTitle>
           <Link
@@ -71,8 +71,8 @@ export function BudgetSummaryCard() {
       </CardHeader>
       <CardContent className="space-y-3">
         <div>
-          <p className="text-sm font-medium text-white">{summary.budgetName}</p>
-          <p className="text-xs text-neutral-400 mt-1">
+          <p className="text-sm font-medium text-foreground">{summary.budgetName}</p>
+          <p className="text-xs text-muted-foreground mt-1">
             {formatCurrency(summary.totalSpent)} of{" "}
             {formatCurrency(summary.totalAllocated)} ({summary.overallPercentage}
             %)

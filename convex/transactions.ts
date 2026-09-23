@@ -1,8 +1,27 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, type MutationCtx } from "./_generated/server";
+import type { Doc } from "./_generated/dataModel";
 import { requireUser } from "./lib/auth";
+import { sumIncome, sumSpend } from "./lib/amounts";
 
+const MAX_RESULTS = 5000;
+
+/** Clears the other leg's link when a transfer leg is edited or deleted (E9). */
+async function unlinkPartner(ctx: MutationCtx, t: Doc<"transactions">) {
+  if (t.type !== "TRANSFER" || !t.transferPairId) return;
+  const partner = await ctx.db.get(t.transferPairId);
+  if (partner && partner.transferPairId === t._id) {
+    await ctx.db.patch(partner._id, { transferPairId: undefined });
+  }
+}
+
+// Manual create/update stays INCOME/EXPENSE; TRANSFER rows come from imports (E9).
 const transactionType = v.union(v.literal("INCOME"), v.literal("EXPENSE"));
+const anyTransactionType = v.union(
+  v.literal("INCOME"),
+  v.literal("EXPENSE"),
+  v.literal("TRANSFER")
+);
 
 /**
  * Creates a new transaction for the authenticated user.
@@ -92,10 +111,15 @@ export const updateTransaction = mutation({
       }
     }
 
+    await unlinkPartner(ctx, transaction);
     await ctx.db.patch(args.transactionId, {
       type: args.type,
       amount: args.amount,
       description: args.description,
+      // imported rows display `merchant`; keep it in step with the user's edit
+      ...(transaction.merchant !== undefined && { merchant: args.description }),
+      // an edited transfer leg is no longer a transfer
+      ...(transaction.type === "TRANSFER" && { transferPairId: undefined, direction: undefined }),
       date: args.date,
       categoryId: args.categoryId,
       accountId: args.accountId,
@@ -119,6 +143,7 @@ export const deleteTransaction = mutation({
       throw new Error("Transaction not found");
     }
 
+    await unlinkPartner(ctx, transaction);
     await ctx.db.delete(args.transactionId);
   },
 });
@@ -129,16 +154,19 @@ export const deleteTransaction = mutation({
  */
 export const getTransactions = query({
   args: {
-    type: v.optional(transactionType),
+    type: v.optional(anyTransactionType),
     categoryId: v.optional(v.id("categories")),
     accountId: v.optional(v.id("accounts")),
     dateFrom: v.optional(v.number()),
     dateTo: v.optional(v.number()),
+    limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
+    // Convex return arrays max out at 8192 items; imports can exceed that.
+    const limit = Math.min(Math.max(args.limit ?? MAX_RESULTS, 1), MAX_RESULTS);
 
-    let transactions = await ctx.db
+    const transactions = await ctx.db
       .query("transactions")
       .withIndex("by_user_and_date", (q) => {
         const base = q.eq("userId", user._id);
@@ -154,19 +182,14 @@ export const getTransactions = query({
         return base;
       })
       .order("desc")
-      .collect();
-
-    if (args.type) {
-      transactions = transactions.filter((t) => t.type === args.type);
-    }
-    if (args.categoryId) {
-      transactions = transactions.filter(
-        (t) => t.categoryId === args.categoryId
-      );
-    }
-    if (args.accountId) {
-      transactions = transactions.filter((t) => t.accountId === args.accountId);
-    }
+      .filter((q) =>
+        q.and(
+          args.type ? q.eq(q.field("type"), args.type) : true,
+          args.categoryId ? q.eq(q.field("categoryId"), args.categoryId) : true,
+          args.accountId ? q.eq(q.field("accountId"), args.accountId) : true
+        )
+      )
+      .take(limit);
 
     return transactions;
   },
@@ -212,13 +235,8 @@ export const getDashboardStats = query({
       )
       .collect();
 
-    const monthIncomeCents = monthTransactions
-      .filter((t) => t.type === "INCOME")
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    const monthExpensesCents = monthTransactions
-      .filter((t) => t.type === "EXPENSE")
-      .reduce((sum, t) => sum + t.amount, 0);
+    const monthIncomeCents = sumIncome(monthTransactions);
+    const monthExpensesCents = sumSpend(monthTransactions);
 
     const transactionCount = await ctx.db
       .query("transactions")

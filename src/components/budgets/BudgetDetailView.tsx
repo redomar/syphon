@@ -94,26 +94,26 @@ export function BudgetDetailView({
       <BudgetAlertBanner alerts={alerts} />
 
       {/* Overall progress */}
-      <div className="border border-neutral-700 bg-neutral-900 rounded-lg p-6 space-y-3">
+      <div className="border border-border bg-card rounded-lg p-6 space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-neutral-400 uppercase tracking-wider">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">
               Overall Progress
             </p>
-            <p className="text-lg font-semibold text-white">
+            <p className="text-lg font-semibold text-foreground">
               {formatCurrency(totalSpent)}{" "}
-              <span className="text-neutral-500 font-normal">
+              <span className="text-muted-foreground font-normal">
                 of {formatCurrency(grandTotal)}
               </span>
             </p>
           </div>
-          <span className="text-2xl font-bold font-mono text-neutral-300">
+          <span className="text-2xl font-bold font-mono text-foreground">
             {overallPercentage}%
           </span>
         </div>
         <BudgetProgressBar percentage={overallPercentage} />
         {budget.totalAmount && (
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-muted-foreground">
             Budget total: {formatCurrency(budget.totalAmount)} · Allocated:{" "}
             {formatCurrency(grandTotal)} (
             {budget.totalAmount > 0
@@ -139,24 +139,24 @@ export function BudgetDetailView({
         return (
           <div
             key={group}
-            className="border border-neutral-700 bg-neutral-900 rounded-lg overflow-hidden"
+            className="border border-border bg-card rounded-lg overflow-hidden"
           >
             {/* Group header */}
-            <div className="px-6 py-4 border-b border-neutral-800 flex items-center justify-between">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-white uppercase tracking-wider">
+                <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
                   {GROUP_LABELS[group]}
                 </h3>
-                <p className="text-xs text-neutral-500 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {formatCurrency(groupTotal)} · {groupPct}% of total
                 </p>
               </div>
             </div>
 
             {/* Allocation rows */}
-            <div className="divide-y divide-neutral-800/50">
+            <div className="divide-y divide-border/50">
               {groupAllocations.length === 0 ? (
-                <div className="px-6 py-6 text-center text-sm text-neutral-500">
+                <div className="px-6 py-6 text-center text-sm text-muted-foreground">
                   No categories assigned yet
                 </div>
               ) : (
@@ -187,7 +187,7 @@ export function BudgetDetailView({
 
             {/* Add category */}
             {unassignedCategories.length > 0 && (
-              <div className="px-6 py-3 border-t border-neutral-800">
+              <div className="px-6 py-3 border-t border-border">
                 <Select
                   onValueChange={(categoryId) =>
                     onUpsertAllocation({
@@ -197,13 +197,13 @@ export function BudgetDetailView({
                     })
                   }
                 >
-                  <SelectTrigger className="h-8 w-48 text-xs bg-neutral-800 border-neutral-700 text-neutral-400">
+                  <SelectTrigger className="h-8 w-48 text-xs bg-muted border-border text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                       <Plus className="w-3 h-3" />
                       <SelectValue placeholder="Add category" />
                     </div>
                   </SelectTrigger>
-                  <SelectContent className="bg-neutral-900 border-neutral-700 text-white">
+                  <SelectContent className="bg-card border-border text-foreground">
                     {unassignedCategories.map((cat) => (
                       <SelectItem key={cat._id} value={cat._id} className="text-xs">
                         <span className="flex items-center gap-1.5">

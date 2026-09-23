@@ -59,14 +59,14 @@ export function AllocationRow({
   const remaining = allocatedAmount - spentAmount;
 
   return (
-    <div className="flex items-center gap-4 py-3 px-4 rounded-md hover:bg-neutral-800/30 transition-colors group">
+    <div className="flex items-center gap-4 py-3 px-4 rounded-md hover:bg-muted/30 transition-colors group">
       {/* Category indicator */}
       <div className="flex items-center gap-2 w-40 flex-shrink-0">
         <span
           className="inline-block w-2.5 h-2.5 rounded-full"
           style={{ backgroundColor: categoryColor }}
         />
-        <span className="text-sm font-medium text-neutral-200 truncate">
+        <span className="text-sm font-medium text-foreground truncate">
           {categoryName}
         </span>
       </div>
@@ -80,7 +80,7 @@ export function AllocationRow({
           value={localAmount}
           onChange={(e) => setLocalAmount(e.target.value)}
           onBlur={handleBlur}
-          className="h-8 text-sm bg-neutral-800 border-neutral-700 text-white"
+          className="h-8 text-sm bg-muted border-border text-foreground"
           placeholder="0.00"
         />
       </div>
@@ -91,12 +91,12 @@ export function AllocationRow({
       </div>
 
       {/* Spent / remaining */}
-      <div className="text-xs text-neutral-400 w-44 flex-shrink-0 text-right">
-        <span className={status === "red" ? "text-red-400" : status === "yellow" ? "text-yellow-400" : "text-neutral-400"}>
+      <div className="text-xs text-muted-foreground w-44 flex-shrink-0 text-right">
+        <span className={status === "red" ? "text-red-400" : status === "yellow" ? "text-yellow-400" : "text-muted-foreground"}>
           {formatCurrency(spentAmount)} spent
         </span>
-        <span className="text-neutral-600 mx-1">·</span>
-        <span className={remaining < 0 ? "text-red-400" : "text-neutral-500"}>
+        <span className="text-muted-foreground mx-1">·</span>
+        <span className={remaining < 0 ? "text-red-400" : "text-muted-foreground"}>
           {formatCurrency(Math.abs(remaining))} {remaining < 0 ? "over" : "left"}
         </span>
       </div>
@@ -106,7 +106,7 @@ export function AllocationRow({
         variant="ghost"
         size="sm"
         onMouseDown={onDelete}
-        className="text-neutral-600 hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="text-muted-foreground hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
       >
         <X className="w-4 h-4" />
       </Button>
