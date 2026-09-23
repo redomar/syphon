@@ -36,6 +36,12 @@ export function readAmount(row: string[], mapping: ImportMapping): number | null
   return credit ? Math.abs(v) : -Math.abs(v);
 }
 
+/** Convex field names must be printable ASCII and not start with "$" or "_". */
+export function safeKey(header: string, i: number): string {
+  const k = header.replace(/[^\x20-\x7E]/g, "?").replace(/^[$_\s]+/, "").trim();
+  return k || `Column ${i + 1}`;
+}
+
 const normText = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
 
 function ymd(ms: number) {
@@ -80,7 +86,7 @@ export function prepareRows(
     const sourceRow: Record<string, string> = {};
     headers.forEach((h, i) => {
       const v = row[i];
-      if (v !== undefined && v !== "") sourceRow[h || `Column ${i + 1}`] = v;
+      if (v !== undefined && v !== "") sourceRow[safeKey(h, i)] = v;
     });
 
     const rawDescription = cell(row, mapping.rawDescription).replace(/\s+/g, " ");
