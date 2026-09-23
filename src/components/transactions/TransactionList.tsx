@@ -418,6 +418,8 @@ export function TransactionList({
           <span>
             {filtered.filter((t) => t.type === "INCOME").length} income ·{" "}
             {filtered.filter((t) => t.type === "EXPENSE").length} expenses
+            {filtered.some((t) => t.type === "TRANSFER") &&
+              ` · ${filtered.filter((t) => t.type === "TRANSFER").length} transfers`}
           </span>
         </div>
       )}
